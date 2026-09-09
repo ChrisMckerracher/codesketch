@@ -8,7 +8,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createStudio } from '../src/transport/index.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const TEST_FILE = resolve(ROOT, 'tests/browser/studio.mjs');
+const SCENARIOS = ['studio.mjs', 'layers-keyboard.mjs', 'layers-opacity.mjs'];
 const ARTIFACTS_DIR = resolve(ROOT, 'artifacts/browser-check');
 
 // 1. Verify playwright-cli availability
@@ -19,9 +19,11 @@ if (checkCli.status !== 0) {
   process.exit(1);
 }
 
-if (!existsSync(TEST_FILE)) {
-  console.error(`Browser test scenario not found: ${TEST_FILE}`);
-  process.exit(1);
+for (const name of SCENARIOS) {
+  if (!existsSync(resolve(ROOT, 'tests/browser', name))) {
+    console.error(`Browser test scenario not found: ${name}`);
+    process.exit(1);
+  }
 }
 
 mkdirSync(ARTIFACTS_DIR, { recursive: true });
@@ -105,22 +107,19 @@ async function run() {
     throw new Error(`Failed to open browser session: ${openRes.err || openRes.out}`);
   }
 
-  console.log('Running browser scenario from tests/browser/studio.mjs...');
-  const runRes = await execCli(['run-code', '--filename', TEST_FILE], 60_000);
-
-  if (runRes.code !== 0 || runRes.out.includes('### Error') || runRes.err.includes('### Error')) {
-    console.error(runRes.out);
-    if (runRes.err) console.error(runRes.err);
-    throw new Error(`Browser scenario assertion failed:\n${runRes.err || runRes.out}`);
+  for (const name of SCENARIOS) {
+    console.log(`Running browser scenario: ${name}...`);
+    const file = resolve(ROOT, 'tests/browser', name);
+    const result = await execCli(['run-code', '--filename', file], 60_000);
+    if (result.code !== 0 || result.out.includes('### Error') || result.err.includes('### Error')) {
+      throw new Error(`${name} failed:\n${result.out}\n${result.err}`);
+    }
+    if (!/"success"\s*:\s*true\b/.test(result.out)) {
+      throw new Error(`${name} did not report success: true:\n${result.out}`);
+    }
+    if (name === 'studio.mjs') verifyArtifacts();
+    console.log(`${name} passed.`);
   }
-
-  const hasSuccess = /"success"\s*:\s*true\b/.test(runRes.out);
-  if (!hasSuccess) {
-    throw new Error(`Browser scenario did not report success: true. Output:\n${runRes.out}`);
-  }
-
-  verifyArtifacts();
-  console.log('Browser test scenario passed successfully.');
 }
 
 try {

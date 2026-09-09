@@ -35,3 +35,22 @@ Feature: Observable agent painting
     Given a painting with hidden and visible layers
     When the human exports PNG
     Then the image contains the visible artwork and background
+
+  Scenario: Adjust layer opacity during playback
+    Given painting is running
+    When the human holds the opacity slider at a chosen value across playback updates
+    Then the slider preserves that value
+    When the human releases the slider
+    Then the chosen opacity is committed to the layer being edited
+
+  Scenario: Cancel an opacity edit by changing layers
+    Given a layer opacity edit is in progress
+    When the selected layer changes
+    Then the old edit is cancelled
+    And the inspector displays the newly selected layer opacity
+
+  Scenario: Toggle layer visibility with the keyboard
+    Given a layer visibility button has keyboard focus
+    When the human presses Enter or Space
+    Then the layer visibility toggles
+    And keyboard activation of the layer row still selects that layer

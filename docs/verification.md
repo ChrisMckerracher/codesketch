@@ -63,3 +63,19 @@ OpenCode implemented the initial parser and browser-discovery slices. Astra high
 Verified September 9, 2026 after removing the JavaScript CLI, its capture implementation, dedicated tests and obsolete design. `paint` is the sole command-line interface. Current guidance and standards describe the native executable; historical verification above records the earlier releases.
 
 `npm run verify` passed all 56 retained JavaScript/policy tests with no skips, plus Go formatting, dependency/context/embed policy, vet and race tests. `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go` passed native command integration against an isolated studio and real-browser capture/pixel/lifecycle checks. The Go implementation and canonical painting renderer are unchanged. OpenCode performed the bounded removal through Herdr; the lead reviewed the deletions, updated documentation and ran verification.
+
+## Independent review repairs
+
+Verified September 9, 2026. Astra high through Herdr reproduced and repaired three integration defects: capture during paused fill/layer commands, opacity edits overwritten by playback, and suppressed visibility-button keyboard activation. The lead reviewed the patches and independently verified the repairs.
+
+Shared fixtures cover all six command kinds. Node checks them against real paused Session snapshots; Go uses the same data for validation and twelve preview/export pixel cases. Preview renders drawable transients, while fill/layer operations retain committed pixels until playback commits them. Export excludes active work before transient decoding. Malformed rendered data, point/pixel budgets and capture cleanup remain covered.
+
+The opacity controller preserves local edits and their starting layer, serializes saves, handles delayed requests and older completions, and recovers from failure. Browser regressions exercise real pointer holds during playback, native keyboard input including range boundaries, Escape/blur/pointer cancellation, layer switches/removal, delayed-save ordering and retry. Visibility buttons respond to Enter and Space; row selection and arrows remain functional.
+
+| Check | Result |
+| --- | --- |
+| `npm run verify` | 63 JavaScript/policy cases passed, plus Go formatting, dependency/context/embed policy, vet and race tests |
+| `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go` | Passed independently: native studio integration and real-browser capture contracts, pixels and lifecycle checks |
+| `npm run test:browser` | Studio, keyboard and opacity scenarios passed independently; valid 1000 × 700 PNG/project exports and isolated-session cleanup |
+
+Regression work demonstrated the original capture failures and playback overwriting held opacity before repair. Final JavaScript policy and browser checks were repeated after the keyboard-boundary addition. No external dependencies were added. Tests used isolated state and preserved the live painter.

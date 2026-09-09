@@ -27,7 +27,14 @@ func browserImage(t *testing.T, raw json.RawMessage, options Options) image.Imag
 		t.Fatal(err)
 	}
 	assertNoProfiles(t, temp)
-	if got.Path != options.Output || got.InstanceID != "synthetic" || got.Revision != 7 || got.MIMEType != "image/png" {
+	var identity struct {
+		InstanceID string `json:"instanceId"`
+		Revision   int64  `json:"revision"`
+	}
+	if err := json.Unmarshal(raw, &identity); err != nil {
+		t.Fatal(err)
+	}
+	if got.Path != options.Output || got.InstanceID != identity.InstanceID || got.Revision != identity.Revision || got.MIMEType != "image/png" {
 		t.Fatalf("metadata: %+v", got)
 	}
 	f, err := os.Open(got.Path)

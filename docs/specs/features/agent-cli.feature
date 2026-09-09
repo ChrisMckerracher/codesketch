@@ -33,6 +33,18 @@ Feature: Complete agent painting CLI
     When I request that crop at a bounded scale
     Then I receive a PNG with the requested output dimensions
 
+  Scenario: Inspect a pause during a document operation
+    Given playback is paused during a fill or layer command
+    When I request a canvas view or export
+    Then I receive a PNG of the committed artwork
+    And playback remains paused
+
+  Scenario: Export committed artwork independently of transient drawing
+    Given a valid committed document and an active playback command
+    When I export PNG
+    Then capture validates and renders the committed document
+    And active work contributes no pixels
+
   Scenario: Reject invalid input atomically
     Given a running isolated studio
     When I provide unknown flags, malformed coordinates, or oversized JSON input

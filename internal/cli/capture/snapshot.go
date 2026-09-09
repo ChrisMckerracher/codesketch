@@ -68,9 +68,9 @@ func validateSnapshot(raw json.RawMessage, options Options) (captureData, error)
 		Document   json.RawMessage `json:"document"`
 		InstanceID string          `json:"instanceId"`
 		Revision   int64           `json:"revision"`
-		Active     *activeMark     `json:"active"`
+		Active     json.RawMessage `json:"active"`
 		Playback   struct {
-			Active *activeMark `json:"active"`
+			Active json.RawMessage `json:"active"`
 		} `json:"playback"`
 	}
 	if err := json.Unmarshal(raw, &envelope); err != nil {
@@ -87,15 +87,19 @@ func validateSnapshot(raw json.RawMessage, options Options) (captureData, error)
 	if len(data.InstanceID) > 200 || data.Revision < 0 || data.Revision > 9_007_199_254_740_991 {
 		return data, errors.New("invalid snapshot identity or revision")
 	}
-	data.Active = envelope.Playback.Active
-	if data.Active == nil {
-		data.Active = envelope.Active
+	if !options.Committed {
+		active := envelope.Playback.Active
+		if absentActive(active) {
+			active = envelope.Active
+		}
+		var err error
+		data.Active, err = previewActive(active)
+		if err != nil {
+			return data, err
+		}
 	}
 	if err := data.validateDocument(); err != nil {
 		return data, err
-	}
-	if options.Committed {
-		data.Active = nil
 	}
 	if err := data.validateOptions(options); err != nil {
 		return data, err

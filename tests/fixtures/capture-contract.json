@@ -1,0 +1,43 @@
+{
+  "setup": [
+    {"type":"fill","color":"#ffffff"},
+    {"type":"rect","x":10,"y":10,"width":80,"height":60,"color":"#ff0000"}
+  ],
+  "tickMilliseconds": 60,
+  "snapshot": {
+    "instanceId":"synthetic","revision":5,"artRevision":5,
+    "document": {
+      "version":1,"width":1000,"height":700,"background":"#ffffff",
+      "layers":[{"id":"paint","name":"Painting","visible":true,"opacity":1}],
+      "marks":[{"type":"rect","layer":"paint","color":"#ff0000","opacity":1,"x":10,"y":10,"width":80,"height":60}]
+    },
+    "playback":{"status":"paused","speed":1,"remaining":1,"active":null},
+    "history":{"cursor":2,"total":2},"feedback":[],"storageError":null,"playbackError":null
+  },
+  "cases": [
+    {
+      "name":"stroke","drawable":true,
+      "active":{"command":{"type":"stroke","layer":"paint","color":"#0000ff","opacity":1,"points":[[10,100],[76,100]],"size":10,"brush":"marker"},"progress":0.5}
+    },
+    {
+      "name":"rect","drawable":true,
+      "active":{"command":{"type":"rect","layer":"paint","color":"#0000ff","opacity":1,"x":100,"y":100,"width":40,"height":40},"progress":0.5}
+    },
+    {
+      "name":"ellipse","drawable":true,
+      "active":{"command":{"type":"ellipse","layer":"paint","color":"#0000ff","opacity":1,"x":100,"y":100,"width":40,"height":40},"progress":0.5}
+    },
+    {
+      "name":"fill","drawable":false,
+      "active":{"command":{"type":"fill","color":"#00ff00"},"progress":0.5}
+    },
+    {
+      "name":"layer.add","drawable":false,
+      "active":{"command":{"type":"layer.add","id":"top","name":"Top"},"progress":0.5}
+    },
+    {
+      "name":"layer.update","drawable":false,
+      "active":{"command":{"type":"layer.update","id":"paint","visible":false,"opacity":0.5},"progress":0.5}
+    }
+  ]
+}

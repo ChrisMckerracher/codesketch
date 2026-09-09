@@ -1,6 +1,7 @@
 // Layers inspector managing list, selection, visibility, opacity, and creation
 
 import { createSvgIcon } from './icons.mjs';
+import { LayerOpacity } from './layer-opacity.mjs';
 
 export class LayersUI {
   constructor(state, api, dialogs) {
@@ -12,6 +13,7 @@ export class LayersUI {
     this.btnAddLayer = document.getElementById('btn-add-layer');
     this.sliderOpacity = document.getElementById('slider-layer-opacity');
     this.labelOpacity = document.getElementById('label-layer-opacity');
+    this.opacity = new LayerOpacity(state, api, this.sliderOpacity, this.labelOpacity);
     this.lastSignature = '';
 
     this.bindEvents();
@@ -42,25 +44,6 @@ export class LayersUI {
         this.state.setSnapshot(snap);
       } catch (err) {
         this.state.showNotification(`Failed to add layer: ${err.message}`);
-      }
-    });
-
-    this.sliderOpacity.addEventListener('input', (e) => {
-      const pct = Number(e.target.value);
-      this.labelOpacity.textContent = `${pct}%`;
-    });
-
-    this.sliderOpacity.addEventListener('change', async (e) => {
-      const opacity = Math.max(0, Math.min(1, Number(e.target.value) / 100));
-      const targetId = this.state.targetLayer;
-      try {
-        const snap = await this.api.sendCommands([{ type: 'layer.update', id: targetId, opacity }], {
-          immediate: true,
-          play: false,
-        });
-        this.state.setSnapshot(snap);
-      } catch (err) {
-        this.state.showNotification(`Failed to update layer opacity: ${err.message}`);
       }
     });
   }
@@ -118,6 +101,7 @@ export class LayersUI {
       });
 
       item.addEventListener('keydown', (e) => {
+        if (e.target !== item) return;
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
           this.state.setTargetLayer(layer.id);
@@ -182,28 +166,17 @@ export class LayersUI {
   }
 
   updateSelection() {
-    const layers = this.state.snapshot?.document?.layers || [];
-    let activeLayer = null;
-
     for (const item of this.layerList.children) {
       const id = item.getAttribute('data-layer-id');
       const isSelected = id === this.state.targetLayer;
       item.setAttribute('aria-checked', String(isSelected));
       if (isSelected) {
         item.classList.add('active');
-        activeLayer = layers.find((l) => l.id === id);
       } else {
         item.classList.remove('active');
       }
     }
 
-    if (activeLayer) {
-      const pct = Math.round((activeLayer.opacity ?? 1) * 100);
-      this.sliderOpacity.value = String(pct);
-      this.labelOpacity.textContent = `${pct}%`;
-      this.sliderOpacity.disabled = false;
-    } else {
-      this.sliderOpacity.disabled = true;
-    }
+    this.opacity.sync();
   }
 }
