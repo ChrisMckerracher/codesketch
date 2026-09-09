@@ -1,5 +1,9 @@
-
-# Beads / Dolt files (added by bd init)
+node_modules/
+.studio/
+.playwright-cli/
+artifacts/
+.DS_Store
+*.log
 .dolt/
 *.db
 .beads-credential-key

@@ -1,0 +1,160 @@
+/* Responsive styles for varying viewport dimensions */
+
+@media (max-width: 1200px) {
+  .sidebar-tools {
+    width: 200px;
+    padding: 10px;
+  }
+
+  .sidebar-inspector {
+    width: 250px;
+    padding: 10px;
+  }
+
+  .studio-viewport {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 960px) {
+  .studio-header {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 18px;
+  }
+
+  .btn-action .btn-label, .btn-playback .btn-label {
+    display: none;
+  }
+
+  .btn-action, .btn-playback {
+    padding: 6px;
+  }
+
+  .sidebar-tools {
+    width: 170px;
+  }
+
+  .sidebar-inspector {
+    width: 220px;
+  }
+}
+
+/* Mobile stacked layout at <= 760px (e.g. 390x844) */
+@media (max-width: 760px) {
+  body.studio-root {
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .studio-header {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .header-brand {
+    flex: 1 1 auto;
+  }
+
+  .header-status {
+    flex: 0 0 auto;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .btn-group {
+    flex-wrap: nowrap;
+  }
+
+  .btn-action .btn-label, .btn-playback .btn-label {
+    display: none;
+  }
+
+  .btn-action, .btn-playback {
+    padding: 6px 8px;
+  }
+
+  .studio-layout {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    height: auto;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Canvas first */
+  .studio-viewport {
+    order: 1;
+    width: 100%;
+    padding: 12px;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .canvas-mount {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .canvas-welcome {
+    max-width: 90%;
+    padding: 16px;
+  }
+
+  .welcome-title {
+    font-size: 16px;
+  }
+
+  .welcome-desc {
+    font-size: 11px;
+  }
+
+  /* Compact tools second */
+  .sidebar-tools {
+    order: 2;
+    width: 100%;
+    max-width: 100vw;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .sidebar-tools .tool-section {
+    min-width: 0;
+  }
+
+  /* Inspector third */
+  .sidebar-inspector {
+    order: 3;
+    width: 100%;
+    max-width: 100vw;
+    border-left: none;
+    padding: 12px;
+    overflow: visible;
+  }
+
+  .layer-list {
+    max-height: 160px;
+  }
+
+  .feedback-list {
+    max-height: 140px;
+  }
+}

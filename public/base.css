@@ -1,0 +1,131 @@
+:root {
+  --font-serif: "Playfair Display", Georgia, "Palatino Linotype", Palatino, serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, Monaco, monospace;
+
+  --chrome-bg: #1c2b27;
+  --sidebar-bg: #233631;
+  --surface-bg: #2b403a;
+  --surface-hover: #344c45;
+  --surface-active: #3e5a52;
+
+  --border-color: #385149;
+  --border-subtle: #2d423c;
+  --border-focus: #e07a38;
+
+  --text-primary: #f2f7f4;
+  --text-secondary: #a8beb4;
+  --text-muted: #748c83;
+  --text-inverse: #1c2b27;
+
+  --accent: #d96b27;
+  --accent-hover: #eb7c38;
+  --accent-active: #c05819;
+  --accent-tint: rgba(217, 107, 39, 0.18);
+
+  --status-idle: #7d968f;
+  --status-playing: #48bb78;
+  --status-paused: #e67e3a;
+  --status-offline: #e53e3e;
+
+  --paper-bg: #f7f3e8;
+  --canvas-surround: #ded7c6;
+  --shadow-canvas: 0 12px 36px rgba(15, 23, 20, 0.28), 0 2px 8px rgba(15, 23, 20, 0.14);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.studio-root {
+  font-family: var(--font-sans);
+  background-color: var(--chrome-bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-action, .btn-playback, .btn-small, .btn-secondary, .btn-accent {
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-action:hover, .btn-playback:hover, .btn-secondary:hover {
+  background-color: var(--surface-hover);
+}
+
+.btn-action:active, .btn-playback:active, .btn-secondary:active {
+  background-color: var(--surface-active);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-accent:active {
+  background-color: var(--accent-active);
+}
+
+.btn-secondary {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.btn-small {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.btn-icon svg, .tool-icon svg, .queue-icon-slot svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.btn-action:disabled, .btn-playback:disabled, .btn-accent:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}

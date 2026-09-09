@@ -1,0 +1,14 @@
+{
+  "name": "codesketch",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A local painting studio for humans and agents",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/transport/index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tools/browser-check.mjs",
+    "verify": "node tools/verify.mjs && node --test tests/*.test.mjs"
+  }
+}

@@ -1,0 +1,228 @@
+/* Inspector: Playback */
+.playback-controls {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.btn-playback {
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  justify-content: center;
+  padding: 8px 6px;
+}
+
+.btn-playback-primary {
+  background-color: var(--surface-hover);
+  border-color: var(--accent);
+}
+
+.speed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.speed-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.speed-select {
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Inspector: Layers */
+.layer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding-right: 2px;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.layer-item:hover {
+  background-color: var(--surface-hover);
+}
+
+.layer-item.active {
+  border-color: var(--accent);
+  background-color: var(--surface-active);
+}
+
+.layer-main-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.layer-radio-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+}
+
+.layer-item.active .layer-radio-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.layer-name-text {
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-btn-visibility {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.layer-btn-visibility:hover {
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
+}
+
+.layer-btn-visibility.hidden-layer {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.layer-opacity-box {
+  background: var(--surface-bg);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+/* Inspector: Feedback */
+.feedback-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.feedback-input {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px;
+  resize: vertical;
+  outline: none;
+}
+
+.feedback-input:focus {
+  border-color: var(--accent);
+}
+
+.feedback-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-counter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.feedback-history-wrap {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+.history-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.feedback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.feedback-empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.feedback-card {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.feedback-card-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.feedback-card-text {
+  color: var(--text-primary);
+  line-height: 1.35;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
