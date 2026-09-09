@@ -1,105 +1,109 @@
-/* Header */
+/* Apple macOS Unified Toolbar & Application Workspace Layout */
+
 .studio-header {
-  height: 52px;
-  background-color: var(--chrome-bg);
-  border-bottom: 1px solid var(--border-color);
+  height: 50px;
+  background-color: var(--mac-toolbar-bg);
+  border-bottom: 1px solid var(--mac-separator);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  gap: 16px;
+  padding: 0 14px;
+  gap: 12px;
   flex-shrink: 0;
   z-index: 10;
 }
 
 .header-brand {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  min-width: 140px;
 }
 
 .brand-title {
-  font-family: var(--font-serif);
-  font-size: 22px;
+  font-family: var(--font-system);
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
 .brand-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--accent);
-  background: var(--accent-tint);
-  padding: 1px 5px;
-  border-radius: 4px;
+  display: none;
 }
 
+/* Center status & queue indicator */
 .header-status {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
-  font-weight: 500;
-  background-color: var(--surface-bg);
-  border: 1px solid var(--border-color);
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: var(--status-idle);
+  flex-shrink: 0;
 }
 
 .status-playing .status-dot { background-color: var(--status-playing); }
 .status-paused .status-dot { background-color: var(--status-paused); }
-.status-offline .status-dot { background-color: var(--status-offline); }
+.status-offline .status-dot { background-color: var(--status-error); }
 
 .queue-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  background: var(--surface-bg);
-  padding: 4px 10px;
-  border-radius: 9999px;
-  border: 1px solid var(--border-color);
-  font-family: var(--font-mono);
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-system);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
+/* Segmented desktop control styling */
 .btn-group {
   display: inline-flex;
-  background-color: var(--surface-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  overflow: hidden;
+  align-items: center;
+  background-color: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 1px;
 }
 
 .btn-group .btn-action {
-  border-right: 1px solid var(--border-color);
-}
-.btn-group .btn-action:last-child {
-  border-right: none;
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* Studio Layout */
+.btn-group .btn-action:hover {
+  background-color: var(--control-hover);
+}
+
+.btn-group .btn-action:active {
+  background-color: var(--control-active);
+}
+
+/* Main workspace layout */
 .studio-layout {
   display: flex;
   flex: 1;
@@ -109,51 +113,50 @@
 
 /* Sidebars */
 .studio-sidebar {
-  background-color: var(--sidebar-bg);
-  border-color: var(--border-color);
+  background-color: var(--mac-panel-bg);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 14px;
+  gap: 14px;
+  padding: 12px 14px;
   overflow-y: auto;
   flex-shrink: 0;
   z-index: 5;
 }
 
 .sidebar-tools {
-  width: 220px;
-  border-right: 1px solid var(--border-color);
+  width: 210px;
+  border-right: 1px solid var(--mac-separator);
 }
 
 .sidebar-inspector {
-  width: 280px;
-  border-left: 1px solid var(--border-color);
+  width: 260px;
+  border-left: 1px solid var(--mac-separator);
 }
 
 .section-title {
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
 }
 
 .section-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .section-header-row .section-title {
   margin-bottom: 0;
 }
 
-/* Viewport & Proportional Scaling Canvas */
+/* Canvas Viewport: neutral desk matte */
 .studio-viewport {
   flex: 1;
-  background-color: var(--canvas-surround);
+  background-color: var(--mac-workspace-bg);
   overflow: auto;
   display: flex;
   align-items: center;
@@ -172,16 +175,16 @@
   margin: auto;
   position: relative;
   width: 100%;
-  max-width: min(1000px, 100%, calc((100vh - 52px - 48px) * (1000 / 700)));
+  max-width: min(1000px, 100%, calc((100vh - 50px - 48px) * (1000 / 700)));
   aspect-ratio: 1000 / 700;
 }
 
 .canvas-shadow {
   box-shadow: var(--shadow-canvas);
-  border-radius: 3px;
+  border-radius: 2px;
   line-height: 0;
   background-color: var(--paper-bg);
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--canvas-border);
   width: 100%;
   height: 100%;
   display: flex;
@@ -199,24 +202,25 @@
   cursor: cell;
 }
 
-/* Welcoming helper banner on empty canvas */
+/* Modest in-context hint on empty canvas (borderless, shadowless text on paper) */
 .canvas-welcome {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(247, 243, 232, 0.94);
-  border: 1px solid rgba(56, 81, 73, 0.25);
-  border-radius: 8px;
-  padding: 24px 32px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(30, 46, 42, 0.18);
-  pointer-events: auto;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  max-width: 440px;
+  gap: 8px;
+  max-width: 320px;
 }
 
 .canvas-welcome[hidden] {
@@ -224,18 +228,29 @@
 }
 
 .welcome-title {
-  font-family: var(--font-serif);
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e2f2b;
+  display: none;
 }
 
 .welcome-desc {
   font-size: 13px;
-  color: #4b635a;
-  line-height: 1.5;
+  color: #3a3a3c;
+  line-height: 1.4;
+  pointer-events: none;
 }
 
+.canvas-welcome button,
 .welcome-btn {
-  margin-top: 4px;
+  pointer-events: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #1d1d1f;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-btn:hover {
+  background-color: #ffffff;
 }

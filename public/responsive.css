@@ -1,29 +1,25 @@
-/* Responsive styles for varying viewport dimensions */
+/* Responsive Adaptations for Compact Displays and Mobile Viewports */
 
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   .sidebar-tools {
-    width: 200px;
-    padding: 10px;
+    width: 190px;
+    padding: 10px 12px;
   }
 
   .sidebar-inspector {
-    width: 250px;
-    padding: 10px;
+    width: 240px;
+    padding: 10px 12px;
   }
 
   .studio-viewport {
-    padding: 24px;
+    padding: 16px;
   }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 900px) {
   .studio-header {
     padding: 0 10px;
     gap: 8px;
-  }
-
-  .brand-title {
-    font-size: 18px;
   }
 
   .btn-action .btn-label, .btn-playback .btn-label {
@@ -31,19 +27,19 @@
   }
 
   .btn-action, .btn-playback {
-    padding: 6px;
+    padding: 4px 6px;
   }
 
   .sidebar-tools {
-    width: 170px;
+    width: 160px;
   }
 
   .sidebar-inspector {
-    width: 220px;
+    width: 210px;
   }
 }
 
-/* Mobile stacked layout at <= 760px (e.g. 390x844) */
+/* Mobile stacked layout at <= 760px (tested down to 390x844) */
 @media (max-width: 760px) {
   body.studio-root {
     height: auto;
@@ -55,11 +51,12 @@
   .studio-header {
     height: auto;
     flex-wrap: wrap;
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 8px 10px;
+    gap: 6px;
   }
 
   .header-brand {
+    min-width: auto;
     flex: 1 1 auto;
   }
 
@@ -71,7 +68,7 @@
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
-    gap: 6px;
+    gap: 4px;
   }
 
   .btn-group {
@@ -83,7 +80,7 @@
   }
 
   .btn-action, .btn-playback {
-    padding: 6px 8px;
+    padding: 4px 6px;
   }
 
   .studio-layout {
@@ -95,11 +92,11 @@
     max-width: 100vw;
   }
 
-  /* Canvas first */
+  /* 1. Canvas workspace first */
   .studio-viewport {
     order: 1;
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     min-height: auto;
     overflow: visible;
   }
@@ -109,52 +106,41 @@
     max-width: 100%;
   }
 
-  .canvas-welcome {
-    max-width: 90%;
-    padding: 16px;
-  }
-
-  .welcome-title {
-    font-size: 16px;
-  }
-
-  .welcome-desc {
-    font-size: 11px;
-  }
-
-  /* Compact tools second */
+  /* 2. Drawing tools second */
   .sidebar-tools {
     order: 2;
     width: 100%;
     max-width: 100vw;
     border-right: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 12px;
+    border-bottom: 1px solid var(--mac-separator);
+    padding: 10px 12px;
     overflow: visible;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .sidebar-tools .tool-section {
     min-width: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
-  /* Inspector third */
+  /* 3. Inspector third */
   .sidebar-inspector {
     order: 3;
     width: 100%;
     max-width: 100vw;
     border-left: none;
-    padding: 12px;
+    padding: 10px 12px;
     overflow: visible;
   }
 
   .layer-list {
-    max-height: 160px;
+    max-height: 140px;
   }
 
   .feedback-list {
-    max-height: 140px;
+    max-height: 120px;
   }
 }

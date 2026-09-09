@@ -9,7 +9,8 @@ Build an intuitive local painting instrument for agents and humans. The user wat
 - Use `herdr` for all delegated agent requests. Give agy bounded writing/review tasks and opencode small implementation tasks with explicit contracts. Review every result. Use Codex Astra high through herdr for a difficult independent gut check.
 - Workers share this repository. Edit only assigned files and preserve others' work. Do not install dependencies, commit, or change architecture from a worker assignment.
 - Track work with `bd`. Read `docs/plans/architect/studio.md` and relevant standards before changing code.
-- Standards: `docs/standards/architecture.md`, `docs/standards/security.md`, and `docs/standards/testing.md` define context boundaries, supply-chain policy, and release verification.
+- Standards: `docs/standards/architecture.md`, `docs/standards/security.md`, `docs/standards/testing.md`, and `docs/standards/interface.md` define context boundaries, supply-chain policy, release verification, and the Mac application visual language.
+- Design Codesketch as a polished Mac creative application. Keep the canvas prominent, use system typography and compact desktop controls, and keep interface surfaces neutral. The lead delegates visual implementation through `herdr`.
 - Use native JavaScript ES modules, HTML, CSS, browser APIs, and Node built-ins. External dependencies require a concrete proposal and user approval. Development tools already installed on the machine are tooling, not shipped dependencies.
 - Keep each file focused and preferably under 200 lines (hard verification ceiling 300 for source). Model folders as nested bounded contexts, with public `index.mjs` entrypoints. Avoid generic helper dumping grounds.
 - Run `npm run verify` and relevant browser checks before completion. Keep generated browser artifacts out of commits.

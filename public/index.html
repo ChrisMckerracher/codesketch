@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codesketch — Local Painting Studio</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='4' fill='%23d96b27'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%23007aff'/></svg>">
   <link rel="stylesheet" href="/public/base.css">
   <link rel="stylesheet" href="/public/layout.css">
   <link rel="stylesheet" href="/public/tools.css">
@@ -13,10 +13,9 @@
   <link rel="stylesheet" href="/public/responsive.css">
 </head>
 <body class="studio-root">
-  <header class="studio-header">
+  <header class="studio-header" role="banner">
     <div class="header-brand">
       <h1 class="brand-title">Codesketch</h1>
-      <span class="brand-tag">v1.0</span>
     </div>
 
     <div class="header-status">
@@ -47,25 +46,25 @@
           <span class="btn-icon" data-icon="new"></span>
           <span class="btn-label">New</span>
         </button>
-        <button type="button" id="btn-demo" class="btn-action" aria-label="Load landscape demo" title="Load demo landscape (loads paused)">
+        <button type="button" id="btn-demo" class="btn-action" aria-label="Load landscape demo" title="Load sample landscape">
           <span class="btn-icon" data-icon="demo"></span>
-          <span class="btn-label">Demo</span>
+          <span class="btn-label">Sample</span>
         </button>
       </div>
 
       <div class="btn-group" role="group" aria-label="Project files">
-        <button type="button" id="btn-save" class="btn-action" aria-label="Save project as JSON" title="Save project as JSON">
-          <span class="btn-icon" data-icon="save"></span>
-          <span class="btn-label">Save JSON</span>
-        </button>
-        <button type="button" id="btn-load-trigger" class="btn-action" aria-label="Load project from JSON file" title="Load project from JSON file">
+        <button type="button" id="btn-load-trigger" class="btn-action" aria-label="Load project from JSON file" title="Open project file">
           <span class="btn-icon" data-icon="load"></span>
-          <span class="btn-label">Load JSON</span>
+          <span class="btn-label">Open</span>
+        </button>
+        <button type="button" id="btn-save" class="btn-action" aria-label="Save project as JSON" title="Save project file">
+          <span class="btn-icon" data-icon="save"></span>
+          <span class="btn-label">Save</span>
         </button>
         <input type="file" id="file-input-project" accept=".json,application/json" class="visually-hidden" aria-hidden="true">
-        <button type="button" id="btn-export" class="btn-action btn-accent" aria-label="Export composite PNG image" title="Export composite PNG image">
+        <button type="button" id="btn-export" class="btn-action btn-accent" aria-label="Export composite PNG image" title="Export composite PNG">
           <span class="btn-icon" data-icon="export"></span>
-          <span class="btn-label">Export PNG</span>
+          <span class="btn-label">Export</span>
         </button>
       </div>
     </div>
@@ -74,7 +73,7 @@
   <div class="studio-layout">
     <aside class="studio-sidebar sidebar-tools" aria-label="Drawing tools">
       <section class="tool-section">
-        <h2 class="section-title">Brush</h2>
+        <h2 class="section-title">Tools</h2>
         <div class="tool-grid" role="radiogroup" aria-label="Tool selection">
           <button type="button" class="tool-btn active" data-tool="brush" aria-label="Brush tool" title="Brush (1 / B)">
             <span class="tool-icon" data-icon="brush"></span>
@@ -129,7 +128,7 @@
         <div class="bg-picker-row">
           <div class="bg-swatches" id="bg-swatches"></div>
           <input type="color" id="input-bg-color" value="#f7f3e8" class="native-color-input" aria-label="Background fill color picker">
-          <button type="button" id="btn-apply-bg" class="btn-secondary" aria-label="Fill background with chosen color" title="Fill background with chosen color">Fill</button>
+          <button type="button" id="btn-apply-bg" class="btn-small btn-secondary" aria-label="Fill background with chosen color" title="Fill background with chosen color">Fill</button>
         </div>
       </section>
     </aside>
@@ -140,9 +139,8 @@
           <canvas id="canvas" width="1000" height="700" class="main-canvas" aria-label="Artwork canvas (1000 by 700 pixels)"></canvas>
         </div>
         <div id="canvas-welcome" class="canvas-welcome">
-          <h2 class="welcome-title">Welcome to Codesketch</h2>
-          <p class="welcome-desc">Select a brush on the left to start painting, or load the study to watch strokes appear.</p>
-          <button type="button" id="btn-welcome-demo" class="btn-accent welcome-btn" aria-label="Load landscape demo">Load Landscape Demo</button>
+          <p class="welcome-desc">Select a tool to begin drawing, or load the sample landscape.</p>
+          <button type="button" id="btn-welcome-demo" class="btn-small btn-secondary welcome-btn" aria-label="Load landscape demo">Load Landscape Demo</button>
         </div>
       </div>
     </main>
@@ -196,18 +194,18 @@
 
       <section class="inspector-section feedback-section">
         <div class="section-header-row">
-          <h2 class="section-title">Human Feedback</h2>
+          <h2 class="section-title">Notes</h2>
         </div>
         <p class="feedback-hint">Pause the painting and leave a note for your painter.</p>
         <form id="form-feedback" class="feedback-form">
           <textarea id="input-feedback" class="feedback-input" placeholder="Leave a note for your painter..." rows="3" maxlength="2000" aria-label="Feedback note for agent"></textarea>
           <div class="feedback-form-footer">
             <span id="feedback-counter" class="char-counter">0/2000</span>
-            <button type="submit" id="btn-send-feedback" class="btn-accent" aria-label="Pause and send feedback note">Pause &amp; Send</button>
+            <button type="submit" id="btn-send-feedback" class="btn-small btn-secondary" aria-label="Pause and send feedback note">Pause &amp; Send</button>
           </div>
         </form>
         <div class="feedback-history-wrap">
-          <h3 class="history-title">Previous Feedback</h3>
+          <h3 class="history-title">Previous Notes</h3>
           <div id="feedback-list" class="feedback-list" role="feed" aria-label="Feedback history"></div>
         </div>
       </section>
