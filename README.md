@@ -50,8 +50,6 @@ paint save painting.json
 
 The canvas uses 1000 × 700 logical coordinates. Strokes support brush, pencil, marker and eraser; layers have independent visibility and opacity. Batches validate atomically. The session supports 3,000 commands, 24 layers, 2,000 points per stroke and 150,000 total points. See [the agent guide](docs/agent-guide.md) for full syntax, brush behavior and the drawing loop.
 
-The existing `node tools/paint.mjs` entrypoint remains available for scripts during migration. Both clients use the same studio API and project format.
-
 ## Verification
 
 ```sh

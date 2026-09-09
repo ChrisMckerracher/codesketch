@@ -4,7 +4,7 @@ The user wants a mature native CLI installed as `paint`. Build it in Go using on
 
 ## Product contract
 
-Preserve the command vocabulary and JSON transport of `docs/plans/architect/agent-cli.md`: drawing, layers, batch stdin/files, status, feedback, session controls, save/load, bounded wait/watch, immutable preview and committed PNG export. `paint new` resets the session; `paint clear` discards the pending queue. Preserve human pauses. Commands are declarative data.
+The command vocabulary and JSON transport follow `docs/agent-guide.md` and `docs/specs/features/agent-cli.feature`: drawing, layers, batch stdin/files, status, feedback, session controls, save/load, bounded wait/watch, immutable preview and committed PNG export. `paint new` resets the session; `paint clear` discards the pending queue. Preserve human pauses. Commands are declarative data.
 
 Provide offline `help`, command `--help`, `guide`, `version`/`--version`, and `completion bash|zsh|fish`. `doctor [--json]` reports executable/build, configured loopback endpoint, studio reachability and installed browser availability. Document stable exit codes: 0 success, 1 runtime failure, 2 invalid invocation, 130 interruption. Structured errors go to stderr with `--json`; successful JSON goes to stdout. Watch emits newline-delimited JSON. Reject duplicate/unknown flags, extra arguments and invalid values before any mutation.
 
@@ -20,7 +20,7 @@ The implementation uses one immutable snapshot, shared Canvas renderer, a fresh 
 
 ## Delivery and tests
 
-Keep the existing JavaScript CLI available to the active painter during migration. Do not restart the live studio or use live artwork for mutation tests. Delegate implementation and regression tests through Herdr; lead owns design, docs, review and release.
+Deliver `paint` as the sole CLI. Keep the live studio available and use isolated artwork for mutation tests. Delegate implementation and regression tests through Herdr; lead owns design, docs, review and release.
 
 Use Go native tests for parsing, flag strictness, command payloads, file/stdin limits, transport trust/redirect/proxy behavior, cancellation, wait/watch, errors and output contracts. Integration checks use an isolated studio and installed browser: actual PNG pixels for layers, erasure, active partial stroke, committed export and crop/scale; browser exit/timeout cleanup; installed binary from another directory. Check `go test -race ./...`, `go vet ./...`, formatting, module inventory, Go source size and embed/renderer provenance, and existing `npm run verify`. Browser tests must clean resources and preserve active art. Document reproducible build/install commands and external runtime requirements accurately.
 

@@ -24,21 +24,21 @@ Verified September 9, 2026. Agy implemented the presentation through Herdr, with
 
 `npm run verify` passed all architecture, supply-chain, syntax, and 41 native test checks. `npm run test:browser` passed against an isolated ephemeral server and verified painting workflows plus valid PNG and project exports. Lead screenshots confirmed the full canvas and legible controls at 1440 × 980 in light and dark appearance. Browser checks used a separate session from the live painting.
 
-## Complete agent CLI
+## JavaScript CLI release (historical)
 
-Verified September 9, 2026. The CLI provides offline help and an embedded painting guide, direct strokes/shapes/layers, bounded JSON files and stdin, compact status, structured output, feedback-aware observation, and internally managed PNG previews, crops, and exports. `AGENTS.md` directs painters to the guide and records that timing judgments require measured timestamps. Implementation and fixes were delegated through Herdr; the lead reviewed code and ran independent checks.
+Verified September 9, 2026 before replacement by the native Go CLI. The JavaScript implementation and its dedicated tests have since been removed. This section records historical results. The CLI provided offline help and an embedded painting guide, direct strokes/shapes/layers, bounded JSON files and stdin, compact status, structured output, feedback-aware observation, and internally managed PNG previews, crops, and exports. Implementation and fixes were delegated through Herdr; the lead reviewed code and ran independent checks.
 
 | Check | Result |
 | --- | --- |
 | `npm run verify` | Passed: 90 native tests plus syntax, architecture, and supply-chain checks; three browser-only cases are deliberately gated |
-| `CODESKETCH_BROWSER_TESTS=1 node --test tests/cli/observe.test.mjs` | All five cases passed, including full preview, crop, export, and missing-browser behavior |
-| `node tools/capture-check.mjs` | Passed independently: real navigation/context replacement in both arrival orders, three fresh immutable captures, and pixel checks for layers, erasing, partial strokes, crop, and scale |
+| Retired JavaScript observation integration suite | All five cases passed, including full preview, crop, export, and missing-browser behavior |
+| Retired JavaScript capture check | Passed independently: real navigation/context replacement in both arrival orders, three fresh immutable captures, and pixel checks for layers, erasing, partial strokes, crop, and scale |
 | `npm run test:browser` | Existing studio drawing, playback, feedback, and export workflows passed on an isolated server |
 | Live read-only CLI preview | Produced a 1000 × 700 PNG with instance/revision metadata while preserving live playback |
 
 Review addressed strict argument rejection before mutations, finite network/stdin/file reads, FIFO rejection, accurate queued acknowledgements, pause-preserving deadlines, brush instructions, browser startup failures, cancelled output publication, and browser/profile cleanup. Astra reproduced and fixed a navigation race by waiting for the intended document and its retained render promise, with bounded retries for execution-context replacement.
 
-PNG capture uses the existing painting renderer and an installed Chromium-family browser, controlled directly with Node built-ins. It requires no Playwright package or CLI and performs no browser downloads. Native tests require Node alone. `status --json` retains the full state response for automation; plain `status` is concise.
+That implementation controlled an installed Chromium-family browser with Node built-ins and reused the painting renderer. Its tests used Node. The native Go release below records the current capture implementation.
 
 ## Native Go CLI
 
@@ -57,3 +57,9 @@ Verified September 9, 2026 on macOS ARM64 with Go 1.25.7 and installed Chrome. `
 Review corrected single-dash equals parsing, missing flag values consuming other flags, JSON help consistency, and the build/install policy prerequisite. Fifteen isolated policy regressions cover external modules, replacements, workspaces, vendoring, platform-hidden imports/embeds, source ceilings, package direction, formatting, canonical asset provenance and the exact embedded renderer route mapping. Builds disable module networking, persistent Go configuration, automatic toolchain downloads and CGo; race tests use the installed CGo toolchain. There are no third-party Go modules or npm packages.
 
 OpenCode implemented the initial parser and browser-discovery slices. Astra high reviewed and completed native command/capture integration, tests and packaging through Herdr. The lead reviewed the implementation, ran independent checks, and installed the executable. Tests used isolated state; live painting remained available throughout the migration.
+
+## Native CLI cleanup
+
+Verified September 9, 2026 after removing the JavaScript CLI, its capture implementation, dedicated tests and obsolete design. `paint` is the sole command-line interface. Current guidance and standards describe the native executable; historical verification above records the earlier releases.
+
+`npm run verify` passed all 56 retained JavaScript/policy tests with no skips, plus Go formatting, dependency/context/embed policy, vet and race tests. `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go` passed native command integration against an isolated studio and real-browser capture/pixel/lifecycle checks. The Go implementation and canonical painting renderer are unchanged. OpenCode performed the bounded removal through Herdr; the lead reviewed the deletions, updated documentation and ran verification.
