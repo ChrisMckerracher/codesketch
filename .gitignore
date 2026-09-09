@@ -2,6 +2,7 @@ node_modules/
 .studio/
 .playwright-cli/
 artifacts/
+/bin/
 .DS_Store
 *.log
 .dolt/

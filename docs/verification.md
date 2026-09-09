@@ -39,3 +39,21 @@ Verified September 9, 2026. The CLI provides offline help and an embedded painti
 Review addressed strict argument rejection before mutations, finite network/stdin/file reads, FIFO rejection, accurate queued acknowledgements, pause-preserving deadlines, brush instructions, browser startup failures, cancelled output publication, and browser/profile cleanup. Astra reproduced and fixed a navigation race by waiting for the intended document and its retained render promise, with bounded retries for execution-context replacement.
 
 PNG capture uses the existing painting renderer and an installed Chromium-family browser, controlled directly with Node built-ins. It requires no Playwright package or CLI and performs no browser downloads. Native tests require Node alone. `status --json` retains the full state response for automation; plain `status` is concise.
+
+## Native Go CLI
+
+Verified September 9, 2026 on macOS ARM64 with Go 1.25.7 and installed Chrome. `paint` is a compiled Mach-O executable installed in `~/.local/bin`. The binary includes the canonical agent guide and Canvas renderer assets and talks directly to the existing studio API. Its runtime invokes neither Node nor Playwright. The studio continues to use Node and browser Canvas.
+
+| Check | Result |
+| --- | --- |
+| Final `npm run verify` | 105 JavaScript/policy tests passed, three legacy browser cases gated; Go formatting, source/context policy, module/embed inventory, vet and race tests passed |
+| `PAINT_BROWSER_TESTS=1 go test -race ./internal/cli/capture` | Passed independently: real brush/layer/eraser/partial/committed/crop pixels, bounded input and PNG validation, callback trust and completion races, process/descendant/profile/listener cleanup, timeout/cancellation, and atomic output preservation |
+| `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 go test -v ./internal/cli -run TestNativeStudioIntegration` | Passed independently against an ephemeral non-persistent studio: actual binary drawing, layers, sticky feedback pause, wait, new, save/load, undo/redo, submit/resume, native PNG pixels and interrupt exit status |
+| Copied executable outside checkout | Native ARM64 format, version, JSON help, doctor and a 1000 × 700 read-only preview passed with Node absent from PATH |
+| Installed executable | `make install` passed its policy gate; `paint` resolves to `~/.local/bin/paint`, prints the embedded guide and passes doctor from `/private/tmp` |
+| Completion | Bash and Zsh syntax passed; Bash command/brush suggestions passed. Fish output is provided; its runtime test is skipped because Fish is not installed |
+| Cross-compilation | Final CLI builds passed for Linux/amd64 and Windows/amd64. Runtime verification was on macOS; PNG capture is implemented for macOS/Linux and reports unsupported on Windows |
+
+Review corrected single-dash equals parsing, missing flag values consuming other flags, JSON help consistency, and the build/install policy prerequisite. Fifteen isolated policy regressions cover external modules, replacements, workspaces, vendoring, platform-hidden imports/embeds, source ceilings, package direction, formatting, canonical asset provenance and the exact embedded renderer route mapping. Builds disable module networking, persistent Go configuration, automatic toolchain downloads and CGo; race tests use the installed CGo toolchain. There are no third-party Go modules or npm packages.
+
+OpenCode implemented the initial parser and browser-discovery slices. Astra high reviewed and completed native command/capture integration, tests and packaging through Herdr. The lead reviewed the implementation, ran independent checks, and installed the executable. Tests used isolated state; live painting remained available throughout the migration.

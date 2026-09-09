@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const SELF = resolve(import.meta.dirname, 'verify.mjs');
-const IGNORED = new Set(['.git', '.beads', '.studio', '.playwright-cli', 'artifacts', 'node_modules']);
+const IGNORED = new Set(['.git', '.beads', '.studio', '.playwright-cli', 'artifacts', 'bin', 'node_modules']);
 const SOURCE_EXTENSIONS = ['.mjs', '.js', '.cjs'];
 const DEPENDENCY_KEYS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies',
   'bundledDependencies', 'bundleDependencies'];
@@ -101,7 +101,10 @@ function checkSourceFile(file, code, rel, srcDir) {
       continue;
     }
 
-    const targetPath = resolve(dirname(file), spec);
+    // This embedded page serves the canonical module through its local route.
+    // Match both the importer and specifier; all other imports resolve on disk.
+    const targetPath = rel.split(sep).join('/') === 'internal/cli/capture/page.mjs' && spec === './rendering/index.mjs'
+      ? resolve(ROOT, 'src/painting/rendering/index.mjs') : resolve(dirname(file), spec);
     if (!existsSync(targetPath)) {
       fail(`${rel}: Target '${spec}' does not exist on disk`);
       continue;

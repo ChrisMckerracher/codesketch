@@ -1,122 +1,71 @@
 # Codesketch
 
-Codesketch is a local painting instrument for agents and humans. An external agent submits structured drawing commands while a human observes strokes appear in real time, pauses execution, modifies artwork directly, and provides feedback.
+A local painting studio with a native Go CLI. Agents draw through structured commands while a human watches the strokes appear, pauses playback, paints directly, and leaves feedback.
 
-## Features
+## Start the studio
 
-- **Observable Agent Painting**: Step-by-step rendering of strokes and vector shapes across a 1000 × 700 canvas.
-- **Interactive Human Oversight**: Sticky pause on feedback submission, queue inspection, manual pointer drawing, and layer adjustments.
-- **Robust Execution Pipeline**: Atomic batch validation, pending queue replacement, full undo/redo history, and paused session restoration.
-- **Zero Dependencies**: Built with native ECMAScript modules, HTML5 Canvas, and Node.js built-in modules.
-- **Dual Interfaces**: Complete browser studio workspace paired with an agent CLI and local HTTP REST API.
+The studio uses Node.js 22 or newer and browser Canvas. The native CLI builds with Go 1.25.7 or newer and uses an installed Chrome or Chromium for PNG capture on macOS and Linux. All application code uses standard libraries and browser APIs, with zero third-party packages.
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js >= 22
-- An installed Chrome or Chromium browser for CLI PNG previews and exports (`PAINT_BROWSER` can select its executable).
-
-### Starting the Studio
-
-Start the local server:
-
-```bash
+```sh
 npm start
 ```
 
-The studio workspace is served at `http://127.0.0.1:4317`.
+Open <http://127.0.0.1:4317/>. The studio persists its session in `.studio/session.json` and restores queued work paused.
 
-### Running Tests and Verification
+## Install paint
 
-Run native unit tests:
-
-```bash
-npm test
+```sh
+make install
+paint guide
+paint doctor
 ```
 
-Run full validation (supply-chain policies, architectural boundaries, and unit tests):
+The default install directory is `~/.local/bin`; include it on your PATH. Use `make build` to create `bin/paint`. Builds use the installed Go toolchain with module networking and automatic toolchain downloads disabled. The compiled executable includes its guidance and renderer assets and works from any directory.
 
-```bash
+```sh
+paint status
+paint stroke --points "120,240 180,260 220,230" --brush pencil --size 4 --color '#253d38'
+paint view
+paint view detail.png --crop 100,200,200,150 --scale 2
+paint feedback "Make the outline darker"
+paint export painting.png
+paint save painting.json
+```
+
+`view` writes an actual PNG and prints its absolute path for the agent's image reader. The CLI manages its temporary browser internally. `PAINT_BROWSER` selects a Chromium executable; `PAINT_URL` selects the loopback studio endpoint.
+
+## Commands
+
+| Purpose | Commands |
+| --- | --- |
+| Learn and diagnose | `help`, `help COMMAND`, `guide`, `version`, `doctor` |
+| Draw | `stroke`, `rect`, `ellipse`, `fill`, `submit FILE` or `submit -` |
+| Manage layers | `layer list`, `layer add`, `layer update` |
+| Observe | `status`, `view`, `wait`, `watch` |
+| Control playback | `pause`, `resume`, `step`, `speed`, `clear` |
+| Manage session | `new`, `undo`, `redo`, `feedback`, `save`, `load`, `export` |
+| Shell completion | `completion bash`, `completion zsh`, `completion fish` |
+
+`new` clears the canvas, history, queue and feedback. `clear` discards pending strokes and pauses playback. Human pauses remain in place until continuation is authorized. Use `--json` for machine-readable status, mutation responses, diagnostics and errors; `watch --json` emits newline-delimited events.
+
+The canvas uses 1000 × 700 logical coordinates. Strokes support brush, pencil, marker and eraser; layers have independent visibility and opacity. Batches validate atomically. The session supports 3,000 commands, 24 layers, 2,000 points per stroke and 150,000 total points. See [the agent guide](docs/agent-guide.md) for full syntax, brush behavior and the drawing loop.
+
+The existing `node tools/paint.mjs` entrypoint remains available for scripts during migration. Both clients use the same studio API and project format.
+
+## Verification
+
+```sh
 npm run verify
-```
-
-Run browser end-to-end scenario (requires playwright-cli):
-
-```bash
+make verify-go
+PAINT_BROWSER_TESTS=1 make test-go
+PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go
 npm run test:browser
 ```
 
-Verify the CLI's built-in capture using the installed browser directly:
+Verification covers architecture, source size, dependency inventory, command behavior and resource limits. Native Go tests exercise parsing, local transport, cancellation and PNG capture. Optional browser cases use the installed browser and isolated data. Studio end-to-end checks use the installed Playwright CLI. See [release evidence](docs/verification.md) for the checks actually run.
 
-```bash
-node tools/capture-check.mjs
-CODESKETCH_BROWSER_TESTS=1 node --test tests/cli/observe.test.mjs
-```
+## Local API and trust
 
-## Studio Workspace
+The local API exposes `/api/state`, `/api/project`, `/api/commands`, `/api/control` and `/api/feedback`. Drawing is declarative JSON data. State snapshots include document, playback, history, feedback, instance and revision. Projects contain the command history, cursor, pending queue and feedback.
 
-The studio operates on a 1000 × 700 document coordinate space with multi-layer compositing.
-
-### Browser UI Capabilities
-
-- **Canvas Viewport**: 1000 × 700 display rendering per-layer marks and active stroke animations with startup welcome cue.
-- **Manual Drawing**: Pointer-based painting using brush, pencil, marker, and eraser modes. Manual marks pause playback and commit directly to history.
-- **Layer Management**: Create layers, toggle visibility, adjust opacity, and select active target layers with keyboard accessibility.
-- **Queue Controls**: Pause, resume, step forward single commands, adjust playback speed (0.25× to 8×), and clear pending commands.
-- **Human Direction**: Note field to send feedback that pauses painting stickily for external agent inspection.
-- **History Navigation**: Step backward (undo) and forward (redo) through committed operations.
-- **Import and Export**: Export visible layers and background to PNG, or save and load project documents as JSON (up to 8 MiB).
-
-### Persistence and Recovery
-
-Session state persists atomically to `.studio/session.json`. Committed history and feedback survive restarts, and queued commands restore in a paused state.
-
-## Interfaces
-
-### Agent CLI (`tools/paint.mjs`)
-
-External agents and scripts drive the studio via `node tools/paint.mjs`:
-
-```bash
-node tools/paint.mjs help
-node tools/paint.mjs guide
-node tools/paint.mjs status
-node tools/paint.mjs status --json
-node tools/paint.mjs view
-node tools/paint.mjs stroke --points "120,240 180,260 220,230" --brush pencil --size 3 --color '#253d38'
-node tools/paint.mjs view artifacts/detail.png --crop 100,200,200,150 --scale 2
-node tools/paint.mjs export artifacts/painting.png
-node tools/paint.mjs submit FILE [--replace] [--paused]
-node tools/paint.mjs pause
-node tools/paint.mjs resume
-node tools/paint.mjs step
-node tools/paint.mjs clear
-node tools/paint.mjs undo
-node tools/paint.mjs redo
-node tools/paint.mjs feedback TEXT
-node tools/paint.mjs save FILE
-node tools/paint.mjs load FILE
-```
-
-Start with `guide` for a complete drawing workflow and use `help COMMAND` for command-specific syntax. `view` produces a PNG of the current canvas and reports its absolute path for an agent's image-reading tool. Preview capture uses the shared renderer and manages its own headless browser internally. The painting workflow requires no Playwright commands. `status` is concise; automation uses `--json` for complete state. `wait` and `watch` observe playback and feedback while preserving manual pauses.
-
-### HTTP REST API
-
-The local server exposes the following endpoints at `http://127.0.0.1:4317`:
-
-- `GET /api/state`: Returns nested session snapshot (`revision`, `artRevision`, `document`, `playback`, `history`, `feedback`, `storageError`).
-- `GET /api/project`: Returns the complete project document (`commands`, `cursor`, `queue`, `feedback`).
-- `POST /api/commands`: Appends or replaces commands (`{ "commands": [...], "replace": false, "play": true }`). Pauses are sticky and require explicit resume.
-- `POST /api/control`: Executes queue controls (`{ "action": "pause" | "resume" | "step" | "clear" | "undo" | "redo" | "new" | "speed", "speed"?: number }`).
-- `POST /api/feedback`: Submits feedback text and stickily pauses execution (`{ "text": "..." }`).
-- `POST /api/project`: Loads a replacement project document (max 8 MiB).
-
-See [docs/agent-guide.md](docs/agent-guide.md) for command specifications, JSON examples, architectural limits, and the agent interaction loop.
-
-## Security and Local Trust
-
-- **Zero Third-Party Packages**: Uses Node built-ins and the user's browser, with no package installs or automatic browser downloads.
-- **Local Loopback Binding**: Network services bind strictly to `127.0.0.1`.
-- **Local Process Trust**: API accepts commands from local processes without remote credentials; cross-origin browser requests are rejected.
-- **No Embedded Remote Services**: No external generative services or embedded LLMs. Natural language reasoning is handled entirely by the external agent.
+The studio binds to loopback and rejects cross-origin browser requests. The CLI restricts endpoints to loopback and bounds input, responses and captures. PNG capture uses an owned browser profile with the browser sandbox enabled. Artwork and generated outputs stay in ignored local directories. The application is intended for a trusted local machine.

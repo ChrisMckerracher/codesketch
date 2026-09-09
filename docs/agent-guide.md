@@ -58,9 +58,9 @@ Strokes follow a continuous path across coordinate pairs:
 
 ---
 
-## 3. CLI Command Reference (tools/paint.mjs)
+## 3. CLI Command Reference (paint)
 
-The CLI executable is located at tools/paint.mjs.
+Install the native Go executable with `make install`, then begin with `paint guide`. It includes this guide and its preview renderer and works from any directory. `paint doctor` checks studio and browser availability; `paint completion bash|zsh|fish` prints shell completion definitions. PNG capture supports macOS and Linux with an installed Chrome or Chromium browser.
 
 ### Observation Commands
 
@@ -105,26 +105,26 @@ Mutation acknowledgements report the resulting playback state and remaining queu
 "Queued stroke (3 points on \"paint\") - playback: playing, 1 remaining (revision 4)"
 
 #### stroke
-node tools/paint.mjs stroke --points "120,240 180,260 220,300" --brush pencil --color "#253d38" --size 4 --opacity 1 --layer paint
+paint stroke --points "120,240 180,260 220,300" --brush pencil --color "#253d38" --size 4 --opacity 1 --layer paint
 
 #### rect
-node tools/paint.mjs rect --x 0 --y 450 --width 1000 --height 250 --color "#1b4d3e" --opacity 1 --layer background
+paint rect --x 0 --y 450 --width 1000 --height 250 --color "#1b4d3e" --opacity 1 --layer background
 
 #### ellipse
-node tools/paint.mjs ellipse --x 700 --y 80 --width 120 --height 120 --color "#f59e0b" --opacity 0.9 --layer sky
+paint ellipse --x 700 --y 80 --width 120 --height 120 --color "#f59e0b" --opacity 0.9 --layer sky
 
 #### fill
-node tools/paint.mjs fill "#f4efe6"
+paint fill "#f4efe6"
 
 #### layer
-node tools/paint.mjs layer list
-node tools/paint.mjs layer add background "Backdrop Layer"
-node tools/paint.mjs layer update background --opacity 0.85 --visible true
+paint layer list
+paint layer add background "Backdrop Layer"
+paint layer update background --opacity 0.85 --visible true
 
 #### submit
 Submits a batch from a JSON file or standard input (-). Input size is bounded (max 8 MiB) and timed out.
 Example batch submitted via stdin:
-cat << "BATCH" | node tools/paint.mjs submit -
+cat << "BATCH" | paint submit -
 [
   {"type":"fill","color":"#eef2f6"},
   {"type":"layer.add","id":"backdrop","name":"Backdrop"},
@@ -144,7 +144,7 @@ BATCH
 - undo: Undoes the last committed mark in history, moving the cursor back.
 - redo: Redoes the previously undone mark.
 - new: Clears the session to an empty document and resets history, queue, and feedback.
-- speed NUMBER: Sets playback speed (between 0.25 and 8.0, e.g. node tools/paint.mjs speed 2).
+- speed NUMBER: Sets playback speed (between 0.25 and 8.0, e.g. paint speed 2).
 - feedback [TEXT...]:
   - With text: Records a feedback note from the human and immediately pauses execution.
   - Without text: Lists all stored feedback notes.
@@ -166,49 +166,51 @@ These commands execute offline without a running server:
 External agents should structure their painting sessions into iterative cycles:
 
 ### Step 1: Initialize and inspect session
-node tools/paint.mjs status
+paint status
 
 ### Step 2: Establish layers and background
-node tools/paint.mjs fill "#e8eff5"
-node tools/paint.mjs layer add sky "Sky & Mountains"
-node tools/paint.mjs layer add foliage "Midground Foliage"
+paint fill "#e8eff5"
+paint layer add sky "Sky & Mountains"
+paint layer add foliage "Midground Foliage"
 
 ### Step 3: Queue a batch of marks
 Submit small, focused batches (5-20 marks) so the human observer can watch progress:
-node tools/paint.mjs rect --x 0 --y 400 --width 1000 --height 300 --color "#355e3b" --layer foliage
-node tools/paint.mjs stroke --points "200,400 250,320 300,400" --brush pencil --color "#1e3a1e" --size 5 --layer foliage
+paint rect --x 0 --y 400 --width 1000 --height 300 --color "#355e3b" --layer foliage
+paint stroke --points "200,400 250,320 300,400" --brush pencil --color "#1e3a1e" --size 5 --layer foliage
 
 ### Step 4: Wait for playback
-node tools/paint.mjs wait --timeout 30
+paint wait --timeout 30
 
 ### Step 5: Visually inspect progress
 Capture a snapshot of the artwork to observe the result:
-node tools/paint.mjs view /tmp/progress.png
+paint view /tmp/progress.png
 Open /tmp/progress.png with your image reader to evaluate color harmony, contrast, and layout.
 To inspect fine details (e.g. a face or focal point at x=220, y=340):
-node tools/paint.mjs view /tmp/focal_detail.png --crop 200,320,80,80 --scale 2
+paint view /tmp/focal_detail.png --crop 200,320,80,80 --scale 2
 
 ### Step 6: Review feedback and handle human pause
 Check if the human paused the session or provided feedback:
-node tools/paint.mjs feedback
+paint feedback
 If notes exist (e.g. "Darken the hill shadows and lighten the sky"):
 1. Formulate corrected marks.
 2. Submit them with --replace to overwrite obsolete planned work:
-   node tools/paint.mjs submit revisions.json --replace
+   paint submit revisions.json --replace
 3. Resume a human pause only after the human resumes or explicitly authorizes continuation. Resume an agent-initiated pause when its planned work is ready:
-   node tools/paint.mjs resume
+   paint resume
 
 ### Step 7: Export final piece
 When the artwork is complete:
-node tools/paint.mjs export artwork.png
-node tools/paint.mjs save artwork.json
+paint export artwork.png
+paint save artwork.json
 
 ---
 
 ## 5. Scripting & Error Handling
 
 - Success: Commands exit with status code 0.
-- Failure: Errors are written to STDERR with a nonzero exit code (1).
+- Runtime failure: Errors are written to STDERR with exit code 1.
+- Invalid invocation: Exit code 2.
+- Interruption: Exit code 130.
 - Structured JSON Errors: When --json is included in the command arguments, errors on STDERR are structured JSON objects:
   {"error": "WAIT_TIMEOUT", "message": "wait timed out after 5s before playback settled (WAIT_TIMEOUT)"}
 - Loopback Safety: The CLI only connects to loopback addresses (127.0.0.1, localhost, ::1). Requests to non-loopback addresses are rejected immediately before any network transmission.
