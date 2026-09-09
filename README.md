@@ -15,6 +15,7 @@ Codesketch is a local painting instrument for agents and humans. An external age
 ### Prerequisites
 
 - Node.js >= 22
+- An installed Chrome or Chromium browser for CLI PNG previews and exports (`PAINT_BROWSER` can select its executable).
 
 ### Starting the Studio
 
@@ -46,6 +47,13 @@ Run browser end-to-end scenario (requires playwright-cli):
 npm run test:browser
 ```
 
+Verify the CLI's built-in capture using the installed browser directly:
+
+```bash
+node tools/capture-check.mjs
+CODESKETCH_BROWSER_TESTS=1 node --test tests/cli/observe.test.mjs
+```
+
 ## Studio Workspace
 
 The studio operates on a 1000 × 700 document coordinate space with multi-layer compositing.
@@ -72,7 +80,13 @@ External agents and scripts drive the studio via `node tools/paint.mjs`:
 
 ```bash
 node tools/paint.mjs help
+node tools/paint.mjs guide
 node tools/paint.mjs status
+node tools/paint.mjs status --json
+node tools/paint.mjs view
+node tools/paint.mjs stroke --points "120,240 180,260 220,230" --brush pencil --size 3 --color '#253d38'
+node tools/paint.mjs view artifacts/detail.png --crop 100,200,200,150 --scale 2
+node tools/paint.mjs export artifacts/painting.png
 node tools/paint.mjs submit FILE [--replace] [--paused]
 node tools/paint.mjs pause
 node tools/paint.mjs resume
@@ -84,6 +98,8 @@ node tools/paint.mjs feedback TEXT
 node tools/paint.mjs save FILE
 node tools/paint.mjs load FILE
 ```
+
+Start with `guide` for a complete drawing workflow and use `help COMMAND` for command-specific syntax. `view` produces a PNG of the current canvas and reports its absolute path for an agent's image-reading tool. Preview capture uses the shared renderer and manages its own headless browser internally. The painting workflow requires no Playwright commands. `status` is concise; automation uses `--json` for complete state. `wait` and `watch` observe playback and feedback while preserving manual pauses.
 
 ### HTTP REST API
 
@@ -100,7 +116,7 @@ See [docs/agent-guide.md](docs/agent-guide.md) for command specifications, JSON 
 
 ## Security and Local Trust
 
-- **Zero Third-Party Dependencies**: No external package installs or external runtime dependencies.
+- **Zero Third-Party Packages**: Uses Node built-ins and the user's browser, with no package installs or automatic browser downloads.
 - **Local Loopback Binding**: Network services bind strictly to `127.0.0.1`.
 - **Local Process Trust**: API accepts commands from local processes without remote credentials; cross-origin browser requests are rejected.
 - **No Embedded Remote Services**: No external generative services or embedded LLMs. Natural language reasoning is handled entirely by the external agent.

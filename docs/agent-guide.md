@@ -1,170 +1,214 @@
-# Agent Integration Guide
+# Codesketch Agent Integration Guide
 
-Codesketch provides an automated drawing surface for external agents. Agents submit plain JSON drawing commands over HTTP or the CLI while a human observes strokes in real time, pauses execution, and leaves text feedback.
+Codesketch is a local, dependency-free painting instrument designed for collaborative drawing between AI agents and human observers. The human watches strokes appear in real time on the canvas, pauses the painter at will, and leaves text feedback notes to guide the painting process.
 
-## System Model & Operational Limits
+This document is the complete guide for painting agents. You do not need to read the application source code to paint, observe, or respond to feedback.
 
-- **External Intelligence**: The studio contains no embedded LLM. Reasoning occurs in the external agent.
-- **Canvas Dimensions**: Fixed 1000 × 700 document coordinate space (`(0, 0)` to `(1000, 700)`).
-- **Default Layer**: Target layer defaults to `paint` when omitted from a command.
-- **Validation & Simulation**: Incoming command batches are simulated completely before acceptance. Any invalid property rejects the entire batch atomically without mutating the document.
-- **Local Persistence**: State persists to `.studio/session.json`. Committed history survives restarts; unexecuted queue items restore paused.
-- **Project Budget & Serialization**: The server enforces a 7 MiB compact project budget across retained history, queue, and feedback, and an 8 MiB payload ceiling on JSON imports. Save projects with compact single-line serialization.
-- **Instance Tracking & Polling**: The server generates a unique `instanceId` per server run and increments `revision`. Polling clients pass `?since=REVISION&instanceId=ID`; unchanged states return `{ unchanged: true }`. Lower revisions are rejected unless paired with a new `instanceId` (preventing stale updates across restarts).
+---
+
+## 1. System Model & Operating Limits
+
+- **Canvas Dimensions**: The document is a fixed 1000 x 700 coordinate space ((0, 0) at top-left to (1000, 700) at bottom-right).
+- **Default Layer**: The default artwork layer is named "paint". Additional layers stack back-to-front above previous layers.
+- **Atomic Batch Validation**: Every mark or batch submitted is simulated against the document state before acceptance. If any coordinate, color, or property is invalid, the entire batch is rejected atomically without mutating the painting history or canvas.
+- **Human Pause vs Agent Pause**:
+  - When a human pauses execution or submits feedback, playback pauses stickily.
+  - An agent pause (--paused) queues commands while leaving playback paused for staging.
+  - Never present unconditional resume as the next step after every human pause. Only resume when the human direction has been incorporated and continuation is authorized.
+- **Queue Replacement**: Replacing the queue (--replace) cancels unrendered pending work and any active partial stroke, while safely preserving all previously committed history marks.
+- **Zero External Dependencies**: The studio and CLI require zero third-party packages. Headless Chromium capture is handled internally without Playwright.
+- **Local Loopback Only**: The studio runs on a local HTTP loopback server (default http://127.0.0.1:4317). No external networks or credentials are used.
 
 ### Architectural Limits
 
-| Limit | Maximum | Description |
+| Limit | Boundary | Description |
 |---|---|---|
 | Commands per session | 3,000 | Total committed marks plus queued commands |
-| Points per stroke | 2,000 | Number of coordinate pairs in a single stroke |
-| Total document points | 150,000 | Sum of all stroke points across history |
-| Layers | 24 | Maximum concurrent artwork layers |
-| Feedback notes | 100 | Maximum feedback entries (up to 2,000 chars each) |
-| Playback speed | 0.25× to 8× | Supported animation playback rates |
-| Project file size | 8 MiB | Hard ceiling for JSON import payload size |
-| Project budget | 7 MiB | Enforced across compact history, queue, and feedback |
+| Points per stroke | 2,000 | Maximum coordinate pairs in a single stroke |
+| Total document points | 150,000 | Sum of all stroke points across document history |
+| Concurrent layers | 24 | Maximum artwork layers |
+| Feedback notes | 100 | Maximum stored feedback entries (up to 2,000 chars each) |
+| Playback speed | 0.25x to 8x | Supported animation playback multipliers |
+| Request body ceiling | 8 MiB | Maximum JSON payload size |
+| Response stream ceiling | 16 MiB | Maximum state/feedback read size |
+| Project budget | 7 MiB | Enforced serialization budget for projects |
 
-## Command Specifications
+---
 
-Commands are JSON objects with a `type` discriminator. Colors use six-digit hex (`#rrggbb`), opacity spans `0.0` to `1.0`, and size spans `1` to `100`.
+## 2. Drawing Primitives & Renderer Mechanics
 
-- **`stroke`**: Continuous line across points.
-  `{ "type": "stroke", "layer": "paint", "brush": "brush"|"pencil"|"marker"|"eraser", "color": "#2563eb", "size": 12, "opacity": 0.9, "points": [[120, 240], [180, 260]] }`
-- **`rect`**: Filled rectangle.
-  `{ "type": "rect", "layer": "paint", "x": 100, "y": 150, "width": 300, "height": 200, "color": "#16a34a", "opacity": 1.0 }`
-- **`ellipse`**: Filled ellipse.
-  `{ "type": "ellipse", "layer": "paint", "x": 450, "y": 80, "width": 120, "height": 120, "color": "#f59e0b", "opacity": 0.95 }`
-- **`fill`**: Global canvas background color.
-  `{ "type": "fill", "color": "#f8fafc" }`
-- **`layer.add`**: Register a new artwork layer above existing layers.
-  `{ "type": "layer.add", "id": "sky", "name": "Sky & Clouds" }`
-- **`layer.update`**: Modify an existing layer's visibility, opacity, or name.
-  `{ "type": "layer.update", "id": "sky", "visible": true, "opacity": 0.85, "name": "Sky Layer" }`
+### Brushes (stroke)
+Strokes follow a continuous path across coordinate pairs:
+- brush (default): Five soft overlapping passes [1.18x, 1.0x, 0.82x, 0.64x, 0.46x size] rendered with round caps at opacity * 0.16. This creates a soft, expressive, buildable stroke.
+- pencil: Fine, sharp line with round caps rendered at width max(1, size * 0.35) and opacity * 0.85. Perfect for sketching structural contours and hatching.
+- marker: Translucent stroke with square line caps rendered at opacity * 0.45 using standard source-over compositing. Layering builds tonal density.
+- eraser: Destination-out compositing (destination-out) that clears marks strictly on the target layer without touching other layers.
 
-## Copy/Paste Command Batch Example
+### Geometric Shapes (rect & ellipse)
+- rect: Axis-aligned filled rectangle specified by x, y, width, height, color, and opacity.
+- ellipse: Filled ellipse bounded within x, y, width, height, color, and opacity.
 
-Save this array as a JSON file (e.g. `drawing.json`) to submit:
+### Canvas Background (fill)
+- fill: Fills the document background with a hex color (#rrggbb).
 
-```json
+### Layers (layer)
+- layer list: Lists all registered layers, their visibility, and opacity.
+- layer add <id> <name>: Registers a new layer above existing layers. Layer IDs must start with a letter and contain up to 40 alphanumeric characters, hyphens, or underscores.
+- layer update <id>: Adjusts layer --name, --opacity (0.0 to 1.0), or --visible true|false.
+
+---
+
+## 3. CLI Command Reference (tools/paint.mjs)
+
+The CLI executable is located at tools/paint.mjs.
+
+### Observation Commands
+
+#### status [--json]
+Prints a compact summary of the session: instance ID, revision numbers, playback status, queued commands, cursor/total marks, layer count, and latest feedback note.
+- Adding --json emits the full raw state snapshot from the server.
+
+#### view [FILE] [--crop x,y,w,h] [--scale N] [--json]
+Captures an immutable PNG snapshot of the live canvas, including any in-progress partial stroke.
+- If FILE is omitted, saves to a temporary file in the OS temp directory.
+- Reports output path, MIME type (image/png), dimensions, revision, instance ID, and playback state.
+- Optional --crop x,y,w,h extracts a sub-region in canvas coordinates.
+- Optional --scale N (e.g. 2) scales the output for inspecting fine detail.
+- Agents should inspect the returned PNG path using their image-viewing tool (e.g. view_file) to observe canvas progress.
+
+#### export FILE [--crop x,y,w,h] [--scale N] [--json]
+Exports a clean PNG containing only committed artwork marks (committed: true). FILE is required.
+
+#### wait [--timeout SECONDS] [--json]
+Polls the studio and returns success promptly as soon as playback settles into idle or paused.
+- Default timeout is 30 seconds (valid range: 0.001 to 3600 seconds).
+- Bounded network calls ensure a hung connection never exceeds the remaining deadline.
+- Prints state summary and all feedback notes.
+- If the timeout expires while commands are still playing, exits nonzero with error WAIT_TIMEOUT.
+
+#### watch [--timeout SECONDS] [--interval MILLISECONDS] [--json]
+Streams playback and feedback changes. Emits an initial summary and subsequent updates whenever revision, playback, or feedback changes.
+- Default timeout: 30 seconds; default interval: 400 milliseconds.
+- With --json, emits compact events containing instance, revision, playback, history, and feedback metadata (excluding huge document marks arrays).
+- Exits with status 0 upon normal timeout completion. Never auto-resumes playback.
+
+---
+
+### Drawing Commands
+
+All drawing commands accept --paused, --replace, and --json:
+- --paused: Queues the command without unpausing playback.
+- --replace: Discards unexecuted pending commands in the queue before adding the new command.
+- --json: Outputs the complete raw API response snapshot.
+
+Mutation acknowledgements report the resulting playback state and remaining queued marks:
+"Queued stroke (3 points on \"paint\") - playback: playing, 1 remaining (revision 4)"
+
+#### stroke
+node tools/paint.mjs stroke --points "120,240 180,260 220,300" --brush pencil --color "#253d38" --size 4 --opacity 1 --layer paint
+
+#### rect
+node tools/paint.mjs rect --x 0 --y 450 --width 1000 --height 250 --color "#1b4d3e" --opacity 1 --layer background
+
+#### ellipse
+node tools/paint.mjs ellipse --x 700 --y 80 --width 120 --height 120 --color "#f59e0b" --opacity 0.9 --layer sky
+
+#### fill
+node tools/paint.mjs fill "#f4efe6"
+
+#### layer
+node tools/paint.mjs layer list
+node tools/paint.mjs layer add background "Backdrop Layer"
+node tools/paint.mjs layer update background --opacity 0.85 --visible true
+
+#### submit
+Submits a batch from a JSON file or standard input (-). Input size is bounded (max 8 MiB) and timed out.
+Example batch submitted via stdin:
+cat << "BATCH" | node tools/paint.mjs submit -
 [
-  { "type": "fill", "color": "#f0f9ff" },
-  { "type": "layer.add", "id": "backdrop", "name": "Backdrop" },
-  { "type": "layer.add", "id": "details", "name": "Details" },
-  { "type": "rect", "layer": "backdrop", "x": 0, "y": 480, "width": 1000, "height": 220, "color": "#15803d", "opacity": 1.0 },
-  { "type": "ellipse", "layer": "backdrop", "x": 780, "y": 80, "width": 140, "height": 140, "color": "#facc15", "opacity": 0.9 },
-  { "type": "stroke", "layer": "paint", "brush": "brush", "color": "#0284c7", "size": 24, "opacity": 0.8, "points": [[0, 520], [250, 540], [500, 510], [750, 550], [1000, 530]] },
-  { "type": "stroke", "layer": "paint", "brush": "pencil", "color": "#0f172a", "size": 4, "opacity": 1.0, "points": [[150, 480], [220, 360], [290, 480]] },
-  { "type": "stroke", "layer": "details", "brush": "marker", "color": "#dc2626", "size": 16, "opacity": 0.5, "points": [[220, 370], [260, 400], [240, 440]] },
-  { "type": "stroke", "layer": "details", "brush": "eraser", "color": "#000000", "size": 10, "opacity": 1.0, "points": [[245, 410], [255, 410]] },
-  { "type": "layer.update", "id": "backdrop", "opacity": 0.95 }
+  {"type":"fill","color":"#eef2f6"},
+  {"type":"layer.add","id":"backdrop","name":"Backdrop"},
+  {"type":"rect","layer":"backdrop","x":0,"y":300,"width":1000,"height":400,"color":"#15803d"},
+  {"type":"stroke","layer":"paint","brush":"brush","size":12,"color":"#0284c7","points":[[100,200],[300,250],[600,220]]}
 ]
-```
+BATCH
 
-## Agent CLI Reference (`tools/paint.mjs`)
+---
 
-| Command | Arguments | Description |
-|---|---|---|
-| `help` | None | Print command summary. |
-| `status` | None | Report playback state, queue size, cursor, and latest feedback. |
-| `submit` | `FILE [--replace] [--paused]` | Load commands from JSON file. `--replace` clears pending queue; `--paused` disables auto-play. |
-| `pause` / `resume` | None | Pause or resume command queue playback. |
-| `step` / `clear` | None | Step one command or clear pending unexecuted commands. |
-| `undo` / `redo` | None | Step backward or forward through committed mark history. |
-| `feedback` | `TEXT` | Record feedback note and immediately pause execution. |
-| `save` / `load` | `FILE` | Save or load project JSON document. |
+### Session & Playback Commands
 
-## HTTP REST API
+- pause: Pauses playback of queued commands.
+- resume: Resumes playback if commands are queued.
+- step: Advances and commits exactly one command from the queue, remaining paused.
+- clear: Clears all pending unexecuted commands from the queue and pauses.
+- undo: Undoes the last committed mark in history, moving the cursor back.
+- redo: Redoes the previously undone mark.
+- new: Clears the session to an empty document and resets history, queue, and feedback.
+- speed NUMBER: Sets playback speed (between 0.25 and 8.0, e.g. node tools/paint.mjs speed 2).
+- feedback [TEXT...]:
+  - With text: Records a feedback note from the human and immediately pauses execution.
+  - Without text: Lists all stored feedback notes.
+- save FILE: Saves the full project JSON (document history, cursor, queue, feedback) to FILE.
+- load FILE: Restores a previously saved project JSON document.
 
-All endpoints run on `http://127.0.0.1:4317`:
+---
 
-### `GET /api/state`
-Returns the full session snapshot. Supports conditional polling: `GET /api/state?since=REVISION&instanceId=ID`. Returns `{ "unchanged": true }` when state is unchanged.
+### Guidance Commands (Offline)
 
-```json
-{
-  "instanceId": "3f8a9e21",
-  "revision": 22,
-  "artRevision": 15,
-  "document": {
-    "version": 1,
-    "width": 1000,
-    "height": 700,
-    "background": "#f7f3e8",
-    "layers": [{ "id": "paint", "name": "Painting", "visible": true, "opacity": 1 }],
-    "marks": []
-  },
-  "playback": {
-    "status": "playing",
-    "speed": 1,
-    "remaining": 8,
-    "active": {
-      "command": { "type": "stroke", "layer": "paint", "points": [[10, 20], [30, 40]] },
-      "progress": 0.45
-    }
-  },
-  "history": { "cursor": 14, "total": 20 },
-  "feedback": [
-    { "id": "4a7c-uuid", "text": "Darken the hill contours", "at": "2026-09-09T14:00:00.000Z", "cursor": 12 }
-  ],
-  "storageError": null
-}
-```
+These commands execute offline without a running server:
+- help [COMMAND] (or <command> --help): Prints command summary or detailed help for a specific command.
+- guide: Prints the practical painting guide to stdout.
 
-### `GET /api/project`
-Returns the project document with complete command history and serialized queue:
-```json
-{
-  "format": "codesketch",
-  "version": 1,
-  "commands": [
-    { "type": "fill", "color": "#f7f3e8" },
-    { "type": "layer.add", "id": "land", "name": "Hills" }
-  ],
-  "cursor": 2,
-  "queue": [
-    { "type": "stroke", "layer": "land", "color": "#526f69", "points": [[0, 400], [200, 420]] }
-  ],
-  "feedback": [
-    { "id": "4a7c-uuid", "text": "Darken the hill contours", "at": "2026-09-09T14:00:00.000Z", "cursor": 1 }
-  ]
-}
-```
+---
 
-### `POST /api/commands`
-Submits commands to the queue.
-- `commands` (array): Array of valid drawing command objects.
-- `replace` (boolean, default `false`): Discards unexecuted pending queue items while retaining committed history.
-- `play` (boolean, default `true`): Requests playback if not already paused. Sticky pause requires explicit resume.
+## 4. The Collaborative Agent Painting Workflow
 
-### `POST /api/control`
-Sends playback action: `{ "action": "pause" | "resume" | "step" | "clear" | "undo" | "redo" | "new" | "speed", "speed"?: number }`.
+External agents should structure their painting sessions into iterative cycles:
 
-### `POST /api/feedback`
-Records feedback text and stickily pauses execution: `{ "text": "..." }`.
+### Step 1: Initialize and inspect session
+node tools/paint.mjs status
 
-### `POST /api/project`
-Replaces the active document with the supplied project payload (max 8 MiB).
+### Step 2: Establish layers and background
+node tools/paint.mjs fill "#e8eff5"
+node tools/paint.mjs layer add sky "Sky & Mountains"
+node tools/paint.mjs layer add foliage "Midground Foliage"
 
-## The Agent Paint Loop
+### Step 3: Queue a batch of marks
+Submit small, focused batches (5-20 marks) so the human observer can watch progress:
+node tools/paint.mjs rect --x 0 --y 400 --width 1000 --height 300 --color "#355e3b" --layer foliage
+node tools/paint.mjs stroke --points "200,400 250,320 300,400" --brush pencil --color "#1e3a1e" --size 5 --layer foliage
 
-External agents operate as iterative collaborators by following this loop:
+### Step 4: Wait for playback
+node tools/paint.mjs wait --timeout 30
 
-1. **Check Status (`status`)**:
-   Query `GET /api/state` or run `node tools/paint.mjs status`. Inspect `playback.status`, `playback.remaining`, `history.cursor`, `history.total`, and existing items in `feedback`.
-2. **Submit Small Batch (`submit`)**:
-   Post a discrete batch of commands (e.g. 5 to 20 commands) using `POST /api/commands` or `node tools/paint.mjs submit batch.json`. Small batches ensure responsiveness and human oversight.
-3. **Inspect Progress (`inspect`)**:
-   Poll `/api/state` to monitor `playback.remaining` decreasing and `history.cursor` advancing.
-4. **Read Feedback (`read feedback`)**:
-   When a human submits feedback, playback pauses stickily (`playback.status: "paused"`). Inspect the latest entry in `feedback`. The external agent reasons about the text.
-5. **Replace Pending (`replace pending`)**:
-   If instructions require altering planned work, submit revised commands with `replace: true` (or `--replace`). This cancels unrendered pending queue items while preserving already committed marks in `history`.
-6. **Explicitly Resume (`resume`)**:
-   Because pause is sticky, after incorporating feedback send `POST /api/control` with `{ "action": "resume" }` or run `node tools/paint.mjs resume` to restart playback.
+### Step 5: Visually inspect progress
+Capture a snapshot of the artwork to observe the result:
+node tools/paint.mjs view /tmp/progress.png
+Open /tmp/progress.png with your image reader to evaluate color harmony, contrast, and layout.
+To inspect fine details (e.g. a face or focal point at x=220, y=340):
+node tools/paint.mjs view /tmp/focal_detail.png --crop 200,320,80,80 --scale 2
 
-## Security & Execution Model
+### Step 6: Review feedback and handle human pause
+Check if the human paused the session or provided feedback:
+node tools/paint.mjs feedback
+If notes exist (e.g. "Darken the hill shadows and lighten the sky"):
+1. Formulate corrected marks.
+2. Submit them with --replace to overwrite obsolete planned work:
+   node tools/paint.mjs submit revisions.json --replace
+3. Resume a human pause only after the human resumes or explicitly authorizes continuation. Resume an agent-initiated pause when its planned work is ready:
+   node tools/paint.mjs resume
 
-- **Zero Dependencies**: Pure native JavaScript implementation.
-- **Strict Loopback Trust**: Operates solely on `127.0.0.1`. Untrusted remote connections are refused.
-- **Deterministic Replay**: Documents serialize clean mark histories without executing arbitrary code.
+### Step 7: Export final piece
+When the artwork is complete:
+node tools/paint.mjs export artwork.png
+node tools/paint.mjs save artwork.json
+
+---
+
+## 5. Scripting & Error Handling
+
+- Success: Commands exit with status code 0.
+- Failure: Errors are written to STDERR with a nonzero exit code (1).
+- Structured JSON Errors: When --json is included in the command arguments, errors on STDERR are structured JSON objects:
+  {"error": "WAIT_TIMEOUT", "message": "wait timed out after 5s before playback settled (WAIT_TIMEOUT)"}
+- Loopback Safety: The CLI only connects to loopback addresses (127.0.0.1, localhost, ::1). Requests to non-loopback addresses are rejected immediately before any network transmission.
