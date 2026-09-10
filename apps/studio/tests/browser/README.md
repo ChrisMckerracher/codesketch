@@ -26,4 +26,4 @@ pixels, light/dark appearance, compact drawers, keyboard focus, and pointer
 holds. Generated browser artifacts stay outside commits. Current release
 evidence is recorded in [`docs/verification.md`](../../../../docs/verification.md).
 The browser runner is linked from
-[`tools/browser-check.mjs`](../../../../../tools/browser-check.mjs).
+[`tools/browser-check.mjs`](../../../../tools/browser-check.mjs).
