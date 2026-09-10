@@ -55,7 +55,19 @@ export class StudioState {
   }
 
   setOpacity(opacity) {
-    const val = Math.max(0, Math.min(1, Number(opacity) || 1));
+    let val;
+    if (typeof opacity === 'number' && Number.isFinite(opacity)) {
+      val = opacity;
+    } else if (
+      typeof opacity === 'string' &&
+      opacity.trim() !== '' &&
+      Number.isFinite(Number(opacity))
+    ) {
+      val = Number(opacity);
+    } else {
+      val = 1;
+    }
+    val = Math.max(0, Math.min(1, val));
     if (this.opacity !== val) {
       this.opacity = val;
       this.emit('opacity', this.opacity);
