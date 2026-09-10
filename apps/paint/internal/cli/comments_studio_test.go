@@ -88,7 +88,8 @@ func TestCommentsStudioIntegration(t *testing.T) {
 	}
 
 	// A human pause arms grant enforcement before any comment exists.
-	post("/api/control", map[string]any{"action": "pause", "source": "human"})
+	post("/api/control", map[string]any{"action": "pause", "source": "human",
+		"expectedDocGeneration": status().DocGeneration})
 	runFail("COMMENTS_TIMEOUT", "comments", "wait", "--timeout", "0.3")
 
 	full := status()

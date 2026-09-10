@@ -61,8 +61,8 @@ func TestStopFailurePreservesRunningIdentityAndRecord(t *testing.T) {
 	// the authenticated teardown even when an assertion fails midway.
 	t.Cleanup(func() { cleanupAcceptedRuntime(t, dataDir) })
 	t.Cleanup(func() { _ = os.Chmod(dataDir, 0o700) })
-	seed := `{"commands":[{"type":"fill","color":"#112233"}],"source":"human","play":false,"immediate":true}`
-	seeded := studioRoute(t, first.URL, http.MethodPost, "/api/commands", seed)
+	seeded := studioRoute(t, first.URL, http.MethodPost, "/api/commands",
+		humanSeed(t, first.URL, `{"type":"fill","color":"#112233"}`))
 	var artwork struct {
 		Document struct {
 			Background string `json:"background"`

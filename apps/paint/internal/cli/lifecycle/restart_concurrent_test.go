@@ -21,8 +21,8 @@ func TestStartAndRestartConcurrentCallersSerialiseUnderOperationLock(t *testing.
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { cleanupAcceptedRuntime(t, dataDir) })
-	seed := `{"commands":[{"type":"fill","color":"#334455"}],"source":"human","play":false,"immediate":true}`
-	studioRoute(t, initial.URL, http.MethodPost, "/api/commands", seed)
+	studioRoute(t, initial.URL, http.MethodPost, "/api/commands",
+		humanSeed(t, initial.URL, `{"type":"fill","color":"#334455"}`))
 
 	gate := make(chan struct{})
 	starts := make([]Result, 2)
