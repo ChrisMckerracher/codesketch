@@ -1,0 +1,2513 @@
+[
+  {
+    "type": "layer.add",
+    "id": "effects",
+    "name": "Meme Details & Effects"
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        140,
+        600.2
+      ],
+      [
+        148.9,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        145.9,
+        600.1
+      ],
+      [
+        155.3,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        152.1,
+        599.9
+      ],
+      [
+        161.4,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        158.4,
+        599.8
+      ],
+      [
+        167.2,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        164.4,
+        600
+      ],
+      [
+        173.2,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        170.2,
+        600.2
+      ],
+      [
+        179.5,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        176.3,
+        600.1
+      ],
+      [
+        185.7,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        182.7,
+        599.8
+      ],
+      [
+        191.5,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        188.7,
+        599.8
+      ],
+      [
+        197.4,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        194.5,
+        600.1
+      ],
+      [
+        203.7,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        200.6,
+        600.2
+      ],
+      [
+        210,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        206.9,
+        600
+      ],
+      [
+        215.9,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        213,
+        599.8
+      ],
+      [
+        221.7,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        218.8,
+        599.9
+      ],
+      [
+        227.9,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        224.8,
+        600.1
+      ],
+      [
+        234.3,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        231.1,
+        600.2
+      ],
+      [
+        240.2,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        237.3,
+        600
+      ],
+      [
+        246,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        243.2,
+        599.8
+      ],
+      [
+        252.2,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        249.1,
+        599.9
+      ],
+      [
+        258.5,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        255.4,
+        600.2
+      ],
+      [
+        264.5,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        261.6,
+        600.1
+      ],
+      [
+        270.3,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        267.5,
+        599.9
+      ],
+      [
+        276.4,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        273.4,
+        599.8
+      ],
+      [
+        282.8,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        279.6,
+        600
+      ],
+      [
+        288.9,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        285.9,
+        600.2
+      ],
+      [
+        294.7,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        291.9,
+        600.1
+      ],
+      [
+        300.7,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        297.7,
+        599.9
+      ],
+      [
+        307,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        303.8,
+        599.8
+      ],
+      [
+        313.2,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        310.2,
+        600.1
+      ],
+      [
+        319,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        316.2,
+        600.2
+      ],
+      [
+        324.9,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        322,
+        600
+      ],
+      [
+        331.2,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        328.1,
+        599.8
+      ],
+      [
+        337.5,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        334.4,
+        599.9
+      ],
+      [
+        343.4,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        340.5,
+        600.1
+      ],
+      [
+        349.2,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        346.3,
+        600.2
+      ],
+      [
+        355.4,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        352.3,
+        600
+      ],
+      [
+        361.8,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        358.6,
+        599.8
+      ],
+      [
+        367.7,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        364.8,
+        599.9
+      ],
+      [
+        373.5,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        370.7,
+        600.2
+      ],
+      [
+        379.7,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        376.6,
+        600.2
+      ],
+      [
+        386,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        382.9,
+        599.9
+      ],
+      [
+        392,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        389.1,
+        599.8
+      ],
+      [
+        397.8,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        395,
+        600
+      ],
+      [
+        403.9,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        400.9,
+        600.2
+      ],
+      [
+        410.3,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        407.1,
+        600.1
+      ],
+      [
+        416.4,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        413.4,
+        599.9
+      ],
+      [
+        422.2,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        419.4,
+        599.8
+      ],
+      [
+        428.2,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        425.2,
+        600
+      ],
+      [
+        434.5,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        431.3,
+        600.2
+      ],
+      [
+        440.7,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        437.7,
+        600.1
+      ],
+      [
+        446.5,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        443.7,
+        599.8
+      ],
+      [
+        452.4,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        449.5,
+        599.9
+      ],
+      [
+        458.7,
+        604.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        455.6,
+        600.1
+      ],
+      [
+        465,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        461.9,
+        600.2
+      ],
+      [
+        470.9,
+        604.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        468,
+        600
+      ],
+      [
+        476.7,
+        604.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        473.8,
+        599.8
+      ],
+      [
+        483,
+        604
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        479.8,
+        599.9
+      ],
+      [
+        489.3,
+        604.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        500,
+        619.9
+      ],
+      [
+        509.2,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        506.2,
+        619.8
+      ],
+      [
+        515.1,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        512.3,
+        619.8
+      ],
+      [
+        521,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        518.2,
+        619.9
+      ],
+      [
+        527,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        524,
+        620.1
+      ],
+      [
+        533.2,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        530,
+        620.2
+      ],
+      [
+        539.4,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        536.1,
+        620.2
+      ],
+      [
+        545.5,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        542.3,
+        620.2
+      ],
+      [
+        551.4,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        548.5,
+        620
+      ],
+      [
+        557.2,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        554.4,
+        619.9
+      ],
+      [
+        563.2,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        560.3,
+        619.8
+      ],
+      [
+        569.3,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        566.2,
+        619.8
+      ],
+      [
+        575.6,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        572.3,
+        619.9
+      ],
+      [
+        581.7,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        578.5,
+        620
+      ],
+      [
+        587.6,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        584.7,
+        620.1
+      ],
+      [
+        593.5,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        590.7,
+        620.2
+      ],
+      [
+        599.4,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        596.5,
+        620.2
+      ],
+      [
+        605.5,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        602.4,
+        620.1
+      ],
+      [
+        611.7,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        608.4,
+        620
+      ],
+      [
+        617.9,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        614.6,
+        619.9
+      ],
+      [
+        623.9,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        620.8,
+        619.8
+      ],
+      [
+        629.7,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        626.9,
+        619.8
+      ],
+      [
+        635.6,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        632.8,
+        619.9
+      ],
+      [
+        641.6,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        638.7,
+        620
+      ],
+      [
+        647.8,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        644.6,
+        620.2
+      ],
+      [
+        654,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        650.8,
+        620.2
+      ],
+      [
+        660.1,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        657,
+        620.2
+      ],
+      [
+        666,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        663.1,
+        620.1
+      ],
+      [
+        671.9,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        669.1,
+        619.9
+      ],
+      [
+        677.8,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        674.9,
+        619.8
+      ],
+      [
+        684,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        680.8,
+        619.8
+      ],
+      [
+        690.2,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        686.9,
+        619.9
+      ],
+      [
+        696.3,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        693.1,
+        620
+      ],
+      [
+        702.3,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        699.3,
+        620.1
+      ],
+      [
+        708.1,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        705.3,
+        620.2
+      ],
+      [
+        714,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        711.2,
+        620.2
+      ],
+      [
+        720.1,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        717.1,
+        620.1
+      ],
+      [
+        726.3,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        723.1,
+        620
+      ],
+      [
+        732.5,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        729.3,
+        619.9
+      ],
+      [
+        738.5,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        735.5,
+        619.8
+      ],
+      [
+        744.4,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        741.6,
+        619.8
+      ],
+      [
+        750.3,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        747.5,
+        619.9
+      ],
+      [
+        756.3,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        753.3,
+        620
+      ],
+      [
+        762.5,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        759.3,
+        620.2
+      ],
+      [
+        768.7,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        765.4,
+        620.2
+      ],
+      [
+        774.8,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        771.6,
+        620.2
+      ],
+      [
+        780.7,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        777.8,
+        620.1
+      ],
+      [
+        786.5,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        783.7,
+        619.9
+      ],
+      [
+        792.5,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        789.6,
+        619.8
+      ],
+      [
+        798.6,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        795.5,
+        619.8
+      ],
+      [
+        804.9,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        801.6,
+        619.9
+      ],
+      [
+        811,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        807.8,
+        620
+      ],
+      [
+        816.9,
+        624.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        814,
+        620.1
+      ],
+      [
+        822.8,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        820,
+        620.2
+      ],
+      [
+        828.7,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        825.9,
+        620.2
+      ],
+      [
+        834.8,
+        624.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        831.7,
+        620.1
+      ],
+      [
+        841,
+        624.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        837.7,
+        620
+      ],
+      [
+        847.2,
+        624.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        843.9,
+        619.9
+      ],
+      [
+        853.2,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#55483d",
+    "size": 1.8,
+    "opacity": 0.45,
+    "points": [
+      [
+        850.1,
+        619.8
+      ],
+      [
+        859.1,
+        624
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#211812",
+    "size": 2.8,
+    "opacity": 0.88,
+    "points": [
+      [
+        424.9,
+        340
+      ],
+      [
+        410.2,
+        325
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#211812",
+    "size": 2.8,
+    "opacity": 0.88,
+    "points": [
+      [
+        435.2,
+        335.2
+      ],
+      [
+        430,
+        314.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#211812",
+    "size": 2.8,
+    "opacity": 0.88,
+    "points": [
+      [
+        450.1,
+        339.8
+      ],
+      [
+        460.2,
+        324.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#211812",
+    "size": 2.8,
+    "opacity": 0.88,
+    "points": [
+      [
+        420.1,
+        354.8
+      ],
+      [
+        405,
+        359.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#211812",
+    "size": 2.8,
+    "opacity": 0.88,
+    "points": [
+      [
+        455.1,
+        355
+      ],
+      [
+        469.8,
+        360.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        325.9,
+        269.8
+      ],
+      [
+        325.6,
+        288
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        320.9,
+        269.9
+      ],
+      [
+        331,
+        270
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        333.5,
+        269.8
+      ],
+      [
+        333.5,
+        287.9
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        341.4,
+        269.9
+      ],
+      [
+        341.8,
+        287.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        333.3,
+        279
+      ],
+      [
+        341.6,
+        279
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        344.6,
+        269.8
+      ],
+      [
+        345.9,
+        279.5
+      ],
+      [
+        347.5,
+        287.8
+      ],
+      [
+        349.7,
+        283.2
+      ],
+      [
+        351.3,
+        277
+      ],
+      [
+        353.2,
+        283.2
+      ],
+      [
+        354.8,
+        288.2
+      ],
+      [
+        356.6,
+        279.9
+      ],
+      [
+        358,
+        269.9
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        360.3,
+        287.8
+      ],
+      [
+        362.4,
+        277.8
+      ],
+      [
+        365,
+        269.9
+      ],
+      [
+        367.9,
+        278.1
+      ],
+      [
+        370.1,
+        287.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        362.1,
+        281.8
+      ],
+      [
+        367.9,
+        281.9
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        381.9,
+        273.4
+      ],
+      [
+        380,
+        271.1
+      ],
+      [
+        377.7,
+        269.8
+      ],
+      [
+        375.1,
+        272.4
+      ],
+      [
+        373.3,
+        276.1
+      ],
+      [
+        373.1,
+        279.2
+      ],
+      [
+        373.4,
+        281.9
+      ],
+      [
+        375.4,
+        285.6
+      ],
+      [
+        377.4,
+        288
+      ],
+      [
+        379.7,
+        286.6
+      ],
+      [
+        381.5,
+        284.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        385,
+        270.1
+      ],
+      [
+        385.4,
+        288.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        393.2,
+        270
+      ],
+      [
+        385.2,
+        279.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        388.6,
+        277.9
+      ],
+      [
+        393.8,
+        287.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        398,
+        270.2
+      ],
+      [
+        397.8,
+        282.5
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "effects",
+    "brush": "pencil",
+    "color": "#1e1611",
+    "size": 3.6,
+    "opacity": 0.95,
+    "points": [
+      [
+        397.9,
+        286.5
+      ],
+      [
+        398,
+        287.9
+      ]
+    ]
+  }
+]

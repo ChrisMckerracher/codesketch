@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codesketch Studio — Creative UI Design & Hierarchy Concept</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%233b82f6' d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+  <style>
+    /* CSS Reset & Base Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    :root {
+      /* Default Theme: Dark Matte Studio Craft */
+      --cs-bg-root: #0e0e11;
+      --cs-bg-header: #141417;
+      --cs-bg-sidebar: #18181c;
+      --cs-bg-card: #202026;
+      --cs-bg-card-hover: #282832;
+      --cs-bg-input: #121215;
+      --cs-bg-dock: rgba(24, 24, 28, 0.94);
+      --cs-bg-hud: rgba(20, 20, 24, 0.94);
+
+      /* Canvas & Borders */
+      --cs-canvas-backdrop: #0a0a0c;
+      --cs-canvas-paper: #ffffff;
+      --cs-border-subtle: rgba(255, 255, 255, 0.10);
+      --cs-border-medium: rgba(255, 255, 255, 0.18);
+      --cs-border-strong: rgba(255, 255, 255, 0.32);
+      --cs-border-focus: #3b82f6;
+
+      /* Typography - High Contrast Standards (WCAG AA/AAA) */
+      --cs-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --cs-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --cs-text-primary: #f4f4f6;
+      --cs-text-secondary: #cbd5e1;
+      --cs-text-muted: #94a3b8;
+      --cs-text-white: #ffffff;
+
+      /* Semantic Accents */
+      --cs-accent-blue: #3b82f6;
+      --cs-accent-blue-hover: #2563eb;
+      --cs-accent-violet: #8b5cf6;
+      --cs-accent-amber: #f59e0b;
+      --cs-accent-green: #10b981;
+      --cs-accent-rose: #ef4444;
+
+      /* Shadows & Radii */
+      --cs-shadow-stage: 0 28px 70px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --cs-shadow-dock: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      --cs-shadow-card: 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      --cs-radius-sm: 4px;
+      --cs-radius-md: 8px;
+      --cs-radius-lg: 12px;
+      --cs-radius-full: 9999px;
+    }
+
+    /* Light Appearance Theme */
+    body.theme-light {
+      --cs-bg-root: #f1f5f9;
+      --cs-bg-header: #ffffff;
+      --cs-bg-sidebar: #f8fafc;
+      --cs-bg-card: #ffffff;
+      --cs-bg-card-hover: #f1f5f9;
+      --cs-bg-input: #ffffff;
+      --cs-bg-dock: rgba(255, 255, 255, 0.94);
+      --cs-bg-hud: rgba(255, 255, 255, 0.95);
+
+      --cs-canvas-backdrop: #e2e8f0;
+      --cs-canvas-paper: #ffffff;
+      --cs-border-subtle: rgba(15, 23, 42, 0.08);
+      --cs-border-medium: rgba(15, 23, 42, 0.16);
+      --cs-border-strong: rgba(15, 23, 42, 0.28);
+      --cs-border-focus: #2563eb;
+
+      --cs-text-primary: #0f172a;
+      --cs-text-secondary: #334155;
+      --cs-text-muted: #64748b;
+
+      --cs-accent-blue: #2563eb;
+      --cs-accent-blue-hover: #1d4ed8;
+      --cs-accent-violet: #7c3aed;
+      --cs-accent-amber: #d97706;
+      --cs-accent-green: #059669;
+
+      --cs-shadow-stage: 0 24px 60px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
+      --cs-shadow-dock: 0 12px 30px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.08);
+      --cs-shadow-card: 0 10px 25px rgba(15, 23, 42, 0.10), 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
+
+    body {
+      font-family: var(--cs-font-sans);
+      background-color: var(--cs-bg-root);
+      color: var(--cs-text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Top State Switcher Bar (Prototype-Only Reviewer Tooling) */
+    #state-switcher-bar {
+      height: 40px;
+      background: #1e1b4b;
+      border-bottom: 1px solid #4338ca;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 12px;
+      z-index: 1000;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .switcher-label {
+      font-weight: 600;
+      color: #e0e7ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .switcher-tag {
+      background: #3730a3;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--cs-font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .state-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .state-btn {
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--cs-font-sans);
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .state-btn:hover {
+      background: rgba(255, 255, 255, 0.20);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .state-btn.active {
+      background: #4f46e5;
+      border-color: #818cf8;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* System Notification Banner (State 5) */
+    #recovery-banner {
+      display: none;
+      background: #1c1917;
+      border-bottom: 1px solid #78350f;
+      color: #fef3c7;
+      padding: 8px 16px;
+      font-size: 12px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 999;
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .banner-badge {
+      background: #b45309;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    /* Tier 0: Global Document Header */
+    #global-header {
+      height: 48px;
+      background: var(--cs-bg-header);
+      border-bottom: 1px solid var(--cs-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .header-left, .header-center, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 26px;
+      height: 26px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-logo svg {
+      width: 15px;
+      height: 15px;
+      fill: #ffffff;
+    }
+
+    .doc-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-title-input {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--cs-text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 6px;
+      border-radius: var(--cs-radius-sm);
+      outline: none;
+      transition: all 0.15s ease;
+      width: 280px;
+    }
+
+    .doc-title-input:hover {
+      background: rgba(125, 125, 125, 0.08);
+      border-color: var(--cs-border-subtle);
+    }
+
+    .doc-title-input:focus {
+      background: var(--cs-bg-input);
+      border-color: var(--cs-border-focus);
+    }
+
+    .header-dropdown-btn {
+      background: transparent;
+      border: none;
+      color: var(--cs-text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .header-dropdown-btn:hover {
+      background: var(--cs-bg-card);
+      color: var(--cs-text-primary);
+    }
+
+    .session-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--cs-text-secondary);
+      background: rgba(125, 125, 125, 0.06);
+      padding: 4px 10px;
+      border-radius: var(--cs-radius-full);
+      border: 1px solid var(--cs-border-subtle);
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cs-accent-green);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+    }
+
+    .status-dot.saving {
+      background: var(--cs-accent-amber);
+      animation: pulse 1s infinite;
+    }
+
+    .status-dot.alert {
+      background: var(--cs-accent-rose);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--cs-text-secondary);
+      width: 30px;
+      height: 30px;
+      border-radius: var(--cs-radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--cs-bg-card);
+      color: var(--cs-text-primary);
+      border-color: var(--cs-border-subtle);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    .icon-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .zoom-pill {
+      display: flex;
+      align-items: center;
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-sm);
+      font-size: 11px;
+      color: var(--cs-text-secondary);
+      padding: 4px 8px;
+      font-family: var(--cs-font-mono);
+      font-weight: 600;
+    }
+
+    .btn-export {
+      background: var(--cs-accent-blue);
+      border: none;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--cs-radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-export:hover {
+      background: var(--cs-accent-blue-hover);
+    }
+
+    /* Workspace Layout */
+    #workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 88px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Tier 1: Left Structure Panel */
+    #left-sidebar {
+      width: 260px;
+      background: var(--cs-bg-sidebar);
+      border-right: 1px solid var(--cs-border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 40;
+      transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--cs-border-subtle);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cs-text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sidebar-tab:hover {
+      color: var(--cs-text-primary);
+    }
+
+    .sidebar-tab.active {
+      color: var(--cs-text-primary);
+      border-bottom-color: var(--cs-accent-blue);
+      background: rgba(125, 125, 125, 0.04);
+    }
+
+    .count-badge {
+      background: var(--cs-accent-violet);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--cs-radius-full);
+    }
+
+    .panel-section-header {
+      padding: 12px 14px 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--cs-text-muted);
+    }
+
+    .layer-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: var(--cs-radius-sm);
+      font-size: 12px;
+      color: var(--cs-text-secondary);
+      gap: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.1s ease;
+    }
+
+    .layer-row:hover {
+      background: var(--cs-bg-card);
+      color: var(--cs-text-primary);
+    }
+
+    .layer-row.active {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(59, 130, 246, 0.45);
+      color: var(--cs-text-primary);
+      font-weight: 600;
+    }
+
+    .layer-vis-btn {
+      background: transparent;
+      border: none;
+      color: var(--cs-text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+    }
+
+    .layer-vis-btn:hover {
+      color: var(--cs-text-primary);
+    }
+
+    .layer-vis-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .layer-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .layer-opacity-badge {
+      font-size: 10px;
+      font-family: var(--cs-font-mono);
+      color: var(--cs-text-secondary);
+      background: rgba(125, 125, 125, 0.1);
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Feedback Threads */
+    .feedback-thread-list {
+      list-style: none;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .feedback-card {
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border 0.15s ease;
+    }
+
+    .feedback-card.active-thread {
+      border-color: var(--cs-accent-violet);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+    }
+
+    .feedback-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .thread-pin-badge {
+      background: var(--cs-accent-violet);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--cs-radius-full);
+      font-size: 10px;
+    }
+
+    .thread-author {
+      font-weight: 600;
+      color: var(--cs-text-primary);
+    }
+
+    .thread-time {
+      color: var(--cs-text-muted);
+      font-size: 10px;
+    }
+
+    .thread-region-tag {
+      font-family: var(--cs-font-mono);
+      font-size: 10px;
+      color: var(--cs-accent-violet);
+      background: rgba(139, 92, 246, 0.15);
+      padding: 3px 6px;
+      border-radius: 4px;
+      align-self: flex-start;
+      font-weight: 600;
+    }
+
+    .thread-body {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--cs-text-secondary);
+    }
+
+    .thread-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--cs-radius-full);
+    }
+
+    .status-listening {
+      background: rgba(139, 92, 246, 0.18);
+      color: var(--cs-accent-violet);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .status-acknowledged {
+      background: rgba(59, 130, 246, 0.18);
+      color: var(--cs-accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .status-resolved {
+      background: rgba(16, 185, 129, 0.18);
+      color: var(--cs-accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    /* Tier 2: Center Sacred Stage Viewport */
+    #stage-viewport {
+      flex: 1;
+      background: var(--cs-canvas-backdrop);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Tier 5: Floating Agent Director HUD */
+    #director-hud {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cs-bg-hud);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--cs-border-medium);
+      border-radius: var(--cs-radius-full);
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 12px;
+      box-shadow: var(--cs-shadow-dock);
+      z-index: 60;
+    }
+
+    .hud-state-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cs-text-primary);
+    }
+
+    .hud-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cs-accent-violet);
+      box-shadow: 0 0 10px var(--cs-accent-violet);
+      animation: pulse 1.2s infinite;
+    }
+
+    .hud-beacon.paused {
+      background: var(--cs-accent-amber);
+      box-shadow: 0 0 10px var(--cs-accent-amber);
+      animation: none;
+    }
+
+    .hud-beacon.idle {
+      background: var(--cs-text-muted);
+      box-shadow: none;
+      animation: none;
+    }
+
+    .hud-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--cs-border-subtle);
+    }
+
+    .hud-queue-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 120px;
+    }
+
+    .hud-queue-text {
+      font-size: 11px;
+      font-family: var(--cs-font-mono);
+      color: var(--cs-text-secondary);
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .hud-progress-track {
+      height: 4px;
+      background: rgba(125, 125, 125, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .hud-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      width: 40%;
+      transition: width 0.2s ease;
+    }
+
+    .hud-btn {
+      background: rgba(125, 125, 125, 0.12);
+      border: 1px solid var(--cs-border-subtle);
+      color: var(--cs-text-primary);
+      padding: 5px 12px;
+      border-radius: var(--cs-radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .hud-btn:hover {
+      background: rgba(125, 125, 125, 0.22);
+    }
+
+    .hud-btn.pause-btn {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: rgba(245, 158, 11, 0.5);
+      color: var(--cs-accent-amber);
+    }
+
+    .hud-btn.pause-btn:hover {
+      background: rgba(245, 158, 11, 0.35);
+    }
+
+    .hud-speed-select {
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-subtle);
+      color: var(--cs-text-primary);
+      font-size: 11px;
+      font-family: var(--cs-font-mono);
+      padding: 4px 6px;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Sacred Canvas 1000 x 700 Frame (Strict 10:7 Aspect Ratio) */
+    #canvas-wrapper {
+      width: 1000px;
+      height: 700px;
+      aspect-ratio: 1000 / 700;
+      background: var(--cs-canvas-paper);
+      border-radius: 2px;
+      box-shadow: var(--cs-shadow-stage);
+      position: relative;
+      cursor: crosshair;
+      overflow: hidden;
+      transform: scale(0.88);
+      transform-origin: center center;
+      transition: transform 0.2s ease;
+    }
+
+    #drawing-canvas {
+      width: 1000px;
+      height: 700px;
+      display: block;
+    }
+
+    #stage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1000px;
+      height: 700px;
+      pointer-events: none;
+    }
+
+    /* Marquee Region Selection (State 3) */
+    .region-marquee {
+      stroke: #8b5cf6;
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+      fill: rgba(139, 92, 246, 0.15);
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+      to { stroke-dashoffset: -10; }
+    }
+
+    .marquee-handle {
+      fill: #ffffff;
+      stroke: #8b5cf6;
+      stroke-width: 2;
+    }
+
+    /* Floating Feedback Composer Card (State 3) */
+    #floating-feedback-card {
+      position: absolute;
+      top: 190px;
+      left: 560px;
+      width: 330px;
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-medium);
+      border-radius: var(--cs-radius-lg);
+      padding: 14px;
+      box-shadow: var(--cs-shadow-card);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 80;
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cs-text-primary);
+    }
+
+    .composer-coord-pill {
+      font-family: var(--cs-font-mono);
+      font-size: 10px;
+      background: rgba(139, 92, 246, 0.25);
+      color: var(--cs-accent-violet);
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .composer-textarea {
+      width: 100%;
+      height: 72px;
+      background: var(--cs-bg-input);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-md);
+      color: var(--cs-text-primary);
+      font-family: var(--cs-font-sans);
+      font-size: 12px;
+      padding: 8px;
+      resize: none;
+      outline: none;
+      line-height: 1.45;
+    }
+
+    .composer-textarea:focus {
+      border-color: var(--cs-accent-violet);
+    }
+
+    .composer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .composer-hold-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--cs-text-secondary);
+      cursor: pointer;
+    }
+
+    .btn-submit-feedback {
+      background: var(--cs-accent-violet);
+      color: #ffffff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: var(--cs-radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Cold-Start Empty State Overlay (State 4) */
+    #empty-state-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-medium);
+      border-radius: var(--cs-radius-lg);
+      padding: 34px 40px;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--cs-shadow-card);
+      max-width: 440px;
+    }
+
+    .empty-state-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cs-accent-blue);
+    }
+
+    .empty-state-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--cs-text-primary);
+    }
+
+    .empty-state-desc {
+      font-size: 12px;
+      color: var(--cs-text-secondary);
+      line-height: 1.5;
+    }
+
+    .empty-state-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-example-load {
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-medium);
+      color: var(--cs-text-primary);
+      padding: 8px 16px;
+      border-radius: var(--cs-radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-example-load:hover {
+      background: var(--cs-bg-card-hover);
+      border-color: var(--cs-text-primary);
+    }
+
+    /* Tier 3: Floating Primary Tool Dock */
+    #tool-dock {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cs-bg-dock);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--cs-border-medium);
+      border-radius: var(--cs-radius-full);
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: var(--cs-shadow-dock);
+      z-index: 70;
+    }
+
+    .dock-tool-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--cs-radius-full);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--cs-text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dock-tool-btn:hover {
+      background: rgba(125, 125, 125, 0.12);
+      color: var(--cs-text-primary);
+    }
+
+    .dock-tool-btn.active {
+      background: var(--cs-accent-blue);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .dock-tool-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .dock-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--cs-border-subtle);
+      margin: 0 4px;
+    }
+
+    /* Tier 4: Right Contextual Property Inspector */
+    #right-inspector {
+      width: 280px;
+      background: var(--cs-bg-sidebar);
+      border-left: 1px solid var(--cs-border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 40;
+      overflow-y: auto;
+      transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .inspector-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--cs-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .inspector-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cs-text-primary);
+    }
+
+    .inspector-subtitle {
+      font-size: 11px;
+      color: var(--cs-text-muted);
+    }
+
+    /* Return to Brush Properties Pill */
+    .return-to-brush-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: var(--cs-accent-blue);
+      padding: 6px 10px;
+      border-radius: var(--cs-radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 12px 16px 0 16px;
+      transition: all 0.15s ease;
+    }
+
+    .return-to-brush-pill:hover {
+      background: rgba(59, 130, 246, 0.25);
+      color: #ffffff;
+      border-color: var(--cs-accent-blue);
+    }
+
+    .inspector-group {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--cs-border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .inspector-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--cs-text-muted);
+    }
+
+    .prop-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--cs-text-secondary);
+      font-weight: 500;
+    }
+
+    .prop-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prop-num-input {
+      width: 56px;
+      background: var(--cs-bg-input);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-sm);
+      color: var(--cs-text-primary);
+      font-family: var(--cs-font-mono);
+      font-size: 12px;
+      padding: 4px 6px;
+      text-align: right;
+      outline: none;
+      font-weight: 600;
+    }
+
+    .prop-num-input:focus {
+      border-color: var(--cs-accent-blue);
+    }
+
+    .prop-slider {
+      width: 110px;
+      accent-color: var(--cs-accent-blue);
+      cursor: pointer;
+    }
+
+    /* Quick Preset Pills */
+    .preset-pills {
+      display: flex;
+      gap: 6px;
+      margin-top: -4px;
+    }
+
+    .preset-pill {
+      background: var(--cs-bg-input);
+      border: 1px solid var(--cs-border-subtle);
+      color: var(--cs-text-secondary);
+      font-size: 10px;
+      font-family: var(--cs-font-mono);
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.1s ease;
+    }
+
+    .preset-pill:hover, .preset-pill.active {
+      background: var(--cs-bg-card-hover);
+      color: var(--cs-text-primary);
+      border-color: var(--cs-border-medium);
+    }
+
+    .color-chip-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .active-color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 2px solid rgba(125, 125, 125, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      background: #1e40af;
+    }
+
+    .hex-input {
+      width: 90px;
+      background: var(--cs-bg-input);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-sm);
+      color: var(--cs-text-primary);
+      font-family: var(--cs-font-mono);
+      font-size: 12px;
+      padding: 6px 8px;
+      outline: none;
+      font-weight: 600;
+    }
+
+    .swatches-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .mini-swatch {
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(125, 125, 125, 0.2);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .mini-swatch:hover {
+      transform: scale(1.15);
+      border-color: var(--cs-text-primary);
+    }
+
+    /* Target Layer Box */
+    .target-layer-card {
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-subtle);
+      border-radius: var(--cs-radius-md);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .target-layer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .target-layer-label {
+      font-size: 10px;
+      color: var(--cs-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .target-layer-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cs-text-primary);
+    }
+
+    .btn-edit-layer-inline {
+      background: transparent;
+      border: 1px solid var(--cs-border-subtle);
+      color: var(--cs-text-secondary);
+      font-size: 10px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-edit-layer-inline:hover {
+      background: var(--cs-bg-card-hover);
+      color: var(--cs-text-primary);
+    }
+
+    /* Modal Conflict Dialog (State 5) */
+    #conflict-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--cs-bg-card);
+      border: 1px solid #dc2626;
+      border-radius: var(--cs-radius-lg);
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      z-index: 200;
+      width: 440px;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f87171;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      color: var(--cs-text-secondary);
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-modal-primary {
+      background: #dc2626;
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: var(--cs-radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-modal-sec {
+      background: var(--cs-bg-card);
+      border: 1px solid var(--cs-border-subtle);
+      color: var(--cs-text-secondary);
+      padding: 8px 14px;
+      border-radius: var(--cs-radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Compact Layout Overrides (State 6 & 7) */
+    .compact-mode #left-sidebar {
+      width: 52px;
+    }
+    .compact-mode #left-sidebar .sidebar-tab span,
+    .compact-mode #left-sidebar .panel-section-header,
+    .compact-mode #left-sidebar .layer-name,
+    .compact-mode #left-sidebar .layer-opacity-badge,
+    .compact-mode #left-sidebar .count-badge {
+      display: none;
+    }
+    .compact-mode #left-sidebar .layer-row {
+      justify-content: center;
+      padding: 8px 0;
+    }
+    .compact-mode #right-inspector {
+      width: 56px;
+    }
+    .compact-mode #right-inspector .inspector-title,
+    .compact-mode #right-inspector .inspector-subtitle,
+    .compact-mode #right-inspector .inspector-group-title,
+    .compact-mode #right-inspector .prop-row,
+    .compact-mode #right-inspector .preset-pills,
+    .compact-mode #right-inspector .target-layer-card,
+    .compact-mode #right-inspector .return-to-brush-pill,
+    .compact-mode #right-inspector .hex-input,
+    .compact-mode #right-inspector .swatches-grid,
+    .compact-mode #right-inspector #group-layer-settings {
+      display: none !important;
+    }
+    .compact-mode #right-inspector .active-color-swatch {
+      margin: 8px auto;
+    }
+    .compact-mode #canvas-wrapper {
+      transform: scale(0.66) !important;
+    }
+
+    /* Compact Accessible Reveal Drawers */
+    .compact-flyout-drawer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: var(--cs-bg-sidebar);
+      border: 1px solid var(--cs-border-medium);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      animation: slideDrawer 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideDrawer {
+      from { transform: translateX(var(--drawer-offset, -20px)); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    #compact-layers-drawer {
+      left: 52px;
+      width: 270px;
+      border-left: none;
+      --drawer-offset: -20px;
+    }
+
+    #compact-inspector-drawer {
+      right: 56px;
+      width: 290px;
+      border-right: none;
+      --drawer-offset: 20px;
+    }
+
+    .drawer-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--cs-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cs-text-primary);
+    }
+
+    .drawer-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--cs-text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .drawer-close-btn:hover {
+      background: var(--cs-bg-card-hover);
+      color: var(--cs-text-primary);
+    }
+
+    .drawer-body {
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body class="state-brush">
+
+  <!-- Top State Switcher Bar (Prototype-Only Reviewer Tooling) -->
+  <div id="state-switcher-bar">
+    <div class="switcher-label">
+      <span>Codesketch State Navigator</span>
+      <span class="switcher-tag">Prototype Tool</span>
+    </div>
+    <div class="state-pills">
+      <button class="state-btn active" data-state="brush">1. Paintbrush Active</button>
+      <button class="state-btn" data-state="agent">2. Agent Progressive Painting</button>
+      <button class="state-btn" data-state="review">3. Authoritative Pause & Review</button>
+      <button class="state-btn" data-state="empty">4. New Document / Cold Start</button>
+      <button class="state-btn" data-state="recovery">5. Recovery & Server Conflict</button>
+      <button class="state-btn" data-state="compact">6. Compact Desktop (1024px)</button>
+      <button class="state-btn" data-state="compact-open">7. Compact: Revealed Properties & Layers</button>
+      <button class="state-btn" data-state="light-desktop">8. Light Desktop View</button>
+      <button class="theme-toggle-btn" id="btn-toggle-theme" title="Toggle Dark/Light Mode">
+        🌓 Theme
+      </button>
+    </div>
+  </div>
+
+  <!-- System Recovery Banner (State 5) -->
+  <div id="recovery-banner">
+    <div class="banner-content">
+      <span class="banner-badge">LOCAL SNAPSHOT RESTORED</span>
+      <span>Session restored from local persistence: 48 unsaved commands recovered.</span>
+    </div>
+    <button class="hud-btn" onclick="document.getElementById('recovery-banner').style.display='none'">Dismiss</button>
+  </div>
+
+  <!-- Tier 0: Global Document Header -->
+  <header id="global-header">
+    <div class="header-left">
+      <div class="brand-logo" title="Codesketch Studio">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="doc-info">
+        <input type="text" class="doc-title-input" id="doc-title" value="Cityscape Architecture.codesketch" spellcheck="false" />
+        <button class="header-dropdown-btn" title="Document Actions">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="session-status" id="session-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="session-status-text">Saved locally</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="icon-btn" id="btn-undo" title="Undo (Cmd+Z)">
+        <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-redo" title="Redo (Cmd+Shift+Z)">
+        <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13"/></svg>
+      </button>
+      <div class="zoom-pill" id="zoom-indicator">100%</div>
+      <button class="btn-export" id="btn-export-png">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export PNG</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Layout Container -->
+  <main id="workspace">
+
+    <!-- Tier 1: Left Structure & Navigation Panel -->
+    <aside id="left-sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" id="tab-btn-layers" onclick="toggleCompactLayersDrawer()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Layers</span>
+        </button>
+        <button class="sidebar-tab" id="tab-btn-feedback">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Feedback</span>
+          <span class="count-badge" id="feedback-badge">1</span>
+        </button>
+      </div>
+
+      <!-- Layers Content -->
+      <div id="layers-content" style="display: flex; flex-direction: column; flex: 1;">
+        <div class="panel-section-header">
+          <span>Layer Stack</span>
+          <button class="icon-btn" style="width:20px;height:20px;" title="Add Layer (+)">+</button>
+        </div>
+        <ul class="layer-list" id="layer-list-items">
+          <!-- Populated dynamically -->
+        </ul>
+      </div>
+
+      <!-- Feedback Content -->
+      <div id="feedback-content" style="display: none; flex-direction: column; flex: 1;">
+        <div class="panel-section-header">
+          <span>Review Threads</span>
+          <span style="font-size: 10px; color: var(--cs-text-muted);">1 Open</span>
+        </div>
+        <ul class="feedback-thread-list">
+          <li class="feedback-card active-thread">
+            <div class="feedback-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="thread-pin-badge">#1</span>
+                <span class="thread-author">Human Reviewer</span>
+              </div>
+              <span class="thread-time">Just now</span>
+            </div>
+            <div class="thread-region-tag">Region: (410, 220, 190 × 150)</div>
+            <p class="thread-body">The keystone here is skewed 5° left. Please align with the center column and repaint the hatching on Layer 2.</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+              <span class="thread-status-pill status-listening">
+                <span class="status-dot" style="background:#a855f7;width:5px;height:5px;"></span>
+                Agent listening
+              </span>
+              <button class="hud-btn" style="padding:2px 8px;font-size:10px;">Resolve</button>
+            </div>
+          </li>
+          <li class="feedback-card">
+            <div class="feedback-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="thread-pin-badge" style="background:var(--cs-text-muted);">#0</span>
+                <span class="thread-author">Human Reviewer</span>
+              </div>
+              <span class="thread-time">10m ago</span>
+            </div>
+            <p class="thread-body">Add warm sunset gradient to background layer.</p>
+            <span class="thread-status-pill status-resolved">
+              ✓ Resolved by Agent
+            </span>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Compact Accessible Reveal: Layers Flyout Drawer -->
+    <div id="compact-layers-drawer" class="compact-flyout-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Choose Named Layer</span>
+        <button class="drawer-close-btn" onclick="closeCompactDrawers()">✕</button>
+      </div>
+      <div class="drawer-body">
+        <ul class="layer-list" id="compact-drawer-layer-list">
+          <!-- Populated dynamically -->
+        </ul>
+        <button class="btn-export" style="margin-top: 8px; justify-content: center;">+ Add New Layer</button>
+      </div>
+    </div>
+
+    <!-- Tier 2: Center Sacred Stage Viewport -->
+    <section id="stage-viewport" onclick="onCanvasStageClick()">
+
+      <!-- Tier 5: Floating Agent Director HUD -->
+      <div id="director-hud" onclick="event.stopPropagation()">
+        <div class="hud-state-pill" id="hud-status-pill">
+          <span class="hud-beacon idle" id="hud-beacon"></span>
+          <span id="hud-status-label">Agent Idle</span>
+        </div>
+        <div class="hud-sep"></div>
+        <div class="hud-queue-info">
+          <div class="hud-queue-text">
+            <span>Progress</span>
+            <span id="hud-step-counter">34 / 85</span>
+          </div>
+          <div class="hud-progress-track">
+            <div class="hud-progress-fill" id="hud-progress-fill"></div>
+          </div>
+        </div>
+        <div class="hud-sep"></div>
+        <button class="hud-btn pause-btn" id="btn-pause-toggle" title="Authoritative Pause (Space)">
+          <span>⏸ Pause</span>
+        </button>
+        <button class="hud-btn" id="btn-step-toggle" title="Step One Command (])">
+          <span>Step ❯</span>
+        </button>
+        <select class="hud-speed-select" id="hud-speed-select">
+          <option value="0.5">0.5x</option>
+          <option value="1">1.0x</option>
+          <option value="2" selected>2.0x</option>
+          <option value="5">5.0x</option>
+        </select>
+      </div>
+
+      <!-- Sacred Canvas 1000 x 700 Container (Strict 10:7 Aspect Ratio) -->
+      <div id="canvas-wrapper">
+        <canvas id="drawing-canvas" width="1000" height="700"></canvas>
+        <svg id="stage-overlay" viewBox="0 0 1000 700">
+          <!-- Dynamic Brush Footprint Ring (State 1) -->
+          <g id="brush-cursor-indicator" transform="translate(540, 320)">
+            <circle r="12" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+            <circle r="12" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="2 2"/>
+            <circle r="1.5" fill="#ffffff"/>
+          </g>
+
+          <!-- Region Marquee Selection (State 3) -->
+          <g id="region-selection-group" style="display: none;">
+            <rect x="410" y="220" width="190" height="150" class="region-marquee"/>
+            <rect x="406" y="216" width="8" height="8" class="marquee-handle"/>
+            <rect x="596" y="216" width="8" height="8" class="marquee-handle"/>
+            <rect x="406" y="366" width="8" height="8" class="marquee-handle"/>
+            <rect x="596" y="366" width="8" height="8" class="marquee-handle"/>
+            <!-- Pin Badge #1 -->
+            <circle cx="410" cy="220" r="11" fill="#8b5cf6"/>
+            <text x="410" y="224" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+          </g>
+        </svg>
+
+        <!-- Floating Comment Composer (State 3) -->
+        <div id="floating-feedback-card" onclick="event.stopPropagation()">
+          <div class="composer-header">
+            <span>Feedback on Region</span>
+            <span class="composer-coord-pill">410, 220 (190 × 150)</span>
+          </div>
+          <textarea class="composer-textarea" spellcheck="false">The keystone here is skewed 5° left. Please align with the center column and repaint the hatching on Layer 2.</textarea>
+          <div class="composer-footer">
+            <label class="composer-hold-check">
+              <input type="checkbox" checked />
+              <span>Authoritative Hold</span>
+            </label>
+            <button class="btn-submit-feedback">Send to Agent</button>
+          </div>
+        </div>
+
+        <!-- Cold-Start Empty State Guide (State 4) -->
+        <div id="empty-state-overlay" onclick="event.stopPropagation()">
+          <div class="empty-state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </div>
+          <h2 class="empty-state-title">Pristine 1000 × 700 Canvas</h2>
+          <p class="empty-state-desc">Start sketching with freehand instruments, or load the official example composition to explore multi-layer artwork and progressive agent painting.</p>
+          <div class="empty-state-actions">
+            <button class="btn-example-load" id="btn-load-example">Load Example Composition</button>
+            <button class="btn-export" id="btn-quick-brush">Select Paintbrush (B)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 3: Floating Primary Tool Dock -->
+      <nav id="tool-dock" aria-label="Drawing Tools" onclick="event.stopPropagation()">
+        <button class="dock-tool-btn" data-tool="select" title="Select / Move (V)">
+          <svg viewBox="0 0 24 24"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+        </button>
+        <button class="dock-tool-btn" data-tool="hand" title="Hand / Pan (H)">
+          <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83L7 15"/></svg>
+        </button>
+
+        <div class="dock-sep"></div>
+
+        <button class="dock-tool-btn active" data-tool="brush" title="Paintbrush (B)">
+          <svg viewBox="0 0 24 24"><path d="M18.37 2.63c-.39-.39-1.02-.39-1.41 0l-9.19 9.19a2 2 0 0 0-.58 1.41v1.77h1.77c.53 0 1.04-.21 1.41-.58l9.19-9.19c.39-.39.39-1.02 0-1.41l-1.19-1.19zM7 16l-3.5 3.5a2.12 2.12 0 0 0 3 3L10 19"/></svg>
+        </button>
+        <button class="dock-tool-btn" data-tool="pencil" title="Pencil (Shift+P)">
+          <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </button>
+        <button class="dock-tool-btn" data-tool="marker" title="Marker (M)">
+          <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+        </button>
+        <button class="dock-tool-btn" data-tool="eraser" title="Eraser (E)">
+          <svg viewBox="0 0 24 24"><path d="M20 20H7L3 16c-.8-.8-.8-2 0-2.8l10-10c.8-.8 2-.8 2.8 0l6 6c.8.8.8 2 0 2.8L13 20"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+        </button>
+
+        <div class="dock-sep"></div>
+
+        <button class="dock-tool-btn" data-tool="rect" title="Rectangle (R)">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+        </button>
+        <button class="dock-tool-btn" data-tool="ellipse" title="Ellipse (O)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+        </button>
+
+        <div class="dock-sep"></div>
+
+        <button class="dock-tool-btn" data-tool="comment" title="Comment & Feedback (C)">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+      </nav>
+    </section>
+
+    <!-- Compact Accessible Reveal: Properties Flyout Drawer -->
+    <div id="compact-inspector-drawer" class="compact-flyout-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Brush Properties</span>
+        <button class="drawer-close-btn" onclick="closeCompactDrawers()">✕</button>
+      </div>
+      <div class="drawer-body">
+        <div class="prop-row">
+          <span>Brush Size</span>
+          <div class="prop-input-wrap">
+            <input type="range" class="prop-slider" id="compact-slider-size" min="1" max="128" value="24" oninput="setBrushSize(this.value)" />
+            <span style="font-family:var(--cs-font-mono);font-size:12px;font-weight:600;" id="compact-size-val">24 px</span>
+          </div>
+        </div>
+        <div class="preset-pills">
+          <span class="preset-pill" onclick="setBrushSize(2)">2</span>
+          <span class="preset-pill" onclick="setBrushSize(8)">8</span>
+          <span class="preset-pill" onclick="setBrushSize(16)">16</span>
+          <span class="preset-pill active" onclick="setBrushSize(24)">24</span>
+          <span class="preset-pill" onclick="setBrushSize(48)">48</span>
+        </div>
+
+        <div class="prop-row" style="margin-top:6px;">
+          <span>Opacity</span>
+          <div class="prop-input-wrap">
+            <input type="range" class="prop-slider" min="0" max="100" value="85" oninput="document.getElementById('compact-opacity-val').innerText=this.value+'%'" />
+            <span style="font-family:var(--cs-font-mono);font-size:12px;font-weight:600;" id="compact-opacity-val">85%</span>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--cs-text-muted);margin-top:8px;">Color & Palette</div>
+        <div class="color-chip-row">
+          <div class="active-color-swatch" id="compact-active-swatch"></div>
+          <span style="font-family:var(--cs-font-mono);font-size:12px;font-weight:600;" id="compact-hex-label">#1E40AF</span>
+        </div>
+        <div class="swatches-grid">
+          <div class="mini-swatch" style="background:#1e40af;" onclick="setColor('#1e40af')"></div>
+          <div class="mini-swatch" style="background:#3b82f6;" onclick="setColor('#3b82f6')"></div>
+          <div class="mini-swatch" style="background:#0284c7;" onclick="setColor('#0284c7')"></div>
+          <div class="mini-swatch" style="background:#0f172a;" onclick="setColor('#0f172a')"></div>
+          <div class="mini-swatch" style="background:#f59e0b;" onclick="setColor('#f59e0b')"></div>
+          <div class="mini-swatch" style="background:#ef4444;" onclick="setColor('#ef4444')"></div>
+          <div class="mini-swatch" style="background:#10b981;" onclick="setColor('#10b981')"></div>
+        </div>
+
+        <div class="target-layer-card" style="margin-top:8px;">
+          <div class="target-layer-info">
+            <span class="target-layer-label">Painting Onto</span>
+            <span class="target-layer-name" id="compact-target-layer-name">Layer 2 — Ink Lines</span>
+          </div>
+          <span style="font-size:10px;font-weight:600;color:var(--cs-accent-green);">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 4: Right Contextual Property Inspector (Desktop) -->
+    <aside id="right-inspector">
+      <!-- Breadcrumb / Return Pill to Brush Properties (when layer is selected) -->
+      <button class="return-to-brush-pill" id="btn-return-to-brush" style="display: none;" onclick="returnToBrushProperties()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Return to Brush Properties (B)</span>
+      </button>
+
+      <div class="inspector-header">
+        <div>
+          <h3 class="inspector-title" id="inspector-title">Brush Properties</h3>
+          <span class="inspector-subtitle" id="inspector-subtitle">Contextual Tool Inspector</span>
+        </div>
+        <button class="icon-btn" style="width:22px;height:22px;" onclick="toggleCompactPropsDrawer()" title="Reveal Properties">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+      </div>
+
+      <!-- Stroke Geometry Section (Visible when Brush active) -->
+      <div class="inspector-group" id="group-stroke">
+        <span class="inspector-group-title">Stroke Dynamics</span>
+        <div class="prop-row">
+          <span>Brush Size</span>
+          <div class="prop-input-wrap">
+            <input type="range" class="prop-slider" id="slider-brush-size" min="1" max="128" value="24" />
+            <input type="text" class="prop-num-input" id="input-brush-size" value="24 px" />
+          </div>
+        </div>
+        <div class="preset-pills">
+          <span class="preset-pill" onclick="setBrushSize(2)">2</span>
+          <span class="preset-pill" onclick="setBrushSize(8)">8</span>
+          <span class="preset-pill" onclick="setBrushSize(16)">16</span>
+          <span class="preset-pill active" onclick="setBrushSize(24)">24</span>
+          <span class="preset-pill" onclick="setBrushSize(48)">48</span>
+        </div>
+
+        <div class="prop-row" style="margin-top: 4px;">
+          <span>Opacity</span>
+          <div class="prop-input-wrap">
+            <input type="range" class="prop-slider" id="slider-brush-opacity" min="0" max="100" value="85" />
+            <input type="text" class="prop-num-input" id="input-brush-opacity" value="85%" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Color & Palette Section (Visible when Brush active) -->
+      <div class="inspector-group" id="group-color">
+        <span class="inspector-group-title">Color & Palette</span>
+        <div class="color-chip-row">
+          <div class="active-color-swatch" id="active-swatch" title="Click to Pick Color"></div>
+          <input type="text" class="hex-input" id="input-hex" value="#1E40AF" spellcheck="false" />
+        </div>
+        <div class="swatches-grid" id="swatches-grid">
+          <div class="mini-swatch" style="background:#1e40af;" onclick="setColor('#1e40af')"></div>
+          <div class="mini-swatch" style="background:#3b82f6;" onclick="setColor('#3b82f6')"></div>
+          <div class="mini-swatch" style="background:#0284c7;" onclick="setColor('#0284c7')"></div>
+          <div class="mini-swatch" style="background:#0f172a;" onclick="setColor('#0f172a')"></div>
+          <div class="mini-swatch" style="background:#f59e0b;" onclick="setColor('#f59e0b')"></div>
+          <div class="mini-swatch" style="background:#ef4444;" onclick="setColor('#ef4444')"></div>
+          <div class="mini-swatch" style="background:#10b981;" onclick="setColor('#10b981')"></div>
+        </div>
+      </div>
+
+      <!-- Target Layer Indicator (In Brush Properties) -->
+      <div class="inspector-group" id="group-target-layer">
+        <span class="inspector-group-title">Target Destination</span>
+        <div class="target-layer-card">
+          <div class="target-layer-info">
+            <span class="target-layer-label">Painting Onto</span>
+            <span class="target-layer-name" id="inspector-layer-name">Layer 2 — Ink Lines</span>
+          </div>
+          <button class="btn-edit-layer-inline" onclick="selectLayer(2, 'Layer 2 — Ink Lines', 85)">Inspect</button>
+        </div>
+      </div>
+
+      <!-- Layer Properties Section (Visible when Layer selected in left sidebar) -->
+      <div class="inspector-group" id="group-layer-settings" style="display: none;">
+        <span class="inspector-group-title">Layer Attributes</span>
+        <div class="prop-row">
+          <span>Layer Name</span>
+          <input type="text" class="prop-num-input" id="input-selected-layer-name" value="Layer 2 — Ink Lines" style="width: 140px; text-align: left;" />
+        </div>
+        <div class="prop-row">
+          <span>Visibility</span>
+          <button class="btn-edit-layer-inline" id="btn-layer-vis-toggle">Visible (Showing)</button>
+        </div>
+        <div class="prop-row">
+          <span>Layer Opacity</span>
+          <div class="prop-input-wrap">
+            <input type="range" class="prop-slider" id="slider-layer-opacity" min="0" max="100" value="85" />
+            <input type="text" class="prop-num-input" id="input-layer-opacity" value="85%" />
+          </div>
+        </div>
+        <div style="font-size: 11px; color: var(--cs-text-muted); line-height: 1.4; margin-top: 4px;">
+          Eraser actions are scoped to this layer. Preserves compositing order.
+        </div>
+      </div>
+
+      <!-- Document Background Color Section (Visible in State 4) -->
+      <div class="inspector-group" id="group-doc-canvas" style="display: none;">
+        <span class="inspector-group-title">Document Setup</span>
+        <div class="prop-row">
+          <span>Dimensions</span>
+          <span style="font-family: var(--cs-font-mono); font-size: 12px; color: var(--cs-text-primary); font-weight: 600;">1000 × 700 px</span>
+        </div>
+        <div class="prop-row">
+          <span>Background</span>
+          <div class="prop-input-wrap">
+            <div style="width: 20px; height: 20px; border-radius: 4px; background: #ffffff; border: 1px solid var(--cs-border-medium);"></div>
+            <span style="font-family: var(--cs-font-mono); font-size: 11px; font-weight: 600;">#FFFFFF</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Server Conflict Modal (State 5) -->
+  <div id="conflict-modal">
+    <div class="modal-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Server Instance Sync Conflict</span>
+    </div>
+    <div class="modal-body">
+      Sync conflict detected: Server instance was retired or delayed revisions were rejected. To protect your artwork from loss, the local session has preserved all 48 uncommitted commands.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-sec" onclick="document.getElementById('conflict-modal').style.display='none'">Review Changes</button>
+      <button class="btn-modal-primary" onclick="document.getElementById('conflict-modal').style.display='none'">Accept Merged Canvas</button>
+    </div>
+  </div>
+
+  <!-- Interactive State Engine & Canvas Renderer Script -->
+  <script>
+    const canvas = document.getElementById('drawing-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentActiveLayer = { id: 2, name: 'Layer 2 — Ink Lines', opacity: 85 };
+
+    // Default layers HTML
+    const defaultLayersHTML = `
+      <li class="layer-row" data-layer="3" onclick="selectLayer(3, 'Layer 3 — Highlights', 100)">
+        <button class="layer-vis-btn" title="Toggle Visibility" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <span class="layer-name">Layer 3 — Highlights</span>
+        <span class="layer-opacity-badge">100%</span>
+      </li>
+      <li class="layer-row active" data-layer="2" onclick="selectLayer(2, 'Layer 2 — Ink Lines', 85)">
+        <button class="layer-vis-btn" title="Toggle Visibility" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <span class="layer-name">Layer 2 — Ink Lines</span>
+        <span class="layer-opacity-badge">85%</span>
+      </li>
+      <li class="layer-row" data-layer="1" onclick="selectLayer(1, 'Layer 1 — Background Wash', 100)">
+        <button class="layer-vis-btn" title="Toggle Visibility" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <span class="layer-name">Layer 1 — Background Wash</span>
+        <span class="layer-opacity-badge">100%</span>
+      </li>
+    `;
+
+    const singleLayerHTML = `
+      <li class="layer-row active" data-layer="1" onclick="selectLayer(1, 'Layer 1', 100)">
+        <button class="layer-vis-btn" title="Toggle Visibility" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <span class="layer-name">Layer 1</span>
+        <span class="layer-opacity-badge">100%</span>
+      </li>
+    `;
+
+    // Render architectural scene on 1000 x 700 canvas
+    function drawArtisticScene(withStrokes = true) {
+      ctx.clearRect(0, 0, 1000, 700);
+
+      if (!withStrokes) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 1000, 700);
+        return;
+      }
+
+      // Layer 1: Atmospheric Sky & Horizon Wash
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 700);
+      skyGrad.addColorStop(0, '#f1f5f9');
+      skyGrad.addColorStop(0.5, '#e2e8f0');
+      skyGrad.addColorStop(1, '#cbd5e1');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, 1000, 700);
+
+      // Clouds (Layer 1)
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(250, 120, 180, 50, 0, 0, Math.PI * 2);
+      ctx.ellipse(750, 160, 220, 60, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Horizon silhouette
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.ellipse(500, 720, 700, 160, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Layer 2: Architectural Ink Lines
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Pediment / Roof
+      ctx.beginPath();
+      ctx.moveTo(280, 180);
+      ctx.lineTo(500, 80);
+      ctx.lineTo(720, 180);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Tympanum Medallion
+      ctx.beginPath();
+      ctx.arc(500, 145, 20, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Entablature Frieze
+      ctx.strokeRect(300, 180, 400, 30);
+
+      // Portico Facade
+      ctx.strokeRect(320, 210, 360, 370);
+
+      // Columns
+      const columns = [360, 420, 580, 640];
+      columns.forEach(x => {
+        ctx.strokeRect(x - 12, 210, 24, 10);
+        ctx.beginPath();
+        ctx.moveTo(x - 8, 220);
+        ctx.lineTo(x - 8, 570);
+        ctx.moveTo(x + 8, 220);
+        ctx.lineTo(x + 8, 570);
+        ctx.stroke();
+        ctx.strokeRect(x - 12, 570, 24, 10);
+      });
+
+      // Archway
+      ctx.beginPath();
+      ctx.arc(500, 360, 75, Math.PI, 0, false);
+      ctx.lineTo(575, 580);
+      ctx.lineTo(425, 580);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Keystone detail
+      ctx.strokeRect(492, 275, 16, 20);
+
+      // Hatching
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#334155';
+      for (let y = 300; y <= 560; y += 10) {
+        ctx.beginPath();
+        ctx.moveTo(435, y);
+        ctx.lineTo(475, y + 8);
+        ctx.stroke();
+      }
+
+      // Deep Blue Paintbrush Strokes
+      ctx.strokeStyle = 'rgba(30, 64, 175, 0.85)';
+      ctx.lineWidth = 24;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(445, 430);
+      ctx.bezierCurveTo(475, 405, 515, 465, 555, 425);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(450, 480);
+      ctx.bezierCurveTo(485, 460, 525, 505, 550, 475);
+      ctx.stroke();
+
+      // Layer 3: Highlights
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.9)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(280, 176);
+      ctx.lineTo(500, 76);
+      ctx.lineTo(720, 176);
+      ctx.stroke();
+    }
+
+    // Helpers
+    function setBrushSize(val) {
+      document.getElementById('slider-brush-size').value = val;
+      document.getElementById('input-brush-size').value = val + ' px';
+      const compactSlider = document.getElementById('compact-slider-size');
+      if (compactSlider) compactSlider.value = val;
+      const compactVal = document.getElementById('compact-size-val');
+      if (compactVal) compactVal.innerText = val + ' px';
+
+      document.querySelectorAll('.preset-pill').forEach(p => {
+        p.classList.toggle('active', p.innerText === String(val));
+      });
+      const r = Math.max(2, val / 2);
+      const cursor = document.getElementById('brush-cursor-indicator');
+      if (cursor) {
+        const circles = cursor.querySelectorAll('circle');
+        circles[0].setAttribute('r', r);
+        circles[1].setAttribute('r', r);
+      }
+    }
+
+    function setColor(hex) {
+      document.getElementById('active-swatch').style.background = hex;
+      document.getElementById('input-hex').value = hex.toUpperCase();
+      const compactSwatch = document.getElementById('compact-active-swatch');
+      if (compactSwatch) compactSwatch.style.background = hex;
+      const compactHex = document.getElementById('compact-hex-label');
+      if (compactHex) compactHex.innerText = hex.toUpperCase();
+    }
+
+    // Layer Selection -> Shows Layer Inspector with Return Path
+    function selectLayer(id, name, opacity) {
+      currentActiveLayer = { id, name, opacity };
+      document.querySelectorAll('.layer-row').forEach(row => {
+        row.classList.toggle('active', parseInt(row.dataset.layer) === id);
+      });
+      document.getElementById('inspector-layer-name').innerText = name;
+      const compactTarget = document.getElementById('compact-target-layer-name');
+      if (compactTarget) compactTarget.innerText = name;
+
+      // Switch Right Inspector to Layer Properties
+      document.getElementById('btn-return-to-brush').style.display = 'flex';
+      document.getElementById('inspector-title').innerText = 'Layer Properties';
+      document.getElementById('inspector-subtitle').innerText = name + ' (Selected)';
+
+      document.getElementById('group-stroke').style.display = 'none';
+      document.getElementById('group-color').style.display = 'none';
+      document.getElementById('group-target-layer').style.display = 'none';
+      document.getElementById('group-doc-canvas').style.display = 'none';
+      document.getElementById('group-layer-settings').style.display = 'flex';
+
+      document.getElementById('input-selected-layer-name').value = name;
+      document.getElementById('slider-layer-opacity').value = opacity;
+      document.getElementById('input-layer-opacity').value = opacity + '%';
+    }
+
+    // Return from Layer Properties to Brush Properties
+    function returnToBrushProperties() {
+      document.getElementById('btn-return-to-brush').style.display = 'none';
+      document.getElementById('inspector-title').innerText = 'Brush Properties';
+      document.getElementById('inspector-subtitle').innerText = 'Contextual Tool Inspector';
+
+      document.getElementById('group-stroke').style.display = 'flex';
+      document.getElementById('group-color').style.display = 'flex';
+      document.getElementById('group-target-layer').style.display = 'flex';
+      document.getElementById('group-layer-settings').style.display = 'none';
+      document.getElementById('group-doc-canvas').style.display = 'none';
+
+      document.querySelector('[data-tool="brush"]').classList.add('active');
+    }
+
+    // Compact Drawers Toggles
+    function toggleCompactLayersDrawer() {
+      if (!document.body.classList.contains('compact-mode')) return;
+      const drawer = document.getElementById('compact-layers-drawer');
+      const isVisible = drawer.style.display === 'flex';
+      closeCompactDrawers();
+      if (!isVisible) {
+        drawer.style.display = 'flex';
+      }
+    }
+
+    function toggleCompactPropsDrawer() {
+      if (!document.body.classList.contains('compact-mode')) return;
+      const drawer = document.getElementById('compact-inspector-drawer');
+      const isVisible = drawer.style.display === 'flex';
+      closeCompactDrawers();
+      if (!isVisible) {
+        drawer.style.display = 'flex';
+      }
+    }
+
+    function closeCompactDrawers() {
+      document.getElementById('compact-layers-drawer').style.display = 'none';
+      document.getElementById('compact-inspector-drawer').style.display = 'none';
+    }
+
+    function onCanvasStageClick() {
+      if (document.getElementById('btn-return-to-brush').style.display === 'flex') {
+        returnToBrushProperties();
+      }
+      closeCompactDrawers();
+    }
+
+    // State Switching Logic
+    const stateButtons = document.querySelectorAll('.state-btn');
+    const rootBody = document.body;
+
+    function applyState(stateName) {
+      stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === stateName));
+
+      // Handle Theme
+      if (stateName === 'light-desktop') {
+        rootBody.classList.add('theme-light');
+      } else {
+        rootBody.classList.remove('theme-light');
+      }
+
+      // Reset base elements
+      document.getElementById('recovery-banner').style.display = 'none';
+      document.getElementById('conflict-modal').style.display = 'none';
+      document.getElementById('floating-feedback-card').style.display = 'none';
+      document.getElementById('region-selection-group').style.display = 'none';
+      document.getElementById('empty-state-overlay').style.display = 'none';
+      document.getElementById('brush-cursor-indicator').style.display = 'none';
+      document.getElementById('group-doc-canvas').style.display = 'none';
+      document.getElementById('btn-return-to-brush').style.display = 'none';
+      document.getElementById('group-layer-settings').style.display = 'none';
+      closeCompactDrawers();
+
+      document.getElementById('group-stroke').style.display = 'flex';
+      document.getElementById('group-color').style.display = 'flex';
+      document.getElementById('group-target-layer').style.display = 'flex';
+      rootBody.classList.remove('compact-mode');
+
+      // Left sidebar tabs
+      const tabLayers = document.getElementById('tab-btn-layers');
+      const tabFeedback = document.getElementById('tab-btn-feedback');
+      const layersContent = document.getElementById('layers-content');
+      const feedbackContent = document.getElementById('feedback-content');
+      const layerList = document.getElementById('layer-list-items');
+      const compactLayerList = document.getElementById('compact-drawer-layer-list');
+
+      // Dock buttons
+      const dockButtons = document.querySelectorAll('.dock-tool-btn');
+      dockButtons.forEach(btn => btn.classList.remove('active'));
+
+      // Inspector headers
+      const inspectorTitle = document.getElementById('inspector-title');
+      const inspectorSubtitle = document.getElementById('inspector-subtitle');
+
+      // HUD elements
+      const hudStatusLabel = document.getElementById('hud-status-label');
+      const hudBeacon = document.getElementById('hud-beacon');
+      const hudProgressFill = document.getElementById('hud-progress-fill');
+      const hudStepCounter = document.getElementById('hud-step-counter');
+      const pauseBtn = document.getElementById('btn-pause-toggle');
+
+      if (stateName === 'brush' || stateName === 'light-desktop') {
+        // State 1: Paintbrush Active (or State 8: Light Desktop View)
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="brush"]').classList.add('active');
+        document.getElementById('brush-cursor-indicator').style.display = 'block';
+        inspectorTitle.innerText = 'Brush Properties';
+        inspectorSubtitle.innerText = 'Contextual Tool Inspector';
+
+        tabLayers.classList.add('active');
+        tabFeedback.classList.remove('active');
+        layersContent.style.display = 'flex';
+        feedbackContent.style.display = 'none';
+
+        hudStatusLabel.innerText = 'Agent Idle';
+        hudBeacon.className = 'hud-beacon idle';
+        hudProgressFill.style.width = '100%';
+        hudStepCounter.innerText = '85 / 85';
+        pauseBtn.innerHTML = '<span>⏸ Pause</span>';
+      }
+      else if (stateName === 'agent') {
+        // State 2: Agent Progressive Painting
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="select"]').classList.add('active');
+        inspectorTitle.innerText = 'Agent Playback';
+        inspectorSubtitle.innerText = 'Executing Command Batch';
+
+        tabLayers.classList.add('active');
+        tabFeedback.classList.remove('active');
+        layersContent.style.display = 'flex';
+        feedbackContent.style.display = 'none';
+
+        hudStatusLabel.innerText = 'Agent Painting (2.0x)';
+        hudBeacon.className = 'hud-beacon';
+        hudProgressFill.style.width = '40%';
+        hudStepCounter.innerText = '34 / 85';
+        pauseBtn.innerHTML = '<span>⏸ Pause</span>';
+      }
+      else if (stateName === 'review') {
+        // State 3: Authoritative Pause & Review
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="comment"]').classList.add('active');
+        document.getElementById('region-selection-group').style.display = 'block';
+        document.getElementById('floating-feedback-card').style.display = 'flex';
+
+        tabLayers.classList.remove('active');
+        tabFeedback.classList.add('active');
+        layersContent.style.display = 'none';
+        feedbackContent.style.display = 'flex';
+
+        inspectorTitle.innerText = 'Feedback Inspector';
+        inspectorSubtitle.innerText = 'Region Pin #1 Active';
+
+        hudStatusLabel.innerText = 'Paused by Human';
+        hudBeacon.className = 'hud-beacon paused';
+        hudProgressFill.style.width = '40%';
+        hudStepCounter.innerText = '34 / 85';
+        pauseBtn.innerHTML = '<span>▶ Resume</span>';
+      }
+      else if (stateName === 'empty') {
+        // State 4: Cold Start / New Document
+        drawArtisticScene(false);
+        layerList.innerHTML = singleLayerHTML;
+        compactLayerList.innerHTML = singleLayerHTML;
+        document.querySelector('[data-tool="brush"]').classList.add('active');
+        document.getElementById('empty-state-overlay').style.display = 'flex';
+
+        tabLayers.classList.add('active');
+        tabFeedback.classList.remove('active');
+        layersContent.style.display = 'flex';
+        feedbackContent.style.display = 'none';
+
+        document.getElementById('group-stroke').style.display = 'none';
+        document.getElementById('group-color').style.display = 'none';
+        document.getElementById('group-target-layer').style.display = 'none';
+        document.getElementById('group-doc-canvas').style.display = 'flex';
+        inspectorTitle.innerText = 'Document Canvas';
+        inspectorSubtitle.innerText = 'New Composition';
+
+        hudStatusLabel.innerText = 'Agent Idle';
+        hudBeacon.className = 'hud-beacon idle';
+        hudProgressFill.style.width = '0%';
+        hudStepCounter.innerText = '0 / 0';
+      }
+      else if (stateName === 'recovery') {
+        // State 5: Recovery & Conflict
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="brush"]').classList.add('active');
+        document.getElementById('recovery-banner').style.display = 'flex';
+        document.getElementById('conflict-modal').style.display = 'flex';
+      }
+      else if (stateName === 'compact') {
+        // State 6: Compact Viewport (Rail view)
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="brush"]').classList.add('active');
+        rootBody.classList.add('compact-mode');
+      }
+      else if (stateName === 'compact-open') {
+        // State 7: Compact Viewport with Accessible Properties & Layers Drawers Revealed!
+        drawArtisticScene(true);
+        layerList.innerHTML = defaultLayersHTML;
+        compactLayerList.innerHTML = defaultLayersHTML;
+        document.querySelector('[data-tool="brush"]').classList.add('active');
+        rootBody.classList.add('compact-mode');
+        document.getElementById('compact-layers-drawer').style.display = 'flex';
+        document.getElementById('compact-inspector-drawer').style.display = 'flex';
+      }
+    }
+
+    stateButtons.forEach(btn => {
+      btn.addEventListener('click', () => applyState(btn.dataset.state));
+    });
+
+    // Theme toggle
+    document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+      rootBody.classList.toggle('theme-light');
+    });
+
+    // Sidebar tab toggles
+    document.getElementById('tab-btn-layers').addEventListener('click', () => {
+      document.getElementById('tab-btn-layers').classList.add('active');
+      document.getElementById('tab-btn-feedback').classList.remove('active');
+      document.getElementById('layers-content').style.display = 'flex';
+      document.getElementById('feedback-content').style.display = 'none';
+    });
+
+    document.getElementById('tab-btn-feedback').addEventListener('click', () => {
+      document.getElementById('tab-btn-feedback').classList.add('active');
+      document.getElementById('tab-btn-layers').classList.remove('active');
+      document.getElementById('layers-content').style.display = 'none';
+      document.getElementById('feedback-content').style.display = 'flex';
+    });
+
+    // Slider sync
+    document.getElementById('slider-brush-size').addEventListener('input', (e) => {
+      setBrushSize(e.target.value);
+    });
+    document.getElementById('slider-brush-opacity').addEventListener('input', (e) => {
+      document.getElementById('input-brush-opacity').value = e.target.value + '%';
+    });
+
+    // Layer opacity slider sync
+    document.getElementById('slider-layer-opacity').addEventListener('input', (e) => {
+      document.getElementById('input-layer-opacity').value = e.target.value + '%';
+    });
+
+    // Quick empty state triggers
+    document.getElementById('btn-load-example').addEventListener('click', () => {
+      applyState('brush');
+    });
+    document.getElementById('btn-quick-brush').addEventListener('click', () => {
+      applyState('brush');
+    });
+
+    // Keyboard Shortcuts (B, C, L, Space, Escape)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'Escape') closeCompactDrawers();
+      if (e.key === 'b' || e.key === 'B') {
+        returnToBrushProperties();
+        applyState('brush');
+      }
+      if (e.key === 'l' || e.key === 'L') {
+        if (rootBody.classList.contains('compact-mode')) toggleCompactLayersDrawer();
+      }
+      if (e.key === 'c' || e.key === 'C') applyState('review');
+      if (e.key === ' ') {
+        e.preventDefault();
+        const current = rootBody.className.replace('state-', '').replace('theme-light', '').trim();
+        if (current === 'agent') applyState('review');
+        else if (current === 'review') applyState('agent');
+      }
+    });
+
+    // Initialize
+    applyState('brush');
+  </script>
+</body>
+</html>

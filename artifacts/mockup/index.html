@@ -263,6 +263,13 @@
       { id: 7, x: 974, col: "#FFFFFF", name: "TITANIUM WHITE" }
     ];
 
+    const SV_BANDS = [
+      ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E3A8A"],
+      ["#BFDBFE", "#93C5FD", "#3B82F6", "#2563EB", "#1D4ED8", "#172554"],
+      ["#DBEAFE", "#60A5FA", "#2563EB", "#1D4ED8", "#1E3A8A", "#0F172A"],
+      ["#EFF6FF", "#3B82F6", "#1D4ED8", "#1E40AF", "#172554", "#020617"]
+    ];
+
     // State
     const state = {
       activeTool: 'INK',
@@ -668,27 +675,29 @@
         draw_stroke([[710, 176], [716, 182]], "#94A3B8", 1);
         draw_stroke([[716, 176], [710, 182]], "#94A3B8", 1);
 
-        // 2D Saturation / Value Gradient Field
-        ctx.save();
-        const hGrad = ctx.createLinearGradient(486, 202, 714, 202);
-        hGrad.addColorStop(0, '#FFFFFF');
-        hGrad.addColorStop(1, `hsl(${state.pickerHue}, 100%, 50%)`);
-        ctx.fillStyle = hGrad;
-        ctx.fillRect(486, 202, 228, 62);
-
-        const vGrad = ctx.createLinearGradient(486, 202, 486, 264);
-        vGrad.addColorStop(0, 'rgba(0,0,0,0)');
-        vGrad.addColorStop(1, '#000000');
-        ctx.fillStyle = vGrad;
-        ctx.fillRect(486, 202, 228, 62);
-        ctx.restore();
+        // 2D Saturation / Value Matrix of NICE SQUARES (matching FIRE drawing)
+        let by = 202;
+        const segW = 38;
+        const segH = 15.5;
+        for (let r = 0; r < 4; r++) {
+          let bx = 486;
+          for (let c = 0; c < 6; c++) {
+            const cellColor = (state.pickerHue === 220) ? SV_BANDS[r][c] : hsvToHex(state.pickerHue, Math.round(((c + 0.5) / 6) * 100), Math.round((1 - (r + 0.5) / 4) * 100));
+            draw_rect(bx, by, segW, Math.ceil(segH), cellColor);
+            // Fine cell borders
+            draw_rect(bx, by, segW, 1, "#0F172A", 0.15);
+            draw_rect(bx, by, 1, Math.ceil(segH), "#0F172A", 0.15);
+            bx += segW;
+          }
+          by += segH;
+        }
 
         draw_rect(486, 202, 228, 1, "#94A3B8", 0.5);
         draw_rect(486, 263, 228, 1, "#94A3B8", 0.5);
         draw_rect(486, 202, 1, 62, "#94A3B8", 0.5);
         draw_rect(713, 202, 1, 62, "#94A3B8", 0.5);
 
-        // Crosshair thumb in 2D field
+        // Crosshair thumb in 2D field (snapped or aligned over active square)
         const satX = 486 + Math.round((state.pickerSat / 100) * 228);
         const valY = 202 + Math.round((1 - state.pickerVal / 100) * 62);
         draw_ellipse(satX, valY, 12, 12, "#FFFFFF");
@@ -696,23 +705,18 @@
         draw_stroke([[satX, valY - 9], [satX, valY + 9]], "#FFFFFF", 1);
         draw_stroke([[satX - 9, valY], [satX + 9, valY]], "#FFFFFF", 1);
 
-        // 1D Hue Spectrum Slider Bar
-        ctx.save();
-        const hueGrad = ctx.createLinearGradient(486, 270, 714, 270);
-        hueGrad.addColorStop(0, '#FF0000');
-        hueGrad.addColorStop(0.17, '#FFFF00');
-        hueGrad.addColorStop(0.33, '#00FF00');
-        hueGrad.addColorStop(0.5, '#00FFFF');
-        hueGrad.addColorStop(0.67, '#0000FF');
-        hueGrad.addColorStop(0.83, '#FF00FF');
-        hueGrad.addColorStop(1, '#FF0000');
-        ctx.fillStyle = hueGrad;
-        ctx.fillRect(486, 270, 228, 8);
-        ctx.restore();
+        // 1D Hue Spectrum Slider Bar (Discrete color bands matching FIRE drawing)
+        const hues = ["#EF4444", "#F97316", "#F59E0B", "#10B981", "#06B6D4", "#3B82F6", "#6366F1", "#A855F7", "#EC4899", "#EF4444"];
+        let hx = 486;
+        const hw = 228 / hues.length;
+        for (const hc of hues) {
+          draw_rect(hx, 270, Math.ceil(hw), 8, hc);
+          hx += hw;
+        }
 
         const hueThumbX = 486 + Math.round((state.pickerHue / 360) * 228);
         draw_ellipse(hueThumbX, 274, 14, 14, "#FFFFFF");
-        draw_ellipse(hueThumbX, 274, 10, 10, `hsl(${state.pickerHue}, 100%, 50%)`);
+        draw_ellipse(hueThumbX, 274, 10, 10, hues[Math.min(hues.length - 1, Math.floor((state.pickerHue / 360) * hues.length))]);
 
         // Action Row: Eyedropper + Hex + Swatch
         const isEye = state.eyedropperActive;
@@ -744,26 +748,65 @@
         }
       }
 
-      // 5. LIVE CANVAS EYEDROPPER LOUPE (When active or hovered)
+      // 5. LIVE CANVAS EYEDROPPER LOUPE ("PIXEL THINGY"): CLEAR SQUARES, NOT GRADIENT!
       if (state.eyedropperActive && state.loupePos) {
         const lx = state.loupePos.x;
         const ly = state.loupePos.y;
         const col = state.loupeColor || state.pickerColor;
 
-        draw_ellipse(lx, ly, 28, 28, "#FFFFFF", 0.95);
-        draw_ellipse(lx, ly, 24, 24, col);
-        draw_stroke([[lx, ly - 14], [lx, ly - 4]], "#FFFFFF", 1.5);
-        draw_stroke([[lx, ly + 4], [lx, ly + 14]], "#FFFFFF", 1.5);
-        draw_stroke([[lx - 14, ly], [lx - 4, ly]], "#FFFFFF", 1.5);
-        draw_stroke([[lx + 4, ly], [lx + 14, ly]], "#FFFFFF", 1.5);
+        const gridSize = 7;
+        const cellSize = 5;
+        const gridW = gridSize * cellSize; // 35px
+        const halfGrid = Math.floor(gridSize / 2); // 3
+        const startX = Math.round(lx - gridW / 2);
+        const startY = Math.round(ly - gridW / 2);
 
-        // Badge
-        draw_rounded_rect(lx - 24, ly + 18, 48, 14, 2, "#0F172A", 0.85);
-        draw_text(col.toUpperCase(), lx - 21, ly + 20, 0.55, "#FFFFFF", 1);
+        // Outer dark frame with shadow
+        draw_rect(startX - 3, startY - 3, gridW + 6, gridW + 6, "#0F172A");
+        draw_rect(startX - 2, startY - 2, gridW + 4, gridW + 4, "#FFFFFF");
+        draw_rect(startX - 1, startY - 1, gridW + 2, gridW + 2, "#0F172A");
+
+        // Clear magnified pixel squares (NO GRADIENT!)
+        for (let dy = -halfGrid; dy <= halfGrid; dy++) {
+          for (let dx = -halfGrid; dx <= halfGrid; dx++) {
+            const px = Math.floor(lx + dx);
+            const py = Math.floor(ly + dy);
+            let cellCol = col;
+            try {
+              const pixel = ctx.getImageData(px, py, 1, 1).data;
+              const toHex = n => n.toString(16).padStart(2, '0');
+              cellCol = `#${toHex(pixel[0])}${toHex(pixel[1])}${toHex(pixel[2])}`.toUpperCase();
+            } catch (e) {}
+
+            const cx = startX + (dx + halfGrid) * cellSize;
+            const cy = startY + (dy + halfGrid) * cellSize;
+            draw_rect(cx, cy, cellSize, cellSize, cellCol);
+            draw_rect(cx, cy, cellSize, 1, "#0F172A", 0.35);
+            draw_rect(cx, cy, 1, cellSize, "#0F172A", 0.35);
+          }
+        }
+
+        // Center target square reticle
+        const centerCellX = startX + halfGrid * cellSize;
+        const centerCellY = startY + halfGrid * cellSize;
+        draw_rect(centerCellX, centerCellY, cellSize, 1, "#FFFFFF");
+        draw_rect(centerCellX, centerCellY + cellSize - 1, cellSize, 1, "#FFFFFF");
+        draw_rect(centerCellX, centerCellY, 1, cellSize, "#FFFFFF");
+        draw_rect(centerCellX + cellSize - 1, centerCellY, 1, cellSize, "#FFFFFF");
+
+        // Crosshairs extending out
+        draw_stroke([[lx, startY - 8], [lx, startY - 2]], "#FFFFFF", 1.5);
+        draw_stroke([[lx, startY + gridW + 2], [lx, startY + gridW + 8]], "#FFFFFF", 1.5);
+        draw_stroke([[startX - 8, ly], [startX - 2, ly]], "#FFFFFF", 1.5);
+        draw_stroke([[startX + gridW + 2, ly], [startX + gridW + 8, ly]], "#FFFFFF", 1.5);
+
+        // Badge underneath with hex code
+        draw_rounded_rect(lx - 24, startY + gridW + 8, 48, 14, 2, "#0F172A", 0.9);
+        draw_text(col.toUpperCase(), lx - 21, startY + gridW + 10, 0.55, "#38BDF8", 1);
 
         // Leader line to pick button if popover is open
         if (state.colorPickerOpen) {
-          draw_stroke([[lx + 16, ly], [486, 300]], "#0284C7", 1, 0.6);
+          draw_stroke([[lx + 18, ly], [486, 300]], "#0284C7", 1, 0.6);
         }
       }
     }
@@ -945,9 +988,15 @@
         const rect = canvas.getBoundingClientRect();
         const cx = clientX - rect.left;
         const cy = clientY - rect.top;
-        state.pickerSat = Math.max(0, Math.min(100, Math.round(((cx - 486) / 228) * 100)));
-        state.pickerVal = Math.max(0, Math.min(100, Math.round((1 - (cy - 202) / 62) * 100)));
-        state.pickerColor = hsvToHex(state.pickerHue, state.pickerSat, state.pickerVal);
+        const colIdx = Math.max(0, Math.min(5, Math.floor(((cx - 486) / 228) * 6)));
+        const rowIdx = Math.max(0, Math.min(3, Math.floor(((cy - 202) / 62) * 4)));
+        state.pickerSat = Math.round(((colIdx + 0.5) / 6) * 100);
+        state.pickerVal = Math.round((1 - (rowIdx + 0.5) / 4) * 100);
+        if (state.pickerHue === 220) {
+          state.pickerColor = SV_BANDS[rowIdx][colIdx];
+        } else {
+          state.pickerColor = hsvToHex(state.pickerHue, state.pickerSat, state.pickerVal);
+        }
         document.getElementById('pickerHexInput').value = state.pickerColor.toUpperCase();
         renderStudio();
       };

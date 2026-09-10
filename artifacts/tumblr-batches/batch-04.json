@@ -1,0 +1,254 @@
+[
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        904,
+        155
+      ],
+      [
+        940,
+        165
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        975,
+        150
+      ],
+      [
+        940,
+        165
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        940,
+        165
+      ],
+      [
+        942,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        892,
+        185
+      ],
+      [
+        915,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        985,
+        180
+      ],
+      [
+        965,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "rect",
+    "layer": "washes",
+    "x": 470,
+    "y": 135,
+    "width": 72,
+    "height": 50,
+    "color": "#e8dfce",
+    "opacity": 0.6
+  },
+  {
+    "type": "rect",
+    "layer": "washes",
+    "x": 0,
+    "y": 240,
+    "width": 1000,
+    "height": 26,
+    "color": "#ede5d5",
+    "opacity": 0.45
+  },
+  {
+    "type": "rect",
+    "layer": "washes",
+    "x": 0,
+    "y": 268,
+    "width": 1000,
+    "height": 28,
+    "color": "#e6ded0",
+    "opacity": 0.4
+  },
+  {
+    "type": "ellipse",
+    "layer": "washes",
+    "x": 418,
+    "y": 503,
+    "width": 176,
+    "height": 46,
+    "color": "#ece4d4",
+    "opacity": 0.5
+  },
+  {
+    "type": "stroke",
+    "layer": "washes",
+    "brush": "marker",
+    "color": "#d5cbba",
+    "size": 14,
+    "opacity": 0.35,
+    "points": [
+      [
+        450,
+        180
+      ],
+      [
+        560,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "washes",
+    "brush": "marker",
+    "color": "#d5cbba",
+    "size": 14,
+    "opacity": 0.35,
+    "points": [
+      [
+        445,
+        230
+      ],
+      [
+        565,
+        230
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "washes",
+    "brush": "marker",
+    "color": "#d5cbba",
+    "size": 14,
+    "opacity": 0.35,
+    "points": [
+      [
+        30,
+        215
+      ],
+      [
+        115,
+        215
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "washes",
+    "brush": "marker",
+    "color": "#d5cbba",
+    "size": 14,
+    "opacity": 0.35,
+    "points": [
+      [
+        885,
+        215
+      ],
+      [
+        975,
+        215
+      ]
+    ]
+  },
+  {
+    "type": "ellipse",
+    "layer": "monferno",
+    "x": 462,
+    "y": 442,
+    "width": 56,
+    "height": 24,
+    "color": "#ea580c",
+    "opacity": 0.75
+  },
+  {
+    "type": "ellipse",
+    "layer": "monferno",
+    "x": 432,
+    "y": 434,
+    "width": 34,
+    "height": 26,
+    "color": "#ea580c",
+    "opacity": 0.8
+  },
+  {
+    "type": "ellipse",
+    "layer": "monferno",
+    "x": 434,
+    "y": 444,
+    "width": 22,
+    "height": 14,
+    "color": "#fef3c7",
+    "opacity": 0.9
+  },
+  {
+    "type": "ellipse",
+    "layer": "monferno",
+    "x": 438,
+    "y": 432,
+    "width": 12,
+    "height": 10,
+    "color": "#2563eb",
+    "opacity": 0.85
+  },
+  {
+    "type": "ellipse",
+    "layer": "monferno",
+    "x": 448,
+    "y": 430,
+    "width": 10,
+    "height": 8,
+    "color": "#2563eb",
+    "opacity": 0.85
+  }
+]

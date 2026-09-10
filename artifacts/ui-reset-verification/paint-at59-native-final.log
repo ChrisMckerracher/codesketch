@@ -1,0 +1,12 @@
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOWORK=off GOFLAGS= GOENV=off node tools/verify-go.mjs --policy-only
+Go policy passed: 120 source files, 229 resolved packages, canonical renderer embeds.
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOWORK=off GOFLAGS= GOENV=off CGO_ENABLED=1 go test -race ./...
+?   	github.com/ChrisMckerracher/codesketch/apps/paint/cmd/paint	[no test files]
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli	(cached)
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/capture	(cached)
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/input	(cached)
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/lifecycle	22.522s
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/parse	(cached)
+ok  	github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/transport	(cached)
+ok  	github.com/ChrisMckerracher/codesketch/apps/studio	(cached)
+?   	github.com/ChrisMckerracher/codesketch/docs	[no test files]

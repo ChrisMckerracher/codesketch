@@ -1,0 +1,326 @@
+[
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        125,
+        205
+      ],
+      [
+        125,
+        295
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        0,
+        295
+      ],
+      [
+        125,
+        295
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        60,
+        108
+      ],
+      [
+        24,
+        155
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        60,
+        108
+      ],
+      [
+        95,
+        150
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        24,
+        155
+      ],
+      [
+        62,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        95,
+        150
+      ],
+      [
+        62,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        24,
+        155
+      ],
+      [
+        60,
+        165
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        95,
+        150
+      ],
+      [
+        60,
+        165
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        60,
+        165
+      ],
+      [
+        62,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        12,
+        185
+      ],
+      [
+        35,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        105,
+        180
+      ],
+      [
+        85,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        875,
+        205
+      ],
+      [
+        1000,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        875,
+        205
+      ],
+      [
+        875,
+        295
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        875,
+        295
+      ],
+      [
+        1000,
+        295
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        940,
+        108
+      ],
+      [
+        904,
+        155
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        940,
+        108
+      ],
+      [
+        975,
+        150
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        904,
+        155
+      ],
+      [
+        942,
+        205
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "arena",
+    "brush": "pencil",
+    "color": "#453a32",
+    "size": 3.2,
+    "opacity": 0.85,
+    "points": [
+      [
+        975,
+        150
+      ],
+      [
+        942,
+        205
+      ]
+    ]
+  }
+]

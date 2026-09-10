@@ -1,0 +1,736 @@
+[
+  {
+    "type": "layer.add",
+    "id": "details",
+    "name": "Fine Details"
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 10,
+    "opacity": 1,
+    "points": [
+      [
+        446.2,
+        166.7
+      ],
+      [
+        455.3,
+        166.7
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 8,
+    "opacity": 1,
+    "points": [
+      [
+        446.2,
+        162.2
+      ],
+      [
+        453.8,
+        162.2
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#783c18",
+    "size": 8,
+    "opacity": 1,
+    "points": [
+      [
+        456.8,
+        163.7
+      ],
+      [
+        456.8,
+        171.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#0a0606",
+    "size": 5,
+    "opacity": 1,
+    "points": [
+      [
+        457.6,
+        166
+      ],
+      [
+        457.6,
+        170.5
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 3.5,
+    "opacity": 1,
+    "points": [
+      [
+        455.3,
+        163.7
+      ],
+      [
+        455.3,
+        163.7
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#080404",
+    "size": 7,
+    "opacity": 1,
+    "points": [
+      [
+        441.6,
+        166.7
+      ],
+      [
+        447.7,
+        159.1
+      ],
+      [
+        458.4,
+        160.6
+      ],
+      [
+        462.9,
+        166.7
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#080404",
+    "size": 6,
+    "opacity": 0.95,
+    "points": [
+      [
+        437.1,
+        154.6
+      ],
+      [
+        447.7,
+        150
+      ],
+      [
+        458.4,
+        153
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 10,
+    "opacity": 1,
+    "points": [
+      [
+        499.4,
+        172.8
+      ],
+      [
+        508.5,
+        172.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 8,
+    "opacity": 1,
+    "points": [
+      [
+        500.9,
+        166.7
+      ],
+      [
+        507,
+        166.7
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#783c18",
+    "size": 8,
+    "opacity": 1,
+    "points": [
+      [
+        496.4,
+        168.2
+      ],
+      [
+        496.4,
+        177.4
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#0a0606",
+    "size": 5,
+    "opacity": 1,
+    "points": [
+      [
+        495.6,
+        170.5
+      ],
+      [
+        495.6,
+        175.8
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 3.5,
+    "opacity": 1,
+    "points": [
+      [
+        494.1,
+        169
+      ],
+      [
+        494.1,
+        169
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#080404",
+    "size": 7,
+    "opacity": 1,
+    "points": [
+      [
+        490.3,
+        169.8
+      ],
+      [
+        497.9,
+        162.2
+      ],
+      [
+        507,
+        165.2
+      ],
+      [
+        511.6,
+        171.3
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#080404",
+    "size": 6,
+    "opacity": 0.95,
+    "points": [
+      [
+        490.3,
+        157.6
+      ],
+      [
+        500.9,
+        156.1
+      ],
+      [
+        511.6,
+        160.6
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#781c20",
+    "size": 9,
+    "opacity": 1,
+    "points": [
+      [
+        458.4,
+        188
+      ],
+      [
+        470.5,
+        188
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ed687c",
+    "size": 8,
+    "opacity": 1,
+    "points": [
+      [
+        458.4,
+        194.1
+      ],
+      [
+        470.5,
+        194.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#ffffff",
+    "size": 4,
+    "opacity": 1,
+    "points": [
+      [
+        459.9,
+        186.5
+      ],
+      [
+        466,
+        186.5
+      ],
+      [
+        472,
+        186.5
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#180808",
+    "size": 5.5,
+    "opacity": 1,
+    "points": [
+      [
+        455.3,
+        185
+      ],
+      [
+        458.4,
+        198.6
+      ],
+      [
+        470.5,
+        197.1
+      ],
+      [
+        475.1,
+        186.5
+      ],
+      [
+        455.3,
+        185
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#2c1810",
+    "size": 4.5,
+    "opacity": 1,
+    "points": [
+      [
+        431,
+        185
+      ],
+      [
+        438.6,
+        186.5
+      ],
+      [
+        432.5,
+        191
+      ],
+      [
+        440.1,
+        192.6
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#2c1810",
+    "size": 4.5,
+    "opacity": 1,
+    "points": [
+      [
+        491.8,
+        189.5
+      ],
+      [
+        499.4,
+        191
+      ],
+      [
+        493.3,
+        195.6
+      ],
+      [
+        500.9,
+        197.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#222228",
+    "size": 7,
+    "opacity": 1,
+    "points": [
+      [
+        466,
+        112
+      ],
+      [
+        481.2,
+        105.9
+      ],
+      [
+        496.4,
+        112
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#222228",
+    "size": 7,
+    "opacity": 1,
+    "points": [
+      [
+        469,
+        118.1
+      ],
+      [
+        481.2,
+        115
+      ],
+      [
+        493.3,
+        118.1
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#fabc18",
+    "size": 8.5,
+    "opacity": 1,
+    "points": [
+      [
+        496.4,
+        320.2
+      ],
+      [
+        535.9,
+        330.9
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#c49008",
+    "size": 3.5,
+    "opacity": 0.9,
+    "points": [
+      [
+        496.4,
+        324.8
+      ],
+      [
+        535.9,
+        335.4
+      ]
+    ]
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#fabc18",
+    "opacity": 1,
+    "x": 457.4,
+    "y": 234.2,
+    "width": 8,
+    "height": 8
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#181210",
+    "size": 3.5,
+    "opacity": 0.9,
+    "points": [
+      [
+        465.4,
+        238.2
+      ],
+      [
+        465.2,
+        239.6
+      ],
+      [
+        464.5,
+        240.8
+      ],
+      [
+        463.4,
+        241.7
+      ],
+      [
+        462.1,
+        242.1
+      ],
+      [
+        460.7,
+        242.1
+      ],
+      [
+        459.4,
+        241.7
+      ],
+      [
+        458.3,
+        240.8
+      ],
+      [
+        457.6,
+        239.5
+      ],
+      [
+        457.4,
+        238.2
+      ],
+      [
+        457.7,
+        236.8
+      ],
+      [
+        458.4,
+        235.6
+      ],
+      [
+        459.4,
+        234.7
+      ],
+      [
+        460.8,
+        234.3
+      ],
+      [
+        462.1,
+        234.3
+      ],
+      [
+        463.4,
+        234.8
+      ],
+      [
+        464.5,
+        235.7
+      ],
+      [
+        465.2,
+        236.9
+      ],
+      [
+        465.4,
+        238.3
+      ]
+    ]
+  },
+  {
+    "type": "rect",
+    "layer": "details",
+    "color": "#9aa4b2",
+    "opacity": 1,
+    "x": 447.3,
+    "y": 338.6,
+    "width": 16,
+    "height": 12
+  },
+  {
+    "type": "rect",
+    "layer": "details",
+    "color": "#18181c",
+    "opacity": 1,
+    "x": 451.3,
+    "y": 341.6,
+    "width": 8,
+    "height": 6
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#141418",
+    "size": 9,
+    "opacity": 1,
+    "points": [
+      [
+        631.6,
+        71
+      ],
+      [
+        678.8,
+        71
+      ]
+    ]
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#141418",
+    "opacity": 1,
+    "x": 652.5,
+    "y": 63,
+    "width": 16,
+    "height": 16
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#ffffff",
+    "opacity": 1,
+    "x": 655.5,
+    "y": 66,
+    "width": 10,
+    "height": 10
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#a0a8b4",
+    "opacity": 1,
+    "x": 658.5,
+    "y": 69,
+    "width": 4,
+    "height": 4
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#f8b0b8",
+    "size": 5,
+    "opacity": 0.75,
+    "points": [
+      [
+        645.3,
+        54.2
+      ],
+      [
+        654.4,
+        51.2
+      ],
+      [
+        663.6,
+        52.7
+      ]
+    ]
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#d82c28",
+    "opacity": 1,
+    "x": 389,
+    "y": 574.6,
+    "width": 8,
+    "height": 8
+  },
+  {
+    "type": "ellipse",
+    "layer": "details",
+    "color": "#d82c28",
+    "opacity": 1,
+    "x": 542.5,
+    "y": 605,
+    "width": 8,
+    "height": 8
+  },
+  {
+    "type": "stroke",
+    "layer": "details",
+    "brush": "pencil",
+    "color": "#5c4838",
+    "size": 2.2,
+    "opacity": 0.65,
+    "points": [
+      [
+        870,
+        665
+      ],
+      [
+        885,
+        655
+      ],
+      [
+        900,
+        665
+      ]
+    ]
+  },
+  {
+    "type": "layer.update",
+    "id": "armature",
+    "visible": false
+  }
+]
