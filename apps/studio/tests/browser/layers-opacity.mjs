@@ -1,191 +1,142 @@
 async (page) => {
-  await page.setViewportSize({ width: 1440, height: 980 });
-  const slider = page.locator('#slider-layer-opacity');
-  const assert = (condition, message) => { if (!condition) throw new Error(message); };
-  const post = (path, body) => page.evaluate(async ({ path, body }) => {
-    const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'human', ...body }) });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error);
-    return data;
-  }, { path, body });
-  const state = () => page.evaluate(async () => (await (await fetch('/api/state')).json()));
-  const select = async (id) => {
-    await page.locator(`[data-layer-id="${id}"] .layer-main-info`).click();
-    await page.waitForFunction(id => document.querySelector(`[data-layer-id="${id}"]`)?.getAttribute('aria-checked') === 'true', id);
+  const assert = (condition, message) => {
+    if (!condition) throw new Error(`layers-opacity: ${message}`);
   };
-  const reset = async () => {
-    await post('/api/control', { action: 'new' });
-    await page.waitForFunction(() => !document.querySelector('[data-layer-id="top"]'));
-    await post('/api/commands', { commands: [{ type: 'layer.add', id: 'top', name: 'Top' }], immediate: true });
-    await page.waitForSelector('[data-layer-id="top"]');
-    await select('paint');
-    await page.waitForFunction(() => document.getElementById('slider-layer-opacity').value === '100');
-  };
-  const hold = async (fraction) => {
-    await slider.scrollIntoViewIfNeeded();
-    const box = await slider.boundingBox();
-    await page.mouse.move(box.x + box.width * fraction, box.y + box.height / 2);
-    await page.mouse.down();
-    return Number(await slider.inputValue());
-  };
-  const committed = async (id, value) => page.waitForFunction(async ({ id, value }) => {
-    const snapshot = await (await fetch('/api/state')).json();
-    return snapshot.document.layers.find(layer => layer.id === id)?.opacity === value / 100;
-  }, { id, value });
-  const pulse = async () => {
-    await post('/api/control', { action: 'speed', speed: 0.25 });
-    await page.waitForTimeout(350);
-  };
-  let releaseRoute = async () => {};
-  const delayFirstSave = async (fail = false) => {
-    let release, entered;
-    const gate = new Promise(resolve => { release = resolve; });
-    const started = new Promise(resolve => { entered = resolve; });
-    const requests = [];
-    const handler = async route => {
-      const command = route.request().postDataJSON()?.commands?.[0];
-      if (command?.type !== 'layer.update' || typeof command.opacity !== 'number') return route.continue();
-      requests.push(command);
-      if (requests.length === 1) {
-        entered();
-        await gate; // Delay arrival at the studio, not just the response.
-        if (fail) return route.fulfill({ status: 400, contentType: 'application/json', body: '{"error":"Opacity save rejected for test"}' });
-      }
-      await route.continue();
-    };
-    await page.route('**/api/commands', handler);
-    releaseRoute = async () => {
-      release();
-      await page.unroute('**/api/commands', handler);
-    };
-    return { release, requests, started: async () => {
-      await Promise.race([started, page.waitForTimeout(3000).then(() => { throw new Error('opacity request did not start'); })]);
-    } };
-  };
-
-  try {
-    await reset();
-    await post('/api/commands', { commands: [{ type: 'stroke', points: [[0, 0], [1000, 700]] }] });
-    await pulse(); // Let the paused setup snapshot settle before starting input.
-    const opacity = await hold(.35);
-    assert(opacity > 20 && opacity < 50, 'real pointer did not adjust the native range');
-    await post('/api/control', { action: 'resume' });
-    await page.waitForTimeout(400);
-    assert(Number(await slider.inputValue()) === opacity, 'playback overwrote held opacity');
-    await page.mouse.up();
-    await committed('paint', opacity);
-
-    // Native keyboard input commits normally and remains synchronized.
-    await slider.focus();
-    await page.keyboard.press('ArrowLeft');
-    await committed('paint', opacity - 1);
-    await page.keyboard.press('Home');
-    await committed('paint', 0);
-    await page.keyboard.press('Home'); // A key at the range limit leaves no edit open.
-    await post('/api/commands', { commands: [{ type: 'layer.update', id: 'paint', opacity: .75 }], immediate: true });
-    await page.waitForFunction(() => document.getElementById('slider-layer-opacity').value === '75');
-
-    // Cancellation restores server state and suppresses the old gesture's change.
-    for (const reason of ['Escape', 'blur', 'pointercancel']) {
-      await reset();
-      await hold(.35);
-      if (reason === 'Escape') await page.keyboard.press('Escape');
-      else if (reason === 'blur') await page.locator('#btn-save').focus();
-      else await slider.dispatchEvent('pointercancel', { pointerId: 1 });
-      await page.mouse.up();
-      await pulse();
-      assert(Number(await slider.inputValue()) === 100, `${reason} retained a cancelled value`);
-      assert((await state()).history.cursor === 1, `${reason} committed a cancelled edit`);
+  const problems = [];
+  const layerUpdates = [];
+  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+  page.on('console', (message) => { if (message.type() === 'error') problems.push(`console: ${message.text()}`); });
+  page.on('response', (response) => { if (response.status() >= 400) problems.push(`http ${response.status()}: ${response.url()}`); });
+  page.on('request', (request) => {
+    if (request.url().includes('/api/commands') && request.method() === 'POST') {
+      try {
+        const body = JSON.parse(request.postData() ?? '{}');
+        if (body.commands?.[0]?.type === 'layer.update') layerUpdates.push(body);
+      } catch {}
     }
+  });
+  const state = async () => page.evaluate(async () => (await (await fetch('/api/state')).json()));
+  const pixel = (x, y) => page.evaluate(([px, py]) => {
+    const d = document.getElementById('painting-canvas').getContext('2d').getImageData(px, py, 1, 1).data;
+    return `${d[0]},${d[1]},${d[2]}`;
+  }, [x, y]);
+  const background = '247,243,232';
+  const backgroundRgb = [247, 243, 232];
+  const inkRgb = [37, 61, 56];
+  const brushAlpha = 1 - Math.pow(0.84, 5);
+  const expectedPixel = (layerOpacity) => {
+    const a = layerOpacity * brushAlpha;
+    return `${Math.round(inkRgb[0] * a + backgroundRgb[0] * (1 - a))},${Math.round(inkRgb[1] * a + backgroundRgb[1] * (1 - a))},${Math.round(inkRgb[2] * a + backgroundRgb[2] * (1 - a))}`;
+  };
+  const nearPixel = (value, expected) => {
+    const got = value.split(',').map(Number);
+    const want = expected.split(',').map(Number);
+    return got.every((channel, index) => Math.abs(channel - want[index]) <= 3);
+  };
+  const waitForPixel = async (x, y, expected, label) => {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const value = await pixel(x, y);
+      if (nearPixel(value, expected)) return value;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`layers-opacity: pixel never ${expected} (${label}): ${await pixel(x, y)}`);
+  };
+  const waitFor = async (predicate, label, attempts = 30) => {
+    let latest = null;
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      latest = await state();
+      if (predicate(latest)) return latest;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`layers-opacity: never ${label}; state=${JSON.stringify(latest).slice(0, 200)}`);
+  };
+  const drain = async () => { for (let index = 0; index < 4; index += 1) await Promise.resolve(); };
+  const panel = '#right-inspector .cs-insp-panel:not([hidden])';
+  const numberInput = () => page.locator(`${panel} input[aria-label="Layer opacity percent"]`);
+  const rangeInput = () => page.locator(`${panel} input[aria-label="Layer opacity"]`);
+  const badge = () => page.textContent('.cs-layer-row >> nth=0 >> .cs-layer-opacity');
 
-    // Selection changes cancel the unsaved edit and preserve the new target.
-    await reset();
-    await hold(.35);
-    await page.locator('[data-layer-id="top"] .layer-main-info').dispatchEvent('click');
-    await page.mouse.up();
-    await pulse();
-    const switched = await state();
-    assert(switched.document.layers.every(layer => layer.opacity === 1), 'selection switch saved the old gesture');
-    assert(await page.locator('[data-layer-id="top"]').getAttribute('aria-checked') === 'true', 'selection switch lost its target');
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.waitForSelector('.cs-dock', { timeout: 15000 });
+  await page.waitForTimeout(600);
+  await page.mouse.move(560, 300);
+  await page.mouse.down();
+  await page.mouse.move(700, 400, { steps: 5 });
+  await page.mouse.up();
+  let snap = await waitFor((s) => s.document.marks.length === 1, 'ink stroke');
+  const inkAt = snap.document.marks[0].points[0].map(Math.round);
+  assert((await pixel(inkAt[0], inkAt[1])) !== background, 'stroke painted before opacity changes');
 
-    // Removing the edited layer via a new document cancels the gesture.
-    await select('top');
-    await hold(.35);
-    await post('/api/control', { action: 'new' });
-    await page.waitForFunction(() => !document.querySelector('[data-layer-id="top"]'));
-    await page.mouse.up();
-    await pulse();
-    assert((await state()).history.cursor === 0, 'removed target produced a replacement-layer edit');
-    assert(Number(await slider.inputValue()) === 100, 'removed target retained local opacity');
+  await page.click('.cs-layer-name');
+  await page.waitForSelector(`${panel} .cs-insp-name`, { timeout: 5000 });
+  const generationAtStart = (await state()).docGeneration;
 
-    // An older save keeps its starting layer; the newer save waits its turn.
-    await reset();
-    let delayed = await delayFirstSave();
-    const first = await hold(.25);
-    await page.mouse.up();
-    await delayed.started();
-    await pulse();
-    assert(Number(await slider.inputValue()) === first, 'polling overwrote a pending save');
-    await select('top');
-    assert(Number(await slider.inputValue()) === 100, 'pending save followed selection to a different layer');
-    const second = await hold(.65);
-    await page.mouse.up();
-    await pulse();
-    assert(delayed.requests.length === 1, 'newer save reached the server before the delayed first save');
-    assert(Number(await slider.inputValue()) === second, 'pending older save overwrote the newer value');
-    delayed.release();
-    await committed('paint', first);
-    await committed('top', second);
-    assert(delayed.requests.map(command => command.id).join(',') === 'paint,top', 'saves lost their starting targets');
-    await releaseRoute();
+  await numberInput().fill('100');
+  await numberInput().press('Enter');
+  await waitFor((s) => s.document.layers[0].opacity === 1, 'opacity 100 committed');
+  const fullInk = await waitForPixel(inkAt[0], inkAt[1], expectedPixel(1), 'opacity 100 full ink');
+  assert((await badge()) === '100%', 'badge shows 100%');
 
-    // An older completion cannot settle a newer gesture that is still held.
-    await reset();
-    delayed = await delayFirstSave();
-    const older = await hold(.25);
-    await page.mouse.up();
-    await delayed.started();
-    const newer = await hold(.65);
-    delayed.release();
-    await committed('paint', older);
-    await pulse();
-    assert(Number(await slider.inputValue()) === newer, 'older completion settled a newer held gesture');
-    await page.mouse.up();
-    await committed('paint', newer);
-    await releaseRoute();
+  await numberInput().fill('0');
+  await numberInput().press('Enter');
+  await waitFor((s) => s.document.layers[0].opacity === 0, 'opacity 0 committed');
+  assert((await waitForPixel(inkAt[0], inkAt[1], background, 'opacity 0')) === background, 'opacity 0 hides the stroke pixels');
+  assert((await badge()) === '0%', `badge shows 0%: ${await badge()}`);
 
-    // Failed earlier saves do not strand the queue or clear a newer local save.
-    await reset();
-    delayed = await delayFirstSave(true);
-    await hold(.25);
-    await page.mouse.up();
-    await delayed.started();
-    const afterFailure = await hold(.65);
-    await page.mouse.up();
-    await pulse();
-    assert(delayed.requests.length === 1, 'failed-save queue sent its successor prematurely');
-    delayed.release();
-    await committed('paint', afterFailure);
-    assert(Number(await slider.inputValue()) === afterFailure, 'old failure cleared a newer edit');
-    await releaseRoute();
+  await numberInput().fill('50');
+  await numberInput().press('Enter');
+  await waitFor((s) => s.document.layers[0].opacity === 0.5, 'opacity 50 committed');
+  assert((await rangeInput().inputValue()) === '50', 'slider reflects the committed value');
+  const blended = await waitForPixel(inkAt[0], inkAt[1], expectedPixel(0.5), 'opacity 50 blend');
+  assert(blended !== background && blended !== fullInk, `opacity 50 blends pixels: ${blended}`);
+  const [fr, fg, fb] = fullInk.split(',').map(Number);
+  const [br, bg2, bb] = blended.split(',').map(Number);
+  const deltas = [Math.abs(br - (backgroundRgb[0] + Math.round((fr - backgroundRgb[0]) / 2))), Math.abs(bg2 - (backgroundRgb[1] + Math.round((fg - backgroundRgb[1]) / 2))), Math.abs(bb - (backgroundRgb[2] + Math.round((fb - backgroundRgb[2]) / 2)))];
+  assert(deltas.every((delta) => delta <= 3), `50% is the midpoint of background and the observed full ink: ${blended} deltas ${deltas}`);
+  assert((await badge()) === '50%', 'badge shows 50%');
 
-    // Failure of the current edit restores the server value and permits retry.
-    await reset();
-    delayed = await delayFirstSave(true);
-    await hold(.25);
-    await page.mouse.up();
-    await delayed.started();
-    delayed.release();
-    await page.waitForFunction(() => document.getElementById('slider-layer-opacity').value === '100' &&
-      document.getElementById('notification-message').textContent.includes('Failed to update layer opacity'));
-    assert((await state()).history.cursor === 1, 'failed save mutated the layer');
-    await releaseRoute();
-    await slider.focus();
-    await page.keyboard.press('ArrowLeft');
-    await committed('paint', 99);
-    return { success: true };
-  } finally {
-    await releaseRoute();
-    await page.mouse.up();
-  }
+  await page.click(`${panel} .cs-insp-visibility`);
+  await waitFor((s) => s.document.layers[0].visible === false, 'visibility hidden');
+  assert((await pixel(inkAt[0], inkAt[1])) === background, 'hidden layer hides pixels');
+  await page.click(`${panel} .cs-insp-visibility`);
+  await waitFor((s) => s.document.layers[0].visible === true, 'visibility shown');
+  assert(nearPixel(await waitForPixel(inkAt[0], inkAt[1], expectedPixel(0.5), 'shown repaint at 50% layer opacity'), expectedPixel(0.5)), 'shown layer repaints at its layer opacity');
+
+  const updatesBefore = layerUpdates.length;
+  await numberInput().focus();
+  await numberInput().fill('4');
+  await page.waitForTimeout(700);
+  assert((await numberInput().inputValue()) === '4', 'held partial input survives polling');
+  await numberInput().fill('40');
+  await numberInput().press('Enter');
+  await waitFor((s) => s.document.layers[0].opacity === 0.4, 'opacity 40 committed');
+  assert(layerUpdates.length === updatesBefore + 1, `held edit committed exactly once: +${layerUpdates.length - updatesBefore}`);
+  assert(layerUpdates[layerUpdates.length - 1].expectedDocGeneration === generationAtStart, 'commit carried the frozen generation');
+  assert(await page.locator('.cs-insp-pending').isHidden(), 'pending indicator cleared after acceptance');
+
+  const generationBefore = (await state()).docGeneration;
+  await numberInput().focus();
+  await numberInput().fill('9');
+  await page.evaluate(async (generation) => {
+    await fetch('/api/project', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project: { format: 'codesketch', version: 2, commands: [], cursor: 0, queue: [], comments: [] }, source: 'human', expectedDocGeneration: generation }) });
+  }, generationBefore);
+  await waitFor((s) => s.document.marks.length === 0 && s.docGeneration !== generationBefore, 'server generation reset to a replacement document');
+  await page.waitForFunction(() => {
+    const input = document.querySelector('#right-inspector .cs-insp-panel:not([hidden]) input[aria-label="Layer opacity percent"]');
+    return input && input.value === '100';
+  }, { timeout: 5000 });
+  await drain();
+  assert(layerUpdates.length === updatesBefore + 1, 'held edit cancelled: no mutation reached the replacement document');
+  assert((await numberInput().inputValue()) === '100', 'cancellation restores the replacement layer value (old edit text does not survive)');
+  const commandsBefore = layerUpdates.length;
+  await numberInput().press('Enter');
+  await drain();
+  await page.waitForTimeout(300);
+  assert(layerUpdates.length === commandsBefore, 'stale held edit cannot mutate the replacement document');
+  assert((await state()).docGeneration !== generationBefore, 'replacement document generation untouched');
+  await drain();
+
+  assert(problems.length === 0, `no runtime problems: ${JSON.stringify(problems)}`);
+  return { success: true, layerUpdates: layerUpdates.length, background: (await state()).document.background };
 }

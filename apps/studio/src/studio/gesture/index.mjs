@@ -161,6 +161,9 @@ export function createGesture({ model, dispatch, requests, canvas, point }) {
     draft = kind === 'stroke' ? buildStroke(gesture, points) : buildShape(gesture, kind, start, start);
     model.patch({ draft });
     phase = 'drawing';
+    try {
+      canvas.focus({ preventScroll: true });
+    } catch {}
     requestPause(token);
     event.preventDefault();
   }
