@@ -95,16 +95,17 @@ async (page) => {
 
   await page.click('.cs-layer-row >> nth=0 >> .cs-layer-name');
   await page.waitForTimeout(200);
-  assert.match(await page.textContent('.cs-insp-title'), /Layer Properties/i, 'inspecting layer');
+  assert(/Layer Properties/i.test(await page.textContent('.cs-insp-title')), 'inspecting layer');
   await drag([300, 500], [360, 550]);
   snap = await waitFor((s) => s.document.marks.length === 6, 'post-return stroke');
   const returned = snap.document.marks[5];
   assert(returned.brush === 'brush', 'canvas pointerdown returned to brush');
   assert(returned.layer === 'layer-2', 'target preserved through inspect/return');
   assert(returned.size === 33, 'brush size parameter preserved');
-  assert.match(await page.textContent('.cs-insp-title'), /Brush Properties/i, 'inspector back on brush');
+  assert(/Brush Properties/i.test(await page.textContent('.cs-insp-title')), 'inspector back on brush');
 
   await page.focus('.cs-filename');
+  await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.press('e');
   assert((await page.inputValue('.cs-filename')) === 'e', 'editable input keeps native typing');
   assert((await pressedTool()) === 'Paintbrush (B)', 'typing in an input never runs tool shortcuts');
