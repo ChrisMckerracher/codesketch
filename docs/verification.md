@@ -1,3 +1,33 @@
+# Reconstruction release verification
+
+Verified September 10, 2026 for the reconstructed UI release. The
+strict browser runner in `tools/browser-check.mjs` runs the eight registered
+scenarios (`studio`, `layers-keyboard`, `layers-opacity`, `comments`,
+`comments-races`, `finish`, `appearance`, `connection`); each receives a fresh
+ephemeral in-memory studio and a fresh short browser session, its parsed
+run-code result must report `success: true`, `### Error` output rejects the
+run, failures save full CLI output under
+`artifacts/browser-check/<scenario>.last-run.log`, and `studio.mjs` deletes
+stale downloads then validates a fresh codesketch v2 `project.json` and a
+1000 × 700 `artwork.png`.
+
+| Check | Result |
+| --- | --- |
+| Final `npm run verify` | Passed: 410 JavaScript tests with zero failures plus Go formatting, dependency/context policy, vet and race checks (`/private/tmp/codesketch-release-verify-final.log`) |
+| Full native suite | `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go` passed all packages after isolated readiness-fixture prewarming (`/private/tmp/codesketch-native-final-rerun.log`) |
+| Built binary | `make build` passed its policy gate; the copied binary served the complete embedded UI on ephemeral port 55164 — icon 200, 50 controls, 1000 × 700 canvas, runtime digest `0ab213ef5cc6cb71660a97302912a303af819f0626f16819a5003f3351f9c663` — and the owned browser session and runtime were stopped afterward |
+| Full browser suite | Root combined `npm run test:browser` passed 8/8, including `finish` (active-preview Clear, Finish 101, pixel and Undo/Redo checks) and `connection` (`/private/tmp/codesketch-browser-release-final.log`) |
+| User visual acceptance | Pending user review; technical checks do not constitute design approval. |
+
+Production cutover completed on September 10, 2026 through the lead-managed
+sequence: checksum-verified fresh recovery backup, old binary stop, new binary
+start, with startup succeeding. The verified runtime is healthy at
+`http://127.0.0.1:4317` with the same runtime digest as the verified build,
+`0ab213ef5cc6cb71660a97302912a303af819f0626f16819a5003f3351f9c663`.
+`make install` rebuilt and installed the CLI at `~/.local/bin/paint`.
+Read-only verification confirms the artwork project is byte-identical across
+the cutover and the human pause is preserved.
+
 # Initial release verification
 
 Verified on September 9, 2026 with Node 26.8.1 and the installed Playwright CLI using Chrome.
