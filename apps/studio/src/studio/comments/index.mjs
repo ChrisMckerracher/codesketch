@@ -1,10 +1,6 @@
-// Comments bounded context: region selection, composer, overlay, inspector.
+// Comments bounded context: retained geometry and pause handshake.
+// The presentation workflow (selection, composer, overlay, list, status,
+// shortcuts, UI controller) was removed for the from-zero UI reset.
 
 export { canvasPoint, selectionRect } from './geometry.mjs';
-export { RegionSelection } from './selection.mjs';
-export { CommentOverlay } from './overlay.mjs';
-export { CommentList } from './comments-list.mjs';
-export { CommentComposer } from './composer.mjs';
-export { ListeningStatus } from './listening-status.mjs';
-export { CommentShortcuts } from './comment-shortcuts.mjs';
-export { CommentsUI } from './comments-ui.mjs';
+export { PauseHandshake } from './handshake.mjs';

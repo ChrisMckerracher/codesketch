@@ -2,6 +2,7 @@ package lifecycle
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -38,6 +39,21 @@ func studioRoute(t *testing.T, url, method, path, body string) []byte {
 		t.Fatalf("%s %s must succeed: %d %s", method, path, response.StatusCode, data)
 	}
 	return data
+}
+
+// humanSeed reads the live generation and returns a raw human commands body
+// carrying the exact observed expectedDocGeneration for guarded setup.
+func humanSeed(t *testing.T, url, command string) string {
+	t.Helper()
+	state := studioRoute(t, url, http.MethodGet, "/api/state", "")
+	var current struct {
+		DocGeneration string `json:"docGeneration"`
+	}
+	if err := json.Unmarshal(state, &current); err != nil {
+		t.Fatal(err)
+	}
+	return fmt.Sprintf(`{"commands":[%s],"source":"human","play":false,"immediate":true,"expectedDocGeneration":%q}`,
+		command, current.DocGeneration)
 }
 
 func TestRestartReplacesRuntimeWithNewIdentity(t *testing.T) {
@@ -82,8 +98,8 @@ func TestRestartRecoversDurablePausedArtwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { cleanupAcceptedRuntime(t, dataDir) })
-	seed := `{"commands":[{"type":"fill","color":"#223344"}],"source":"human","play":false,"immediate":true}`
-	seeded := studioRoute(t, first.URL, http.MethodPost, "/api/commands", seed)
+	seeded := studioRoute(t, first.URL, http.MethodPost, "/api/commands",
+		humanSeed(t, first.URL, `{"type":"fill","color":"#223344"}`))
 	var before struct {
 		Document struct {
 			Background string `json:"background"`

@@ -51,6 +51,14 @@ func startFakeChild(t *testing.T, script string, deadline time.Duration) (*Manag
 		t.Fatal(err)
 	}
 	manager.node = fake
+	if deadline > 0 {
+		// The real caller deadline covers all startup, including the cold
+		// runtime extraction. This test prewarms extraction so the bounded
+		// context exercises the readiness-pipe deadline specifically.
+		if _, _, err := ensureRuntime(t.Context(), manager.cacheDir); err != nil {
+			t.Fatalf("prewarming the isolated runtime cache failed: %v", err)
+		}
+	}
 	ctx := t.Context()
 	if deadline > 0 {
 		var cancel context.CancelFunc

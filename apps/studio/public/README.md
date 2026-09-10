@@ -1,24 +1,23 @@
 # Studio public assets
 
-This folder contains the browser shell and static Mac-style workspace assets.
+This folder is the dependency-free browser shell served by the studio.
+[`index.html`](index.html) defines the workspace landmarks: header, layer and
+feedback sidebar, canvas stage, contextual inspector, drawers, and notice area.
 
-## Key files
+Stylesheet entrypoints are [`tokens.css`](tokens.css),
+[`workspace.css`](workspace.css), [`controls.css`](controls.css),
+[`stage.css`](stage.css), [`layers.css`](layers.css), [`inspector.css`](inspector.css),
+and [`feedback.css`](feedback.css). They share `--cs-*` tokens and system
+typography, with light and dark appearance rules.
 
-- [`index.html`](index.html) defines the canvas, toolbar, inspector, playback controls, comments panel, and dialogs.
-- [`base.css`](base.css) defines typography, colors, controls, and appearance foundations.
-- [`layout.css`](layout.css), [`responsive.css`](responsive.css) define workspace geometry and narrow layouts.
-- [`tools.css`](tools.css), [`inspector.css`](inspector.css), [`comments.css`](comments.css), and [`dialogs.css`](dialogs.css) style bounded UI surfaces.
+[`icon.svg`](icon.svg) supplies the studio’s static icon asset.
 
-The module entry is [`../src/studio/index.mjs`](../src/studio/index.mjs); HTML loads it as a same-origin module.
-The transport serves these assets through its explicit static allowlist and sends a strict CSP.
+The canvas remains the primary workspace. The shell keeps the 1000 × 700
+canvas, compact desktop controls, neutral surfaces, keyboard focus rings,
+responsive side rails/drawers, and reduced-motion behavior visible in the
+committed markup and CSS.
 
-## Boundaries and invariants
-
-Keep assets dependency-free, local, and free of remote fonts, scripts, images, or styles.
-The canvas remains the primary workspace; controls use neutral surfaces, system typography, and clear focus/disabled states.
-Keep IDs, labels, and ARIA relationships aligned with the UI modules and browser scenarios.
-Markdown documentation in this folder is not a runtime asset and is excluded from native embedding.
-
-## Verification
-
-Run [`npm run verify`](../../../package.json) and [`npm run test:browser`](../../../package.json) at desktop and narrow viewports.
+Native embedding treats Markdown as documentation rather than runtime asset
+content. The static contract is covered by
+[`../tests/static-ui.test.mjs`](../tests/static-ui.test.mjs) and browser
+scenarios under [`../tests/browser/`](../tests/browser/README.md).

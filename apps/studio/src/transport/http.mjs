@@ -1,5 +1,5 @@
 import { readFile, realpath } from 'node:fs/promises';
-import { resolve, sep, extname } from 'node:path';
+import { resolve, sep, extname, join } from 'node:path';
 import { MAX_IMPORT_BYTES } from '../direction/index.mjs';
 
 export const headers = {
@@ -35,14 +35,80 @@ export function trusted(request, port) {
   return !request.headers['sec-fetch-site'] || ['same-origin', 'none'].includes(request.headers['sec-fetch-site']);
 }
 
+const STYLESHEETS = new Set(['tokens', 'workspace', 'controls', 'layers', 'inspector', 'stage', 'feedback']);
+
+async function containedDirectory(root, relative) {
+  const canonicalRoot = await realpath(root);
+  const expected = join(canonicalRoot, relative);
+  const actual = await realpath(expected);
+  return actual === expected ? expected : null;
+}
+
+async function servePublicFile(response, root, filename, mime) {
+  let publicDir;
+  try {
+    publicDir = await containedDirectory(root, 'public');
+  } catch (error) {
+    if (error?.code === 'ENOENT') return send(response, 404, { error: 'Not found' });
+    throw error;
+  }
+  if (!publicDir) return send(response, 404, { error: 'Not found' });
+  const expected = join(publicDir, filename);
+  let actual;
+  try {
+    actual = await realpath(expected);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return send(response, 404, { error: 'Not found' });
+    throw error;
+  }
+  if (actual !== expected) return send(response, 404, { error: 'Not found' });
+  const data = await readFile(actual);
+  response.writeHead(200, { ...headers, 'Content-Type': `${mime}; charset=utf-8` });
+  response.end(data);
+}
+
 export async function serveStatic(response, pathname, root) {
-  const path = pathname === '/' ? '/public/index.html' : decodeURIComponent(pathname);
-  if (!/^\/(public\/|src\/(studio|painting)\/)/.test(path) || path.includes('\0')) return send(response, 404, { error: 'Not found' });
+  let path;
+  try {
+    path = decodeURIComponent(pathname);
+  } catch {
+    return send(response, 404, { error: 'Not found' });
+  }
+  if (path.includes('\0')) return send(response, 404, { error: 'Not found' });
+  const segments = path.split('/');
+  if (path.includes('\\') || segments.some(segment => segment === '.' || segment === '..')) {
+    return send(response, 404, { error: 'Not found' });
+  }
+  if (path === '/' || path === '/public/index.html') {
+    return servePublicFile(response, root, 'index.html', 'text/html');
+  }
+  if (path === '/public/icon.svg') {
+    return servePublicFile(response, root, 'icon.svg', 'image/svg+xml');
+  }
+  const stylesheet = /^\/public\/([a-z]+)\.css$/.exec(path);
+  if (stylesheet && STYLESHEETS.has(stylesheet[1])) {
+    return servePublicFile(response, root, `${stylesheet[1]}.css`, 'text/css');
+  }
+  if (!/^\/src\/(studio|painting)\//.test(path)) return send(response, 404, { error: 'Not found' });
   const filename = resolve(root, `.${path}`);
-  const allowed = ['public', 'src/studio', 'src/painting'].map(folder => resolve(root, folder) + sep);
-  const actual = await realpath(filename);
+  const allowed = [];
+  try {
+    for (const folder of ['src/studio', 'src/painting']) {
+      const directory = await containedDirectory(root, folder);
+      if (directory) allowed.push(directory + sep);
+    }
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
+  let actual;
+  try {
+    actual = await realpath(filename);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return send(response, 404, { error: 'Not found' });
+    throw error;
+  }
   if (!allowed.some(folder => actual.startsWith(folder))) return send(response, 404, { error: 'Not found' });
-  const mime = { '.html': 'text/html', '.css': 'text/css', '.mjs': 'text/javascript' }[extname(actual)];
+  const mime = { '.mjs': 'text/javascript' }[extname(actual)];
   if (!mime) return send(response, 404, { error: 'Not found' });
   const data = await readFile(actual);
   response.writeHead(200, { ...headers, 'Content-Type': `${mime}; charset=utf-8` });

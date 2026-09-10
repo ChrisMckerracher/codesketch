@@ -1,117 +1,110 @@
-// Codesketch Studio browser application entry point
-
-import { populateIcons } from './icons.mjs';
-import { StudioApi } from './api.mjs';
 import { StudioState } from './state.mjs';
+import { StudioApi } from './api.mjs';
 import { StudioRenderer } from './renderer.mjs';
-import { CanvasController } from './canvas-controller.mjs';
-import { ToolsUI } from './tools-ui.mjs';
-import { PlaybackUI } from './playback-ui.mjs';
-import { LayersUI } from './layers-ui.mjs';
-import { CommentsUI } from './comments/index.mjs';
-import { Dialogs } from './dialogs.mjs';
+import { createApplication } from './application/index.mjs';
+import { createGesture } from './gesture/index.mjs';
+import { mount as mountHeader } from './header/index.mjs';
+import { mount as mountPlayback } from './playback/index.mjs';
+import { mount as mountLayers } from './layers/index.mjs';
+import { mount as mountInspector } from './inspector/index.mjs';
+import { mount as mountTools } from './tools/index.mjs';
+import { mount as mountViewport } from './viewport/index.mjs';
+import { mount as mountReview } from './review/index.mjs';
 
-export function bootstrap() {
-  populateIcons(document);
+const canvas = document.getElementById('painting-canvas');
+const state = new StudioState();
+const api = new StudioApi({ onOfflineChange: (offline) => state.setOffline(offline) });
+const renderer = new StudioRenderer(canvas);
+const application = createApplication({ state, api });
+const model = application.model;
+const dispatch = application.dispatch;
 
-  const state = new StudioState();
-  const api = new StudioApi({
-    onOfflineChange: (offline) => state.setOffline(offline),
-    onError: (err) => state.showNotification(err),
-    onReconnect: () => {
-      api.fetchState(null, null).then((snap) => {
-        if (snap && !snap.unchanged) {
-          state.setSnapshot(snap);
-        }
-      }).catch(() => {});
-    },
-  });
+const components = [];
+function mountComponent(mount, root, extra = {}) {
+  components.push(mount({ root, model: model.get(), dispatch, ...extra }));
+}
 
-  const canvas = document.getElementById('canvas');
-  const renderer = new StudioRenderer(canvas);
-  new CanvasController(canvas, state, api, renderer);
+const viewport = mountViewport({ root: document.getElementById('stage-viewport'), model: model.get(), dispatch });
+components.push(viewport);
+mountComponent(mountHeader, document.getElementById('global-header'));
+mountComponent(mountPlayback, document.getElementById('director-hud'));
+mountComponent(mountLayers, document.getElementById('layer-panel'));
+mountComponent(mountInspector, document.getElementById('right-inspector'));
+mountComponent(mountTools, document.getElementById('tool-dock'));
+components.push(mountReview({
+  root: document.getElementById('feedback-panel'),
+  model: model.get(),
+  dispatch,
+  composer: document.getElementById('feedback-composer'),
+  overlay: document.getElementById('stage-overlay'),
+  canvas,
+  point: viewport.point,
+}));
 
-  new ToolsUI(state, api);
-  const dialogs = new Dialogs(state, api, renderer);
-  new LayersUI(state, api, dialogs);
-  new PlaybackUI(state, api);
-  new CommentsUI({ canvas, state, api });
+const gesture = createGesture({
+  model,
+  dispatch,
+  requests: application.requests,
+  canvas,
+  point: viewport.point,
+});
 
-  // Welcome helper overlay handling
-  const welcomeBanner = document.getElementById('canvas-welcome');
-  function updateWelcomeBanner() {
-    if (!welcomeBanner) return;
-    const hasMarks = (state.snapshot?.document?.marks?.length || 0) > 0;
-    const hasRemaining = (state.snapshot?.playback?.remaining || 0) > 0;
-    const isDrafting = !!state.draft;
-    welcomeBanner.hidden = hasMarks || hasRemaining || isDrafting;
+let lastRenderSignature = null;
+let lastDraft = null;
+let tornDown = false;
+const notice = document.getElementById('studio-notice');
+
+function artSignature(value) {
+  const snapshot = value.snapshot;
+  if (!snapshot) return null;
+  const active = snapshot.playback?.active ?? null;
+  const activeSignature = active ? `${active.command?.id ?? 'command'}:${active.progress}` : '';
+  return `${snapshot.instanceId}:${snapshot.docGeneration}:${snapshot.artRevision}:${activeSignature}`;
+}
+
+function applyValue(value) {
+  const snapshot = value.snapshot;
+  const active = snapshot?.playback?.active ?? null;
+  const signature = artSignature(value);
+  if (snapshot && (signature !== lastRenderSignature || value.draft !== lastDraft)) {
+    renderer.render(snapshot.document, active, value.draft);
+    lastRenderSignature = signature;
   }
-  state.on('snapshot', updateWelcomeBanner);
-  state.on('draft', updateWelcomeBanner);
+  lastDraft = value.draft;
+  for (const component of components) component.update(value);
+  notice.textContent = value.notice?.message ?? '';
+}
 
-  // Keyboard accessibility & shortcuts
-  window.addEventListener('keydown', (e) => {
-    const target = e.target;
-    const isInteractive = target instanceof Element && (
-      target.isContentEditable ||
-      !!target.closest('input, textarea, select, button, a, [role="radio"], [contenteditable]') ||
-      !!target.closest('dialog[open]') ||
-      !!document.querySelector('dialog[open]')
-    );
-    if (isInteractive || e.repeat) return;
+applyValue(model.get());
+const unsubscribeModel = model.subscribe((value) => applyValue(value));
 
-    const isCtrlOrMeta = e.ctrlKey || e.metaKey;
+let pollTimer = null;
+let pollInterval = 100;
 
-    if (isCtrlOrMeta && !e.shiftKey && e.key.toLowerCase() === 'z') {
-      e.preventDefault();
-      api.sendControl('undo').then((s) => state.setSnapshot(s)).catch(() => {});
-    } else if (isCtrlOrMeta && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
-      e.preventDefault();
-      api.sendControl('redo').then((s) => state.setSnapshot(s)).catch(() => {});
-    } else if (!isCtrlOrMeta && e.code === 'Space') {
-      e.preventDefault();
-      const isPlaying = state.snapshot?.playback?.status === 'playing';
-      api.sendControl(isPlaying ? 'pause' : 'resume').then((s) => state.setSnapshot(s)).catch(() => {});
-    } else if (!isCtrlOrMeta && !e.altKey) {
-      if (e.key === '1' || e.key.toLowerCase() === 'b') state.setTool('brush');
-      else if (e.key === '2' || e.key.toLowerCase() === 'p') state.setTool('pencil');
-      else if (e.key === '3' || e.key.toLowerCase() === 'm') state.setTool('marker');
-      else if (e.key === '4' || e.key.toLowerCase() === 'e') state.setTool('eraser');
-    }
-  });
-
-  window.addEventListener('online', () => state.setOffline(false));
-  window.addEventListener('offline', () => state.setOffline(true));
-
-  // Polling loop: every 150ms GET /api/state?since=revision&instanceId=ID
-  let isPolling = false;
-  async function poll() {
-    if (isPolling) return;
-    isPolling = true;
+function schedulePoll() {
+  if (tornDown) return;
+  pollTimer = setTimeout(async () => {
+    if (tornDown) return;
     try {
-      const since = state.snapshot?.revision ?? null;
-      const instanceId = state.currentInstanceId ?? null;
-      const res = await api.fetchState(since, instanceId);
-      if (res && res.unchanged) {
-        // Unchanged replies still carry the agent heartbeat.
-        if (res.heartbeat) state.emit('heartbeat', res.heartbeat);
-      } else if (res) {
-        state.setSnapshot(res);
-      }
+      await application.requests.readState();
+      pollInterval = 100;
     } catch {
-      // Offline/error handled in StudioApi callbacks
-    } finally {
-      isPolling = false;
+      pollInterval = 1000;
     }
-  }
-
-  // Initial fetch immediately without query params, then 150ms intervals
-  poll();
-  setInterval(poll, 150);
+    schedulePoll();
+  }, pollInterval);
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrap);
-} else {
-  bootstrap();
+schedulePoll();
+
+function teardown() {
+  tornDown = true;
+  if (pollTimer !== null) clearTimeout(pollTimer);
+  pollTimer = null;
+  gesture.destroy();
+  for (const component of components) component.destroy?.();
+  unsubscribeModel();
+  application.destroy();
 }
+
+window.addEventListener('pagehide', teardown, { once: true });

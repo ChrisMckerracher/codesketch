@@ -40,7 +40,7 @@ const post = (path, body, extra = {}) => json({ method: 'POST', path,
 const stroke = points => ({ type: 'stroke', layer: 'paint', points,
   color: '#253d38', size: 8, brush: 'brush' });
 const state = async () => (await json({ path: '/api/state' })).data;
-const fresh = () => post('/api/control', { action: 'new', source: 'human' });
+const fresh = async () => post('/api/control', { action: 'new', source: 'human', ...(await context()) });
 const isISO = value => typeof value === 'string' && !Number.isNaN(Date.parse(value));
 const context = async () => {
   const s = await state();
@@ -133,7 +133,7 @@ test('a comment pauses with queue kept, continuePlayback clears it and grants th
     expectedDocGeneration: redirect.data.docGeneration });
   assert.equal(resumed.status, 200, 'the granted agent may paint again');
   assert.equal(resumed.data.playback.status, 'playing');
-  const demo = await post('/api/demo', { source: 'human' });
+  const demo = await post('/api/demo', { source: 'human', ...(await context()) });
   assert.equal(demo.status, 200);
   assert.equal(demo.data.playback.status, 'paused');
   assert.ok(demo.data.playback.remaining > 0, 'demo loads its paused queue');
@@ -226,7 +226,8 @@ test('poll cursors survive until load or new, and projects roundtrip comments', 
   const saved = (await json({ path: '/api/project' })).data;
   assert.equal(saved.version, 2);
   assert.ok(Array.isArray(saved.comments) && saved.comments.length >= 1, 'projects store comments');
-  const loaded = await post('/api/project', { project: saved, source: 'human' });
+  const loaded = await post('/api/project', { project: saved, source: 'human',
+    expectedDocGeneration: beforeLoad.docGeneration });
   assert.equal(loaded.status, 200);
   assert.deepEqual(loaded.data.document, beforeLoad.document, 'art survives the roundtrip');
   assert.equal(loaded.data.heartbeat.lastSeenAt, null, 'load clears the listening heartbeat');

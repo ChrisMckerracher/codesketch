@@ -126,7 +126,8 @@ func TestNativeStudioIntegration(t *testing.T) {
 	artBefore := state("status").ArtRevision
 
 	// A human pause arms the grant requirement.
-	paused := post(map[string]any{"action": "pause", "source": "human"})
+	paused := post(map[string]any{"action": "pause", "source": "human",
+		"expectedDocGeneration": state("status").DocGeneration})
 	if !paused.RequiresGrant || paused.ActiveGrant != nil {
 		t.Fatal("human pause did not require a grant")
 	}
@@ -147,7 +148,8 @@ func TestNativeStudioIntegration(t *testing.T) {
 	}
 	// A human resume issues an active grant; the observed grant authorizes
 	// native execution.
-	granted := post(map[string]any{"action": "resume", "source": "human"})
+	granted := post(map[string]any{"action": "resume", "source": "human",
+		"expectedDocGeneration": state("status").DocGeneration})
 	if granted.ActiveGrant == nil || granted.ActiveGrant.GrantToken == "" {
 		t.Fatal("human resume did not issue a grant")
 	}
@@ -159,7 +161,8 @@ func TestNativeStudioIntegration(t *testing.T) {
 		t.Fatal("granted execution did not commit")
 	}
 	// A later human pause revokes the observed flags.
-	post(map[string]any{"action": "pause", "source": "human"})
+	post(map[string]any{"action": "pause", "source": "human",
+		"expectedDocGeneration": state("status").DocGeneration})
 	mustFail("stroke", "--points", "350,300 360,310", "--generation", grant.DocGeneration,
 		"--epoch", strconv.Itoa(grant.ControlEpoch), "--grant", grant.GrantToken)
 
@@ -194,7 +197,8 @@ func TestNativeStudioIntegration(t *testing.T) {
 	if !bytes.Contains(before, []byte("Keep the painter paused")) {
 		t.Fatal("save omitted comments")
 	}
-	loaded := post(map[string]any{"action": "resume", "source": "human"})
+	loaded := post(map[string]any{"action": "resume", "source": "human",
+		"expectedDocGeneration": state("status").DocGeneration})
 	if loaded.ActiveGrant == nil {
 		t.Fatal("human resume before load did not issue a grant")
 	}
@@ -207,7 +211,8 @@ func TestNativeStudioIntegration(t *testing.T) {
 
 	// Setup resets use the direct human API, then restage for capture with
 	// the post-reset observed context.
-	post(map[string]any{"action": "new", "source": "human"})
+	post(map[string]any{"action": "new", "source": "human",
+		"expectedDocGeneration": state("status").DocGeneration})
 	if state("status").History.Total != 0 {
 		t.Fatal("human new did not reset the session")
 	}

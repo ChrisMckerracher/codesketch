@@ -64,6 +64,18 @@ export async function buildRuntime(t) {
     }
   }
   await normalize('');
+  async function prune(relative) {
+    for (const dirent of await readdir(join(root, relative), { withFileTypes: true })) {
+      const path = relative ? `${relative}/${dirent.name}` : dirent.name;
+      if (dirent.isDirectory()) {
+        await prune(path);
+        if ((await readdir(join(root, ...path.split('/')))).length === 0) {
+          await rm(join(root, ...path.split('/')), { recursive: true });
+        }
+      }
+    }
+  }
+  await prune('');
   entries.sort((a, b) => (a.path < b.path ? -1 : 1));
   const bytes = manifestBytes(entries);
   writeFileSync(join(root, 'runtime-manifest.json'), bytes, { mode: 0o600 });

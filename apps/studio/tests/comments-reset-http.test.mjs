@@ -49,7 +49,8 @@ test('after a human pause agent new/load/demo/undo/redo reject 409 atomically an
   const prepared = await post('/api/commands', { commands: [stroke([[10, 10], [400, 400]])],
     immediate: true, ...(await context()) });
   assert.equal(prepared.status, 200, 'the observed-context setup batch commits');
-  const paused = await post('/api/control', { action: 'pause', source: 'human' });
+  const paused = await post('/api/control', { action: 'pause', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration });
   assert.equal(paused.status, 200);
   await post('/api/comments/poll', { since: null });
   const before = await state();
@@ -77,7 +78,8 @@ test('after a human pause agent new/load/demo/undo/redo reject 409 atomically an
 });
 
 test('wrapped human load and human demo are permitted, land paused, and clear the heartbeat', async () => {
-  const demo = await post('/api/demo', { source: 'human' });
+  const demo = await post('/api/demo', { source: 'human',
+    expectedDocGeneration: (await state()).docGeneration });
   assert.equal(demo.status, 200);
   assert.equal(demo.data.playback.status, 'paused');
   assert.ok(demo.data.playback.remaining > 0, 'the demo stages its landscape queue');
@@ -85,7 +87,8 @@ test('wrapped human load and human demo are permitted, land paused, and clear th
   assert.equal(demo.data.heartbeat.lastSeenAt, null, 'a successful demo rotates the generation and clears the heartbeat');
   const generation = demo.data.docGeneration;
   const saved = (await json({ path: '/api/project' })).data;
-  const loaded = await post('/api/project', { project: saved, source: 'human' });
+  const loaded = await post('/api/project', { project: saved, source: 'human',
+    expectedDocGeneration: demo.data.docGeneration });
   assert.equal(loaded.status, 200);
   assert.equal(loaded.data.playback.status, 'paused');
   assert.equal(loaded.data.requiresGrant, true);
@@ -93,7 +96,8 @@ test('wrapped human load and human demo are permitted, land paused, and clear th
   assert.equal(loaded.data.controlEpoch, 0);
   assert.notEqual(loaded.data.docGeneration, generation);
   assert.equal(loaded.data.heartbeat.lastSeenAt, null);
-  const broken = await post('/api/project', { project: { format: 'nope' }, source: 'human' });
+  const broken = await post('/api/project', { project: { format: 'nope' }, source: 'human',
+    expectedDocGeneration: loaded.data.docGeneration });
   assert.equal(broken.status, 400, 'a trusted wrapper still validates the project');
   const settled = await state();
   assert.equal(settled.revision, loaded.data.revision, 'malformed imports mutate nothing');
@@ -101,11 +105,14 @@ test('wrapped human load and human demo are permitted, land paused, and clear th
 });
 
 test('an active grant authorizes the agent reset over HTTP and spent grants go stale', async () => {
-  assert.equal((await post('/api/control', { action: 'new', source: 'human' })).status, 200);
+  assert.equal((await post('/api/control', { action: 'new', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration })).status, 200);
   assert.equal((await post('/api/commands', { commands: [stroke([[10, 10], [400, 400]])],
     immediate: true, ...(await context()) })).status, 200);
-  assert.equal((await post('/api/control', { action: 'pause', source: 'human' })).status, 200);
-  const resumed = await post('/api/control', { action: 'resume', source: 'human' });
+  assert.equal((await post('/api/control', { action: 'pause', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration })).status, 200);
+  const resumed = await post('/api/control', { action: 'resume', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration });
   const grant = resumed.data.activeGrant;
   assert.ok(grant && grant.grantToken, 'human resume issues a continuation grant');
   const reset = await post('/api/control', { action: 'new',

@@ -1,10 +1,41 @@
 // Studio HTTP client communicating with local loopback server
 
+import { snapshotProblem, projectProblem, stateReadExpect, protocolError } from './response.mjs';
+
+const DEFAULT_TIMEOUT_MS = 10000;
+const OFFLINE_MESSAGE = 'Studio server unreachable. Check connection.';
+
+function normalizeTimeoutMs(value) {
+  if (value === undefined) return DEFAULT_TIMEOUT_MS;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    throw new TypeError('timeoutMs must be a positive finite number');
+  }
+  return value;
+}
+
+function requireGeneration(expectedDocGeneration) {
+  if (typeof expectedDocGeneration !== 'string' || !expectedDocGeneration) {
+    throw Object.assign(new TypeError('expectedDocGeneration must be a nonempty string'), { code: 'INVALID_INPUT' });
+  }
+  return expectedDocGeneration;
+}
+
+function errorBodyMessage(data, text, response) {
+  if (typeof data === 'object' && data !== null && !Array.isArray(data) && typeof data.error === 'string' && data.error) {
+    return data.error;
+  }
+  if (data === undefined && text) return text;
+  return `HTTP ${response.status} ${response.statusText}`;
+}
+
 export class StudioApi {
-  constructor({ onOfflineChange, onError, onReconnect } = {}) {
+  constructor({ onOfflineChange, onError, onReconnect, timeoutMs } = {}) {
     this.onOfflineChange = onOfflineChange || (() => {});
     this.onError = onError || (() => {});
     this.onReconnect = onReconnect || (() => {});
+    this.timeoutMs = normalizeTimeoutMs(timeoutMs);
+    this.nextConnectionIssue = 1;
+    this.appliedConnectionIssue = 0;
     this.isOffline = false;
   }
 
@@ -22,42 +53,70 @@ export class StudioApi {
     }
   }
 
-  async request(path, options = {}) {
+  async request(path, { signal = null, expect = null, ...options } = {}) {
+    const issue = this.nextConnectionIssue++;
+    const applyConnection = (offline, error = null) => {
+      if (issue < this.appliedConnectionIssue) return;
+      this.appliedConnectionIssue = issue;
+      this.setOffline(offline, error);
+    };
+    const reserveConnection = () => {
+      this.appliedConnectionIssue = Math.max(this.appliedConnectionIssue, issue);
+    };
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10000);
+    let timedOut = false;
+    let callerCancelled = false;
+    const onCallerAbort = () => {
+      callerCancelled = true;
+      controller.abort();
+    };
+    if (signal) {
+      if (signal.aborted) onCallerAbort();
+      else signal.addEventListener('abort', onCallerAbort, { once: true });
+    }
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, this.timeoutMs);
     try {
-      const response = await fetch(path, {
-        signal: controller.signal,
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-        },
-      });
-      clearTimeout(timer);
-      this.setOffline(false);
+      const response = await fetch(path, { ...options, signal: controller.signal });
       const text = await response.text();
       let data;
       try {
         data = JSON.parse(text);
       } catch {
-        data = { error: text || 'Invalid JSON response' };
+        data = undefined;
       }
       if (!response.ok) {
-        const message = data.error || `HTTP ${response.status} ${response.statusText}`;
-        const error = new Error(message);
+        const error = new Error(errorBodyMessage(data, text, response));
         error.status = response.status;
+        applyConnection(false);
         throw error;
       }
+      if (data === undefined) {
+        reserveConnection();
+        throw protocolError(text ? 'Malformed JSON in successful response' : 'Empty response body');
+      }
+      if (expect) {
+        const problem = expect(data);
+        if (problem) {
+          reserveConnection();
+          throw protocolError(`Invalid response from ${path}: ${problem}`);
+        }
+      }
+      applyConnection(false);
       return data;
     } catch (error) {
-      clearTimeout(timer);
-      const isNetError = error.name === 'AbortError' || error.name === 'TypeError';
-      if (isNetError) {
-        this.setOffline(true, 'Studio server unreachable. Check connection.');
+      if (callerCancelled) throw error;
+      if (timedOut || error.name === 'TypeError') {
+        applyConnection(true, OFFLINE_MESSAGE);
       } else {
         this.onError(error.message);
       }
       throw error;
+    } finally {
+      clearTimeout(timer);
+      if (signal) signal.removeEventListener('abort', onCallerAbort);
     }
   }
 
@@ -66,23 +125,31 @@ export class StudioApi {
     if (sinceRevision !== null && sinceRevision >= 0 && instanceId) {
       query = `?since=${sinceRevision}&instanceId=${encodeURIComponent(instanceId)}`;
     }
-    return await this.request(`/api/state${query}`);
+    return await this.request(`/api/state${query}`, { expect: stateReadExpect(query !== '') });
   }
 
-  async sendCommands(commands, { replace = false, play = true, immediate = false } = {}) {
+  async sendCommands(commands, { expectedDocGeneration, replace = false, play = true, immediate = false } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/commands', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands, replace, play, immediate, source: 'human' }),
+      body: JSON.stringify({ commands, replace, play, immediate, source: 'human', expectedDocGeneration }),
     });
   }
 
-  async sendControl(action, speed = null) {
-    const payload = { action, source: 'human' };
-    if (action === 'speed' && speed !== null) {
+  async sendControl(action, context = {}) {
+    if (typeof context !== 'object' || context === null || Array.isArray(context)) {
+      throw Object.assign(new TypeError('sendControl expects a {expectedDocGeneration, speed} options object'), { code: 'INVALID_INPUT' });
+    }
+    const { expectedDocGeneration, speed } = context;
+    requireGeneration(expectedDocGeneration);
+    const payload = { action, source: 'human', expectedDocGeneration };
+    if (action === 'speed' && speed !== undefined) {
       payload.speed = Number(speed);
     }
     return await this.request('/api/control', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -91,6 +158,7 @@ export class StudioApi {
 
   async createComment({ requestId, text, rect, continuePlayback, expectedDocGeneration, expectedArtRevision }) {
     return await this.request('/api/comments', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -106,6 +174,7 @@ export class StudioApi {
 
   async resolveComment({ id, reopen, expectedDocGeneration, expectedSeq }) {
     return await this.request('/api/comments/resolve', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, reopen, expectedDocGeneration, expectedSeq }),
@@ -113,22 +182,26 @@ export class StudioApi {
   }
 
   async fetchProject() {
-    return await this.request('/api/project');
+    return await this.request('/api/project', { expect: projectProblem });
   }
 
-  async loadProject(projectData) {
+  async loadProject(projectData, { expectedDocGeneration } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/project', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project: projectData, source: 'human' }),
+      body: JSON.stringify({ project: projectData, source: 'human', expectedDocGeneration }),
     });
   }
 
-  async loadDemo() {
+  async loadDemo({ expectedDocGeneration } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/demo', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'human' }),
+      body: JSON.stringify({ source: 'human', expectedDocGeneration }),
     });
   }
 }
