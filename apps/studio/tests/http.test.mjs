@@ -45,11 +45,10 @@ const currentContext = async () => {
     grantToken: state.activeGrant?.grantToken };
 };
 
-test('root and removed UI assets return JSON 404 while retained modules serve', async () => {
+test('root serves the rebuilt shell and static policy holds', async () => {
   const rootResponse = await request({ path: '/' });
-  assert.equal(rootResponse.status, 404, 'the browser shell was removed; root has no HTML fallback');
-  assert.equal(rootResponse.headers['content-type'], 'application/json');
-  assert.deepEqual(JSON.parse(rootResponse.text), { error: 'Not found' });
+  assert.equal(rootResponse.status, 200, 'the rebuilt UI serves from the root');
+  assert.match(rootResponse.headers['content-type'], /^text\/html/);
   const csp = rootResponse.headers['content-security-policy'];
   for (const directive of ["default-src 'self'", "script-src 'self'", "object-src 'none'",
     "base-uri 'none'", "frame-ancestors 'none'", "form-action 'self'"]) {
@@ -58,14 +57,26 @@ test('root and removed UI assets return JSON 404 while retained modules serve', 
   assert.equal(rootResponse.headers['x-content-type-options'], 'nosniff');
   assert.equal(rootResponse.headers['referrer-policy'], 'no-referrer');
   assert.equal(rootResponse.headers['cache-control'], 'no-store');
-  for (const path of ['/public/index.html', '/public/base.css', '/public/layout.css', '/public/tools.css',
-    '/src/studio/index.mjs', '/src/studio/tools-ui.mjs', '/src/studio/layers-ui.mjs',
+  const entrypoint = await request({ path: '/public/index.html' });
+  assert.equal(entrypoint.status, 200, 'the explicit entrypoint serves the same shell');
+  assert.match(entrypoint.headers['content-type'], /^text\/html/);
+  for (const path of ['/public/base.css', '/public/layout.css', '/public/tools.css',
+    '/src/studio/tools-ui.mjs', '/src/studio/layers-ui.mjs',
     '/src/studio/comments/comments-ui.mjs']) {
     const removed = await request({ path });
     assert.equal(removed.status, 404, `${path} was removed with the UI and must not be served`);
     assert.equal(removed.headers['content-type'], 'application/json');
     assert.deepEqual(JSON.parse(removed.text), { error: 'Not found' });
   }
+  for (const path of ['/public/tokens.css', '/public/workspace.css', '/public/controls.css',
+    '/public/layers.css', '/public/inspector.css', '/public/stage.css', '/public/feedback.css']) {
+    const stylesheet = await request({ path });
+    assert.equal(stylesheet.status, 200, `${path} is an allowed UI stylesheet`);
+    assert.match(stylesheet.headers['content-type'], /^text\/css/);
+  }
+  const entryModule = await request({ path: '/src/studio/index.mjs' });
+  assert.equal(entryModule.status, 200, 'the rebuilt UI entrypoint module serves');
+  assert.match(entryModule.headers['content-type'], /^text\/javascript/);
   const retained = await request({ path: '/src/studio/api.mjs' });
   assert.equal(retained.status, 200, 'retained studio logic modules still serve');
   assert.match(retained.headers['content-type'], /^text\/javascript/);
@@ -143,7 +154,8 @@ test('valid commands commit immediately, comments pause, and projects roundtrip'
   assert.equal(saved.version, 2);
   assert.equal(saved.commands.length, 2);
   assert.equal(saved.comments.length, 1);
-  const reloaded = await post('/api/project', { project: saved, source: 'human' });
+  const reloaded = await post('/api/project', { project: saved, source: 'human',
+    expectedDocGeneration: submitted.data.docGeneration });
   assert.equal(reloaded.status, 200);
   assert.deepEqual(reloaded.data.document, submitted.data.document, 'roundtrip preserves the art');
   assert.deepEqual(reloaded.data.comments.map(item => item.text), ['thicken the trunk here']);
@@ -172,7 +184,8 @@ test('wrong instanceId at the same revision still returns full state', async () 
 
 test('revision advances across mutations while instanceId stays stable', async () => {
   const first = (await json({ path: '/api/state' })).data;
-  await post('/api/commands', { commands: [stroke([[5, 5]])], immediate: true, source: 'human' });
+  await post('/api/commands', { commands: [stroke([[5, 5]])], immediate: true, source: 'human',
+    expectedDocGeneration: first.docGeneration });
   const second = (await json({ path: '/api/state' })).data;
   assert.ok(second.revision > first.revision, 'revision reflects new art');
   assert.equal(second.instanceId, first.instanceId, 'instance survives within one server');

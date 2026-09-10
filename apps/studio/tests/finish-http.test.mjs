@@ -43,10 +43,11 @@ const stroke = (points) => ({ type: 'stroke', layer: 'paint', color: '#253d38',
 
 test('human finish over HTTP completes the queue atomically and revokes grants', async () => {
   const submitted = await post('/api/commands', { commands: [stroke([[5, 5], [15, 15]]), stroke([[25, 25], [35, 35]])],
-    play: false, source: 'human' });
+    play: false, source: 'human', expectedDocGeneration: (await state()).docGeneration });
   assert.equal(submitted.status, 200);
   const before = await state();
-  const response = await post('/api/control', { action: 'finish', source: 'human' });
+  const response = await post('/api/control', { action: 'finish', source: 'human',
+    expectedDocGeneration: before.docGeneration });
   assert.equal(response.status, 200);
   const after = await state();
   assert.equal(after.playback.status, 'paused');
@@ -58,9 +59,11 @@ test('human finish over HTTP completes the queue atomically and revokes grants',
 });
 
 test('guarded agent finish with a current execution grant succeeds', async () => {
-  const queued = await post('/api/commands', { commands: [stroke([[45, 45], [55, 55]])], play: false, source: 'human' });
+  const queued = await post('/api/commands', { commands: [stroke([[45, 45], [55, 55]])], play: false,
+    source: 'human', expectedDocGeneration: (await state()).docGeneration });
   assert.equal(queued.status, 200);
-  const resumed = await post('/api/control', { action: 'resume', source: 'human' });
+  const resumed = await post('/api/control', { action: 'resume', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration });
   assert.equal(resumed.status, 200);
   const snapshot = await state();
   const response = await post('/api/control', { action: 'finish',
@@ -74,10 +77,12 @@ test('guarded agent finish with a current execution grant succeeds', async () =>
 });
 
 test('agent finish with a stale epoch is rejected with 409 and keeps the queue', async () => {
-  const queued = await post('/api/commands', { commands: [stroke([[65, 65], [75, 75]])], play: false, source: 'human' });
+  const queued = await post('/api/commands', { commands: [stroke([[65, 65], [75, 75]])], play: false,
+    source: 'human', expectedDocGeneration: (await state()).docGeneration });
   assert.equal(queued.status, 200);
   const stale = await state();
-  const paused = await post('/api/control', { action: 'pause', source: 'human' });
+  const paused = await post('/api/control', { action: 'pause', source: 'human',
+    expectedDocGeneration: stale.docGeneration });
   assert.equal(paused.status, 200);
   const rejected = await post('/api/control', { action: 'finish',
     expectedDocGeneration: stale.docGeneration, epoch: stale.controlEpoch,
@@ -88,10 +93,12 @@ test('agent finish with a stale epoch is rejected with 409 and keeps the queue',
 });
 
 test('human finish on an empty pending queue is a no-op', async () => {
-  const drained = await post('/api/control', { action: 'finish', source: 'human' });
+  const drained = await post('/api/control', { action: 'finish', source: 'human',
+    expectedDocGeneration: (await state()).docGeneration });
   assert.equal(drained.status, 200);
   const before = await state();
-  const response = await post('/api/control', { action: 'finish', source: 'human' });
+  const response = await post('/api/control', { action: 'finish', source: 'human',
+    expectedDocGeneration: before.docGeneration });
   assert.equal(response.status, 200);
   const after = await state();
   assert.equal(after.revision, before.revision, 'empty finish mutates nothing');

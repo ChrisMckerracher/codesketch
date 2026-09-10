@@ -55,8 +55,9 @@ describe('transport lifecycle integration', () => {
     assert.equal((await request(port, 'GET', '/api/lifecycle/status', { host })).status, 404);
     assert.equal((await request(port, 'POST', '/api/lifecycle/stop', jsonHeaders(host), '{}')).status, 404);
     assert.throws(() => studio.markReady(), /managed/, 'markReady is managed-only');
+    const snapshot = await (await fetch(`http://127.0.0.1:${port}/api/state`)).json();
     const paused = await request(port, 'POST', '/api/control', jsonHeaders(host),
-      JSON.stringify({ action: 'pause', source: 'human' }));
+      JSON.stringify({ action: 'pause', source: 'human', expectedDocGeneration: snapshot.docGeneration }));
     assert.equal(paused.status, 200, 'ordinary behavior is ready without markReady');
     await studio.shutdown();
     assert.equal(studio.server.listening, false, 'shutdown resolves completed closure');
@@ -120,14 +121,14 @@ describe('transport lifecycle integration', () => {
       { type: 'stroke', points: [[0, 0], [100, 0]] }], immediate: true, ...(await context()) }));
     await request(port, 'POST', '/api/commands', jsonHeaders(host), JSON.stringify({ commands: [
       { type: 'stroke', points: [[5, 5], [60, 60]] }, { type: 'fill', color: '#112233' }],
-      replace: false, play: false, source: 'human' }));
+      replace: false, play: false, source: 'human', ...(await context()) }));
     await request(port, 'POST', '/api/control', jsonHeaders(host),
-      JSON.stringify({ action: 'speed', speed: 0.25, source: 'human' }));
+      JSON.stringify({ action: 'speed', speed: 0.25, source: 'human', ...(await context()) }));
     await request(port, 'POST', '/api/control', jsonHeaders(host),
-      JSON.stringify({ action: 'resume', source: 'human' }));
+      JSON.stringify({ action: 'resume', source: 'human', ...(await context()) }));
     session.tick(1);
     await request(port, 'POST', '/api/control', jsonHeaders(host),
-      JSON.stringify({ action: 'pause', source: 'human' }));
+      JSON.stringify({ action: 'pause', source: 'human', ...(await context()) }));
     const progress = session.active.progress;
     assert.ok(progress > 0 && progress < 1, 'the session holds partial preview');
     const stopped = await stopStudio(port, session);
@@ -219,8 +220,10 @@ describe('transport lifecycle integration', () => {
     const port = studio.server.address().port;
     const host = `127.0.0.1:${port}`;
     const cap = { 'x-codesketch-capability': capability };
+    const initial = await request(port, 'GET', '/api/state').then(r => r.body);
     await request(port, 'POST', '/api/commands', jsonHeaders(host), JSON.stringify({
-      commands: [{ type: 'stroke', points: [[0, 0], [10, 10]] }], replace: false, play: false, source: 'human' }));
+      commands: [{ type: 'stroke', points: [[0, 0], [10, 10]] }], replace: false, play: false,
+      source: 'human', expectedDocGeneration: initial.docGeneration }));
     await chmod(dir, 0o555);
     const failed = await stopStudio(port, studio.session);
     assert.equal(failed.status, 500);
@@ -229,8 +232,9 @@ describe('transport lifecycle integration', () => {
     assert.equal(status.body.state, 'running', 'a failed attempt clears the stopping gate');
     assert.equal(studio.session.status, 'paused', 'the session stays paused');
     await chmod(dir, 0o700);
+    const beforeResume = await request(port, 'GET', '/api/state').then(r => r.body);
     const resumed = await request(port, 'POST', '/api/control', jsonHeaders(host),
-      JSON.stringify({ action: 'resume', source: 'human' }));
+      JSON.stringify({ action: 'resume', source: 'human', expectedDocGeneration: beforeResume.docGeneration }));
     assert.equal(resumed.status, 200, 'the live studio resumes once storage is writable again');
     assert.equal(studio.session.status, 'playing');
     studio.session.control('pause', undefined, { source: 'human' });
