@@ -48,7 +48,10 @@ var RendererStroke string
 //go:embed src/painting/rendering/index.mjs
 //go:embed src/painting/rendering/stroke.mjs
 //go:embed src/studio/api.mjs
+//go:embed src/studio/application/actions.mjs
+//go:embed src/studio/application/index.mjs
 //go:embed src/studio/application/local.mjs
+//go:embed src/studio/application/mutations.mjs
 //go:embed src/studio/comments/geometry.mjs
 //go:embed src/studio/comments/handshake.mjs
 //go:embed src/studio/comments/index.mjs
@@ -59,6 +62,7 @@ var RendererStroke string
 //go:embed src/studio/gesture/index.mjs
 //go:embed src/studio/gesture/overlay.mjs
 //go:embed src/studio/header/index.mjs
+//go:embed src/studio/index.mjs
 //go:embed src/studio/inspector/document-context.mjs
 //go:embed src/studio/inspector/dom.mjs
 //go:embed src/studio/inspector/index.mjs
