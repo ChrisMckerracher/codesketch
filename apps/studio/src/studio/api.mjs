@@ -15,7 +15,7 @@ function normalizeTimeoutMs(value) {
 
 function requireGeneration(expectedDocGeneration) {
   if (typeof expectedDocGeneration !== 'string' || !expectedDocGeneration) {
-    throw new TypeError('expectedDocGeneration must be a nonempty string');
+    throw Object.assign(new TypeError('expectedDocGeneration must be a nonempty string'), { code: 'INVALID_INPUT' });
   }
   return expectedDocGeneration;
 }
@@ -140,7 +140,7 @@ export class StudioApi {
 
   async sendControl(action, context = {}) {
     if (typeof context !== 'object' || context === null || Array.isArray(context)) {
-      throw new TypeError('sendControl expects a {expectedDocGeneration, speed} options object');
+      throw Object.assign(new TypeError('sendControl expects a {expectedDocGeneration, speed} options object'), { code: 'INVALID_INPUT' });
     }
     const { expectedDocGeneration, speed } = context;
     requireGeneration(expectedDocGeneration);
