@@ -28,14 +28,6 @@ var RendererStroke string
 // descendant and each public static asset, through explicit reviewed embed
 // paths only. Wildcard and directory embeds are forbidden.
 //
-//go:embed public/base.css
-//go:embed public/comments.css
-//go:embed public/dialogs.css
-//go:embed public/index.html
-//go:embed public/inspector.css
-//go:embed public/layout.css
-//go:embed public/responsive.css
-//go:embed public/tools.css
 //go:embed src/compositions/index.mjs
 //go:embed src/direction/feedback/grant.mjs
 //go:embed src/direction/feedback/index.mjs
@@ -56,26 +48,11 @@ var RendererStroke string
 //go:embed src/painting/rendering/index.mjs
 //go:embed src/painting/rendering/stroke.mjs
 //go:embed src/studio/api.mjs
-//go:embed src/studio/canvas-controller.mjs
-//go:embed src/studio/comments/comment-shortcuts.mjs
-//go:embed src/studio/comments/comments-list.mjs
-//go:embed src/studio/comments/comments-ui.mjs
-//go:embed src/studio/comments/composer.mjs
 //go:embed src/studio/comments/geometry.mjs
 //go:embed src/studio/comments/handshake.mjs
 //go:embed src/studio/comments/index.mjs
-//go:embed src/studio/comments/listening-status.mjs
-//go:embed src/studio/comments/overlay.mjs
-//go:embed src/studio/comments/selection.mjs
-//go:embed src/studio/dialogs.mjs
-//go:embed src/studio/icons.mjs
-//go:embed src/studio/index.mjs
-//go:embed src/studio/layer-opacity.mjs
-//go:embed src/studio/layers-ui.mjs
-//go:embed src/studio/playback-ui.mjs
 //go:embed src/studio/renderer.mjs
 //go:embed src/studio/state.mjs
-//go:embed src/studio/tools-ui.mjs
 //go:embed src/transport/comments.mjs
 //go:embed src/transport/http.mjs
 //go:embed src/transport/index.mjs

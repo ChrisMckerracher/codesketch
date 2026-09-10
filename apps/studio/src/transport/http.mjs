@@ -36,13 +36,19 @@ export function trusted(request, port) {
 }
 
 export async function serveStatic(response, pathname, root) {
-  const path = pathname === '/' ? '/public/index.html' : decodeURIComponent(pathname);
-  if (!/^\/(public\/|src\/(studio|painting)\/)/.test(path) || path.includes('\0')) return send(response, 404, { error: 'Not found' });
+  const path = decodeURIComponent(pathname);
+  if (!/^\/src\/(studio|painting)\//.test(path) || path.includes('\0')) return send(response, 404, { error: 'Not found' });
   const filename = resolve(root, `.${path}`);
-  const allowed = ['public', 'src/studio', 'src/painting'].map(folder => resolve(root, folder) + sep);
-  const actual = await realpath(filename);
+  const allowed = ['src/studio', 'src/painting'].map(folder => resolve(root, folder) + sep);
+  let actual;
+  try {
+    actual = await realpath(filename);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return send(response, 404, { error: 'Not found' });
+    throw error;
+  }
   if (!allowed.some(folder => actual.startsWith(folder))) return send(response, 404, { error: 'Not found' });
-  const mime = { '.html': 'text/html', '.css': 'text/css', '.mjs': 'text/javascript' }[extname(actual)];
+  const mime = { '.mjs': 'text/javascript' }[extname(actual)];
   if (!mime) return send(response, 404, { error: 'Not found' });
   const data = await readFile(actual);
   response.writeHead(200, { ...headers, 'Content-Type': `${mime}; charset=utf-8` });

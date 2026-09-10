@@ -12,6 +12,15 @@ const STUDIO_ROOT = resolve(ROOT, 'apps', 'studio');
 const SCENARIOS = ['studio.mjs', 'layers-keyboard.mjs', 'layers-opacity.mjs', 'comments.mjs', 'comments-races.mjs', 'finish.mjs'];
 const ARTIFACTS_DIR = resolve(ROOT, 'artifacts/browser-check');
 
+// The studio UI was removed for the from-zero reconstruction: browser
+// scenarios are suspended coverage until the rebuilt UI lands. Exit before
+// any studio server or browser runtime starts; the runner and scenario
+// files below are kept intact for that future revision.
+console.error('Browser check is suspended: the studio UI was removed for reconstruction.');
+console.error('Scenario files remain in apps/studio/tests/browser as suspended coverage');
+console.error('and will run again once the rebuilt UI lands. Do not report UI green.');
+process.exit(1);
+
 // 1. Verify playwright-cli availability
 const checkCli = spawnSync('which', ['playwright-cli'], { encoding: 'utf8' });
 if (checkCli.status !== 0) {

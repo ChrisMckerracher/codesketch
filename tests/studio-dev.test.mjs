@@ -98,8 +98,9 @@ test('launcher serves an in-memory studio on an ephemeral port and exits cleanly
     const port = Number(match[1]);
     assert.ok(port > 0 && port <= 65535, `expected an actual ephemeral port, got ${port}`);
     const page = await get(port, '/');
-    assert.equal(page.status, 200);
-    assert.match(page.type, /text\/html/);
+    assert.equal(page.status, 404, 'the browser shell was removed; root has no HTML fallback');
+    assert.equal(page.type, 'application/json');
+    assert.deepEqual(JSON.parse(page.body), { error: 'Not found' });
     const state = await get(port, '/api/state');
     assert.equal(state.status, 200);
     const snapshot = JSON.parse(state.body);

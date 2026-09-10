@@ -80,7 +80,7 @@ func TestEnsureRuntimeCancelledContextLeavesNoTemporary(t *testing.T) {
 
 // extractionCancelContext is a test-only wrapper that deterministically
 // cancels itself the first time production code consults the context after
-// the extractor's own partial asset exists: public/base.css is the first
+// the extractor's own partial asset exists: src/compositions/index.mjs is the first
 // inventory file written inside the sibling temporary directory. There is no
 // goroutine, sleep or production hook: Err() simply observes the real
 // filesystem whenever production checks it.
@@ -97,7 +97,7 @@ func (c *extractionCancelContext) Err() error {
 			if !strings.HasPrefix(entry.Name(), ".extract-") {
 				continue
 			}
-			if _, err := os.Stat(filepath.Join(c.runtimeRoot, entry.Name(), "public", "base.css")); err == nil {
+			if _, err := os.Stat(filepath.Join(c.runtimeRoot, entry.Name(), "src", "compositions", "index.mjs")); err == nil {
 				c.cancels.Do(c.cancel)
 				break
 			}

@@ -49,7 +49,7 @@ func TestEnsureRuntimeExtractsVerifiedTree(t *testing.T) {
 			t.Errorf("%s: extracted files must be private regular files", entry.Path)
 		}
 	}
-	for _, dir := range []string{filepath.Join(root, "public"), filepath.Join(root, "src"), filepath.Join(cache, runtimeDirName)} {
+	for _, dir := range []string{filepath.Join(root, "src", "compositions"), filepath.Join(root, "src"), filepath.Join(cache, runtimeDirName)} {
 		info, err := os.Lstat(dir)
 		if err != nil {
 			t.Fatal(err)

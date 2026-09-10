@@ -45,17 +45,30 @@ const currentContext = async () => {
     grantToken: state.activeGrant?.grantToken };
 };
 
-test('serves the studio HTML with a strict CSP and hardening headers', async () => {
-  const response = await request({ path: '/' });
-  assert.equal(response.status, 200);
-  assert.match(response.headers['content-type'], /^text\/html/);
-  const csp = response.headers['content-security-policy'];
+test('root and removed UI assets return JSON 404 while retained modules serve', async () => {
+  const rootResponse = await request({ path: '/' });
+  assert.equal(rootResponse.status, 404, 'the browser shell was removed; root has no HTML fallback');
+  assert.equal(rootResponse.headers['content-type'], 'application/json');
+  assert.deepEqual(JSON.parse(rootResponse.text), { error: 'Not found' });
+  const csp = rootResponse.headers['content-security-policy'];
   for (const directive of ["default-src 'self'", "script-src 'self'", "object-src 'none'",
     "base-uri 'none'", "frame-ancestors 'none'", "form-action 'self'"]) {
     assert.ok(csp.includes(directive), `CSP must include ${directive}`);
   }
-  assert.equal(response.headers['x-content-type-options'], 'nosniff');
-  assert.equal(response.headers['referrer-policy'], 'no-referrer');
+  assert.equal(rootResponse.headers['x-content-type-options'], 'nosniff');
+  assert.equal(rootResponse.headers['referrer-policy'], 'no-referrer');
+  assert.equal(rootResponse.headers['cache-control'], 'no-store');
+  for (const path of ['/public/index.html', '/public/base.css', '/public/layout.css', '/public/tools.css',
+    '/src/studio/index.mjs', '/src/studio/tools-ui.mjs', '/src/studio/layers-ui.mjs',
+    '/src/studio/comments/comments-ui.mjs']) {
+    const removed = await request({ path });
+    assert.equal(removed.status, 404, `${path} was removed with the UI and must not be served`);
+    assert.equal(removed.headers['content-type'], 'application/json');
+    assert.deepEqual(JSON.parse(removed.text), { error: 'Not found' });
+  }
+  const retained = await request({ path: '/src/studio/api.mjs' });
+  assert.equal(retained.status, 200, 'retained studio logic modules still serve');
+  assert.match(retained.headers['content-type'], /^text\/javascript/);
 });
 
 test('blocks host rebinding, foreign origins, and cross-site fetch metadata', async () => {

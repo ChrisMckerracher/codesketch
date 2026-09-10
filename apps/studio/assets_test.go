@@ -1,22 +1,63 @@
 package studio
 
 import (
+	"errors"
 	"io/fs"
 	"strings"
 	"testing"
 )
 
-func TestRuntimeFSIncludesCanonicalRuntimeEntryPoints(t *testing.T) {
+func TestRuntimeFSIncludesRetainedLogicEntryPoints(t *testing.T) {
 	for _, path := range []string{
-		"public/index.html",
-		"src/transport/index.mjs",
-		"src/studio/index.mjs",
+		"src/compositions/index.mjs",
 		"src/direction/index.mjs",
+		"src/painting/index.mjs",
 		"src/painting/rendering/index.mjs",
 		"src/painting/rendering/stroke.mjs",
+		"src/studio/api.mjs",
+		"src/studio/state.mjs",
+		"src/studio/renderer.mjs",
+		"src/studio/comments/index.mjs",
+		"src/studio/comments/geometry.mjs",
+		"src/studio/comments/handshake.mjs",
+		"src/transport/index.mjs",
 	} {
 		if _, err := fs.Stat(RuntimeFS(), path); err != nil {
-			t.Errorf("RuntimeFS is missing canonical runtime file %s: %v", path, err)
+			t.Errorf("RuntimeFS is missing retained logic file %s: %v", path, err)
+		}
+	}
+}
+
+func TestRuntimeFSExcludesRemovedUI(t *testing.T) {
+	for _, path := range []string{
+		"public/base.css",
+		"public/comments.css",
+		"public/dialogs.css",
+		"public/index.html",
+		"public/inspector.css",
+		"public/layout.css",
+		"public/responsive.css",
+		"public/tools.css",
+		"src/studio/index.mjs",
+		"src/studio/icons.mjs",
+		"src/studio/dialogs.mjs",
+		"src/studio/tools-ui.mjs",
+		"src/studio/layers-ui.mjs",
+		"src/studio/playback-ui.mjs",
+		"src/studio/canvas-controller.mjs",
+		"src/studio/layer-opacity.mjs",
+		"src/studio/comments/comment-shortcuts.mjs",
+		"src/studio/comments/comments-list.mjs",
+		"src/studio/comments/comments-ui.mjs",
+		"src/studio/comments/composer.mjs",
+		"src/studio/comments/listening-status.mjs",
+		"src/studio/comments/overlay.mjs",
+		"src/studio/comments/selection.mjs",
+	} {
+		if _, err := fs.Stat(RuntimeFS(), path); err == nil {
+			t.Errorf("RuntimeFS still contains removed UI file %s", path)
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("statting removed UI file %s: %v", path, err)
 		}
 	}
 }
