@@ -82,6 +82,9 @@ export async function serveStatic(response, pathname, root) {
   if (path === '/' || path === '/public/index.html') {
     return servePublicFile(response, root, 'index.html', 'text/html');
   }
+  if (path === '/public/icon.svg') {
+    return servePublicFile(response, root, 'icon.svg', 'image/svg+xml');
+  }
   const stylesheet = /^\/public\/([a-z]+)\.css$/.exec(path);
   if (stylesheet && STYLESHEETS.has(stylesheet[1])) {
     return servePublicFile(response, root, `${stylesheet[1]}.css`, 'text/css');

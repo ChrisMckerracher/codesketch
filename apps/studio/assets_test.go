@@ -35,6 +35,7 @@ func TestRuntimeFSIncludesRetainedLogicEntryPoints(t *testing.T) {
 		"src/studio/tools/index.mjs",
 		"src/studio/viewport/index.mjs",
 		"public/index.html",
+		"public/icon.svg",
 		"public/tokens.css",
 	} {
 		if _, err := fs.Stat(RuntimeFS(), path); err != nil {
@@ -86,7 +87,8 @@ func TestRuntimeFSExcludesTestsToolingAndState(t *testing.T) {
 			}
 			return nil
 		}
-		if !strings.HasSuffix(path, ".mjs") && !strings.HasSuffix(path, ".css") && !strings.HasSuffix(path, ".html") {
+		if !strings.HasSuffix(path, ".mjs") && !strings.HasSuffix(path, ".css") &&
+			!strings.HasSuffix(path, ".html") && !strings.HasSuffix(path, ".svg") {
 			t.Errorf("RuntimeFS contains non-runtime file %s", path)
 		}
 		if strings.Contains(path, ".test.") || strings.Contains("/"+path, "/tests/") {

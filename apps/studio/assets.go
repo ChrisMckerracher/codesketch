@@ -100,6 +100,7 @@ var RendererStroke string
 //go:embed src/transport/server.mjs
 //go:embed public/controls.css
 //go:embed public/feedback.css
+//go:embed public/icon.svg
 //go:embed public/index.html
 //go:embed public/inspector.css
 //go:embed public/layers.css

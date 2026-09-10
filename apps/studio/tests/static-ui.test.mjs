@@ -40,6 +40,7 @@ test('root and public entrypoint serve the canonical shell with security headers
   assert.match(root.headers['content-type'], /^text\/html; charset=utf-8$/);
   assert.ok(root.text.includes('id="studio-app"'), 'root serves the canonical studio shell');
   assert.ok(root.text.includes('/src/studio/index.mjs'), 'shell links the studio entrypoint');
+  assert.ok(root.text.includes('href="/public/icon.svg"'), 'shell links the explicit SVG application icon');
   const entry = await studio.request('/public/index.html');
   assert.equal(entry.status, 200);
   assert.equal(entry.text, root.text, 'public/index.html is the same explicitly allowed file');
@@ -53,6 +54,18 @@ test('root and public entrypoint serve the canonical shell with security headers
   assert.equal(root.headers['referrer-policy'], 'no-referrer');
   assert.equal(root.headers['cache-control'], 'no-store');
   assert.equal(root.headers['cross-origin-resource-policy'], 'same-origin');
+});
+
+test('the application icon serves as the one explicit SVG with no favicon alias', async t => {
+  const studio = await startStudio(realRoot);
+  t.after(() => studio.close());
+  const icon = await studio.request('/public/icon.svg');
+  assert.equal(icon.status, 200);
+  assert.match(icon.headers['content-type'], /^image\/svg\+xml; charset=utf-8$/);
+  assert.ok(icon.text.startsWith('<svg'), 'the icon is a code-native SVG document');
+  assert.ok(icon.text.includes('#3b82f6') && icon.text.includes('#8b5cf6'),
+    'the icon carries the canonical blue-violet brand gradient');
+  assert.equal(icon.headers['x-content-type-options'], 'nosniff');
 });
 
 test('query strings are stripped from static request targets', async t => {
