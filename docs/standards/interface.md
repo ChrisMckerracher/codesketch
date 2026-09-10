@@ -35,6 +35,13 @@ authoritative pause and any pending review draft remain intact until the
 corresponding state transition resolves. A closed review returns synchronously
 through the local application route.
 
+Substantial UI work requires a user visual checkpoint. Before implementation
+begins, present a concrete mockup of the hierarchy and key user journey,
+request the user's critique, and iterate until the user gives explicit visual
+approval; only then delegate implementation. Automated checks and other agents
+never establish user design approval. When closing design or polish work,
+record technical verification and user visual acceptance separately.
+
 Inspect desktop and compact widths in light and dark appearance. Verify actual
 canvas pixels, status labels, keyboard focus, and pointer behavior. Keep the
 dependency-free browser implementation and the current-only contracts.

@@ -23,4 +23,9 @@ Port 4317 is the managed production default; development and tests use isolated 
 ## Verification
 
 From the repository root, run [`npm run verify`](../../package.json),
-[`npm run test:browser`](../../package.json), and relevant isolated Go checks from [`Makefile`](../../Makefile).
+[`npm run test:browser`](../../package.json) (the runner in
+[`tools/browser-check.mjs`](../../tools/browser-check.mjs) gives each of the
+eight registered browser scenarios a fresh ephemeral in-memory studio, a fresh
+short browser session, a parsed `success: true` result, and fresh download
+validation; `--only=<scenario,...>` runs a subset), and relevant isolated Go
+checks from [`Makefile`](../../Makefile).
