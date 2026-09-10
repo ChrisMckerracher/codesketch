@@ -141,4 +141,4 @@ Production release evidence recorded September 10, 2026. Current contracts are c
 | Production confirmation | Lead confirmed installed CLI status, process state with `ps`, and sole listener with `lsof`. Old source, data and backups remain preserved. New durable data is in `~/Library/Application Support/codesketch`; runtime data is in `~/Library/Caches/codesketch`. |
 | Accepted release self-tests | Passed 103 assertions in `verification/codesketch-release-selftest-accepted.log`. The preserved project had 1,636 commands, cursor 1,636, queue 0, and comments 0. |
 
-GitHub publication remains pending; public visibility is not yet claimed.
+GitHub publication verified: `gh repo view` reports the repository public at [github.com/ChrisMckerracher/codesketch](https://github.com/ChrisMckerracher/codesketch), and main source commit `469cd59` was pushed. A clean `--no-hardlinks` local clone of that committed tree passed `make build` with the offline policy gate (120 Go files and 229 resolved packages); log: `/tmp/codesketch-publication-clean-build.log`.
