@@ -13,7 +13,7 @@ html_content = '''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Codesketch Studio — 100% Exact Native Mockup</title>
+  <title>Codesketch Studio — Interactive Native Mockup</title>
   <style>
     * {
       margin: 0;
@@ -23,13 +23,12 @@ html_content = '''<!DOCTYPE html>
     body {
       background: #0B0F19;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
-      padding: 20px;
+      padding: 0;
     }
     .studio-container {
       position: relative;
@@ -44,6 +43,7 @@ html_content = '''<!DOCTYPE html>
       display: block;
       width: 1000px;
       height: 700px;
+      cursor: crosshair;
     }
     .interactive-layer {
       position: absolute;
@@ -60,9 +60,14 @@ html_content = '''<!DOCTYPE html>
       background: transparent;
       border: none;
       outline: none;
+      transition: background 0.15s ease;
     }
     .interactive-btn:hover {
-      background: rgba(13, 153, 255, 0.08);
+      background: rgba(2, 132, 199, 0.08);
+      border-radius: 3px;
+    }
+    .interactive-btn.primary-cta:hover {
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 3px;
     }
     #replyInput {
@@ -71,36 +76,21 @@ html_content = '''<!DOCTYPE html>
       left: 130px;
       width: 184px;
       height: 24px;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: transparent;
-      caret-color: #0284C7;
-      padding: 2px 8px;
-      pointer-events: auto;
-    }
-    .toast {
-      position: absolute;
-      bottom: 24px;
-      left: 370px;
-      background: #0F172A;
-      color: #FFFFFF;
-      border: 1px solid #334155;
-      padding: 8px 16px;
-      border-radius: 4px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 3px;
+      color: #0F172A;
       font-family: monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.2s ease;
-      pointer-events: none;
-      z-index: 100;
+      padding: 2px 8px;
+      outline: none;
+      pointer-events: auto;
+      text-transform: uppercase;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
+    #replyInput:focus {
+      border-color: #0284C7;
+      box-shadow: 0 0 0 1px #0284C7;
     }
   </style>
 </head>
@@ -110,133 +100,134 @@ html_content = '''<!DOCTYPE html>
     <canvas id="studioCanvas" width="1000" height="700"></canvas>
 
     <div class="interactive-layer" id="interactiveLayer">
-      <!-- Tool Buttons (x: 754..986, y: 70..98) -->
-      <button class="interactive-btn" id="btnToolInk" style="top: 70px; left: 754px; width: 58px; height: 28px;" title="Tool: Ink"></button>
-      <button class="interactive-btn" id="btnToolPencil" style="top: 70px; left: 814px; width: 58px; height: 28px;" title="Tool: Pencil"></button>
-      <button class="interactive-btn" id="btnToolMark" style="top: 70px; left: 874px; width: 58px; height: 28px;" title="Tool: Marker"></button>
-      <button class="interactive-btn" id="btnToolErase" style="top: 70px; left: 932px; width: 54px; height: 28px;" title="Tool: Eraser"></button>
+      <!-- Header Actions -->
+      <button class="interactive-btn" id="btnHeaderFb" style="top: 11px; left: 818px; width: 36px; height: 24px;" title="Toggle Feedback"></button>
+      <button class="interactive-btn primary-cta" id="btnHeaderSave" style="top: 11px; left: 872px; width: 62px; height: 24px;" title="Save Project"></button>
+      <button class="interactive-btn" id="btnHeaderCollapse" style="top: 11px; left: 958px; width: 30px; height: 24px;" title="Collapse Panel"></button>
+      <button class="interactive-btn" id="btnCollapsedStudio" style="display: none; top: 12px; left: 896px; width: 94px; height: 28px;" title="Expand Studio"></button>
 
-      <!-- Sliders Hotspots -->
-      <button class="interactive-btn" id="sliderSizeLess" style="top: 150px; left: 756px; width: 80px; height: 20px;" title="Decrease Size"></button>
-      <button class="interactive-btn" id="sliderSizeMore" style="top: 150px; left: 836px; width: 84px; height: 20px;" title="Increase Size"></button>
+      <!-- Tool Buttons (x: 760..985, y: 70..98) -->
+      <button class="interactive-btn" id="btnToolInk" style="top: 70px; left: 760px; width: 50px; height: 28px;" title="Tool: Ink"></button>
+      <button class="interactive-btn" id="btnToolPencil" style="top: 70px; left: 815px; width: 55px; height: 28px;" title="Tool: Pencil"></button>
+      <button class="interactive-btn" id="btnToolMark" style="top: 70px; left: 875px; width: 50px; height: 28px;" title="Tool: Marker"></button>
+      <button class="interactive-btn" id="btnToolErase" style="top: 70px; left: 930px; width: 55px; height: 28px;" title="Tool: Eraser"></button>
 
-      <button class="interactive-btn" id="sliderOpLess" style="top: 186px; left: 756px; width: 80px; height: 20px;" title="Decrease Opacity"></button>
-      <button class="interactive-btn" id="sliderOpMore" style="top: 186px; left: 836px; width: 84px; height: 20px;" title="Increase Opacity"></button>
+      <!-- Stroke Properties Cycle/Step Hotspots -->
+      <button class="interactive-btn" id="btnPropSize" style="top: 132px; left: 752px; width: 236px; height: 24px;" title="Cycle Brush Size"></button>
+      <button class="interactive-btn" id="btnPropOpacity" style="top: 166px; left: 752px; width: 236px; height: 24px;" title="Cycle Opacity"></button>
+      <button class="interactive-btn" id="btnPropSmoothing" style="top: 202px; left: 752px; width: 236px; height: 24px;" title="Cycle Smoothing"></button>
 
-      <button class="interactive-btn" id="sliderSmLess" style="top: 222px; left: 756px; width: 80px; height: 20px;" title="Decrease Smoothing"></button>
-      <button class="interactive-btn" id="sliderSmMore" style="top: 222px; left: 836px; width: 84px; height: 20px;" title="Increase Smoothing"></button>
+      <!-- Layers: Separate Row Select and Eye Visibility Toggle -->
+      <button class="interactive-btn" id="btnNewLayer" style="top: 294px; left: 932px; width: 56px; height: 24px;" title="Add New Layer"></button>
 
-      <!-- Layers (ly starts at 328, step 32) -->
-      <button class="interactive-btn" id="layer05" style="top: 324px; left: 752px; width: 236px; height: 28px;" title="Layer 05"></button>
-      <button class="interactive-btn" id="layer04" style="top: 356px; left: 752px; width: 236px; height: 28px;" title="Layer 04"></button>
-      <button class="interactive-btn" id="layer03" style="top: 388px; left: 752px; width: 236px; height: 28px;" title="Layer 03"></button>
-      <button class="interactive-btn" id="layer02" style="top: 420px; left: 752px; width: 236px; height: 28px;" title="Layer 02"></button>
-      <button class="interactive-btn" id="layer01" style="top: 452px; left: 752px; width: 236px; height: 28px;" title="Layer 01"></button>
-      <button class="interactive-btn" id="layer00" style="top: 484px; left: 752px; width: 236px; height: 28px;" title="Layer 00"></button>
+      <button class="interactive-btn" id="layerRow05" style="top: 324px; left: 752px; width: 208px; height: 28px;" title="Select 05 Highlights"></button>
+      <button class="interactive-btn" id="layerEye05" style="top: 324px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 05"></button>
 
-      <!-- Header actions -->
-      <button class="interactive-btn" id="btnHeaderFb" style="top: 11px; left: 826px; width: 48px; height: 26px;" title="Toggle Feedback"></button>
-      <button class="interactive-btn" id="btnHeaderExport" style="top: 11px; left: 880px; width: 72px; height: 26px;" title="Export PNG"></button>
-      <button class="interactive-btn" id="btnHeaderCollapse" style="top: 11px; left: 958px; width: 28px; height: 26px;" title="Collapse/Expand Panel"></button>
+      <button class="interactive-btn" id="layerRow04" style="top: 356px; left: 752px; width: 208px; height: 28px;" title="Select 04 Brush Shading"></button>
+      <button class="interactive-btn" id="layerEye04" style="top: 356px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 04"></button>
+
+      <button class="interactive-btn" id="layerRow03" style="top: 388px; left: 752px; width: 208px; height: 28px;" title="Select 03 Lineart"></button>
+      <button class="interactive-btn" id="layerEye03" style="top: 388px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 03"></button>
+
+      <button class="interactive-btn" id="layerRow02" style="top: 420px; left: 752px; width: 208px; height: 28px;" title="Select 02 Pencil Roughs"></button>
+      <button class="interactive-btn" id="layerEye02" style="top: 420px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 02"></button>
+
+      <button class="interactive-btn" id="layerRow01" style="top: 452px; left: 752px; width: 208px; height: 28px;" title="Select 01 Backdrop Wash"></button>
+      <button class="interactive-btn" id="layerEye01" style="top: 452px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 01"></button>
+
+      <button class="interactive-btn" id="layerRow00" style="top: 484px; left: 752px; width: 208px; height: 28px;" title="Select 00 Canvas Fill"></button>
+      <button class="interactive-btn" id="layerEye00" style="top: 484px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 00"></button>
 
       <!-- Canvas Comment Pin -->
       <button class="interactive-btn" id="btnCommentPin" style="top: 215px; left: 478px; width: 34px; height: 34px; border-radius: 50%;" title="Toggle Feedback Pin"></button>
 
-      <!-- Feedback Card Close & Submit -->
+      <!-- Feedback Card -->
       <div id="cardInteractiveGroup">
         <button class="interactive-btn" id="btnCloseCard" style="top: 42px; left: 436px; width: 22px; height: 20px;" title="Close Feedback Card"></button>
-        <input type="text" id="replyInput" value="" autocomplete="off" spellcheck="false" />
+        <input type="text" id="replyInput" placeholder="WRITE A REPLY..." autocomplete="off" spellcheck="false" />
         <button class="interactive-btn" id="btnSubmitResume" style="top: 202px; left: 322px; width: 128px; height: 24px;" title="Submit & Resume"></button>
       </div>
 
     </div>
-
-    <div class="toast" id="toast">Artwork exported!</div>
   </div>
 
   <script>
-    // 1. EXACT VECTOR GLYPH ENGINE
-    const GLYPHS = ''' + glyphs_json + ''';
-
     const canvas = document.getElementById('studioCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Drawing Primitives exactly matching Codesketch Engine
-    function draw_rect(x, y, w, h, color, opacity = 1.0) {
-      x = Math.max(0, Math.min(1000 - w, x));
-      y = Math.max(0, Math.min(700 - h, y));
-      w = Math.max(1, Math.min(1000 - x, w));
-      h = Math.max(1, Math.min(700 - y, h));
-      ctx.fillStyle = color;
-      ctx.globalAlpha = opacity;
-      ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
-      ctx.globalAlpha = 1.0;
-    }
+    const GLYPHS = ''' + glyphs_json + ''';
 
-    function draw_ellipse(x, y, w, h, color, opacity = 1.0) {
-      x = Math.max(0, Math.min(1000 - w, x));
-      y = Math.max(0, Math.min(700 - h, y));
-      w = Math.max(1, Math.min(1000 - x, w));
-      h = Math.max(1, Math.min(700 - y, h));
-      ctx.fillStyle = color;
+    function draw_rect(x, y, w, h, color, opacity = 1.0) {
+      ctx.save();
       ctx.globalAlpha = opacity;
-      ctx.beginPath();
-      ctx.ellipse(x + w/2, y + h/2, w/2, h/2, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
+      ctx.restore();
     }
 
     function draw_rounded_rect(x, y, w, h, r, color, opacity = 1.0) {
-      r = Math.min(r, Math.floor(w / 2), Math.floor(h / 2));
-      if (r <= 0) {
-        draw_rect(x, y, w, h, color, opacity);
-        return;
-      }
-      draw_rect(x + r, y, w - 2*r, h, color, opacity);
-      draw_rect(x, y + r, r, h - 2*r, color, opacity);
-      draw_rect(x + w - r, y + r, r, h - 2*r, color, opacity);
-      draw_ellipse(x, y, 2*r, 2*r, color, opacity);
-      draw_ellipse(x + w - 2*r, y, 2*r, 2*r, color, opacity);
-      draw_ellipse(x, y + h - 2*r, 2*r, 2*r, color, opacity);
-      draw_ellipse(x + w - 2*r, y + h - 2*r, 2*r, 2*r, color, opacity);
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h), r);
+      ctx.fill();
+      ctx.restore();
     }
 
-    function draw_stroke(pts, color = "#1E293B", size = 2, opacity = 1.0) {
-      if (!pts || pts.length === 0) return;
+    function draw_ellipse(cx, cy, rx, ry, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(Math.floor(cx), Math.floor(cy), Math.floor(rx/2), Math.floor(ry/2), 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function draw_stroke(points, color, size = 1, opacity = 1.0) {
+      if (points.length < 2) return;
+      ctx.save();
+      ctx.globalAlpha = opacity;
       ctx.strokeStyle = color;
       ctx.lineWidth = size;
-      ctx.globalAlpha = opacity;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.lineCap = 'butt';
+      ctx.lineJoin = 'miter';
       ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i][0], pts[i][1]);
-      }
-      if (pts.length === 1) {
-        ctx.lineTo(pts[0][0] + 0.1, pts[0][1] + 0.1);
+      ctx.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i][0] + 0.5, points[i][1] + 0.5);
       }
       ctx.stroke();
-      ctx.globalAlpha = 1.0;
+      ctx.restore();
     }
 
-    function draw_text(text, x, y, scale = 1.0, color = "#1E293B", size = 1, opacity = 1.0) {
-      let cur_x = x;
-      const char_w = 6 * scale;
-      const spacing = 2 * scale;
-      const upper = text.toUpperCase();
+    function draw_text(text, start_x, start_y, scale = 1.0, color = "#FFFFFF", size = 1, spacing = 2) {
+      const char_w = 5 * scale;
+      let cur_x = start_x;
       ctx.strokeStyle = color;
-      ctx.lineWidth = Math.min(1.0, size * 0.9);
-      ctx.globalAlpha = opacity;
-      ctx.lineCap = "butt";
-      ctx.lineJoin = "miter";
+      ctx.lineWidth = size;
+      ctx.lineCap = 'butt';
+      ctx.lineJoin = 'miter';
+      ctx.globalAlpha = 1.0;
 
-      for (let i = 0; i < upper.length; i++) {
-        const ch = upper[i];
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === ' ') {
+          cur_x += 4 * scale;
+          continue;
+        }
         if (GLYPHS[ch]) {
           const paths = GLYPHS[ch];
-          for (const path of paths) {
-            const pts = path.map(p => [Math.round(cur_x + p[0] * scale) + 0.5, Math.round(y + p[1] * scale) + 0.5]);
+          for (let p = 0; p < paths.length; p++) {
+            const path = paths[p];
+            const pts = [];
+            for (let k = 0; k < path.length; k++) {
+              pts.push([
+                Math.floor(cur_x + path[k][0] * scale) + 0.5,
+                Math.floor(start_y + path[k][1] * scale) + 0.5
+              ]);
+            }
             if (pts.length === 1) {
               ctx.fillStyle = color;
               ctx.fillRect(Math.floor(pts[0][0]), Math.floor(pts[0][1]), 1, 1);
@@ -262,10 +253,23 @@ html_content = '''<!DOCTYPE html>
       opacity: 100,
       smoothing: 75,
       activeLayer: '03',
+      saved: false,
       feedbackOpen: true,
       statusBadge: 'ACKNOWLEDGED',
-      replyText: '',
-      collapsed: false
+      collapsed: false,
+      layers: [
+        { num: "05", name: "HIGHLIGHTS", op: "100%", vis: true },
+        { num: "04", name: "BRUSH SHADING", op: "80%", vis: true },
+        { num: "03", name: "LINEART", op: "100%", vis: true },
+        { num: "02", name: "PENCIL ROUGHS", op: "60%", vis: true },
+        { num: "01", name: "BACKDROP WASH", op: "100%", vis: true },
+        { num: "00", name: "CANVAS FILL", op: "100%", vis: true }
+      ],
+      thread: [
+        { author: "DIRECTOR", time: "2M AGO", color: "#3B82F6", lines: ["CLEAN TOOL BOX, CLARIFY ACTIVE LAYER,", "AND SHOW IN-APP FEEDBACK FLOW."] },
+        { author: "ARTIST AGENT", time: "JUST NOW", color: "#10B981", lines: ["APPLIED IN V2: REMOVED CLUTTER,", "EXPANDED WIDESCREEN, AND UNIFIED FLOW."] }
+      ],
+      userStrokes: []
     };
 
     function renderStudio() {
@@ -319,46 +323,74 @@ html_content = '''<!DOCTYPE html>
       ];
       draw_stroke(hill_pts, "#047857", 10);
 
-      // Pine Trees
-      const pines = [30, 70, 120, 170, 220, 270, 320, 370, 420, 470, 520, 570, 620, 670, 710];
-      for (const px of pines) {
-        if (px > cw - 10) continue;
-        const py = px < 400 ? 380 : 360;
-        draw_stroke([[px, py+28], [px, py]], "#022C22", 3);
-        draw_stroke([[px-7, py+16], [px, py+3], [px+7, py+16]], "#064E3B", 4);
-        draw_stroke([[px-11, py+26], [px, py+10], [px+11, py+26]], "#047857", 4);
+      // Foliage trees
+      for (let tx = 30; tx <= 710; tx += 45) {
+        if (tx >= cw) break;
+        draw_stroke([[tx, 408], [tx, 380]], "#022C22", 3);
+        draw_stroke([[tx - 7, 396], [tx, 383], [tx + 7, 396]], "#064E3B", 4);
+        draw_stroke([[tx - 11, 406], [tx, 390], [tx + 11, 406]], "#047857", 4);
       }
 
-      // Deep Reflective Lake
+      // Water Deep Blue Base
       draw_rect(0, 510, cw, 190, "#0F172A");
-      const ripples = [
+      const reflections = [
         [40, 530, 140], [220, 545, 180], [450, 535, 160],
         [90, 570, 150], [310, 580, 200], [560, 565, 140],
         [50, 615, 170], [270, 630, 190], [510, 620, 180],
         [120, 665, 160], [380, 675, 210]
       ];
-      for (const r of ripples) draw_rect(r[0], r[1], r[2], 3, "#38BDF8", 0.45);
+      for (const [rx, ry, rw] of reflections) {
+        if (rx < cw) draw_rect(rx, ry, Math.min(rw, cw - rx), 3, "#38BDF8", 0.45);
+      }
 
-      // Live Brush Stroke
-      const brush_pts = [
+      // Active Live Stroke on Canvas
+      const live_stroke = [
         [60, 330], [160, 310], [280, 260], [380, 290], [480, 240], [570, 275]
       ];
-      draw_stroke(brush_pts, "#2563EB", state.size, state.opacity / 100);
+      draw_stroke(live_stroke, "#2563EB", 14, 0.95);
 
-      // Cursor crosshair
-      draw_ellipse(564, 269, 12, 12, "#FFFFFF", 0.6);
+      // Tool cursor crosshair
+      draw_ellipse(570, 275, 12, 12, "#FFFFFF", 0.6);
       draw_stroke([[570, 265], [570, 285]], "#FFFFFF", 1);
       draw_stroke([[560, 275], [580, 275]], "#FFFFFF", 1);
 
-      // 2. IN-APP FEEDBACK FLOW
+      // Render interactive user-painted strokes
+      if (state.userStrokes && state.userStrokes.length > 0) {
+        for (const strk of state.userStrokes) {
+          const lObj = state.layers.find(l => l.num === strk.layer);
+          if (lObj && !lObj.vis) continue;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.strokeStyle = strk.color;
+          ctx.lineWidth = strk.size;
+          ctx.globalAlpha = strk.opacity;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          if (strk.points.length === 1) {
+            ctx.fillStyle = strk.color;
+            ctx.arc(strk.points[0][0], strk.points[0][1], strk.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.moveTo(strk.points[0][0], strk.points[0][1]);
+            for (let i = 1; i < strk.points.length; i++) {
+              ctx.lineTo(strk.points[i][0], strk.points[i][1]);
+            }
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
+      // 2. IN-APP FEEDBACK PIN & CARD
       if (state.feedbackOpen) {
-        // Pin
-        draw_ellipse(486, 222, 22, 22, "#0D99FF");
-        draw_ellipse(488, 224, 18, 18, "#FFFFFF");
-        draw_ellipse(491, 227, 12, 12, "#0D99FF");
+        // Target Anchor Pin at (486, 222)
+        draw_ellipse(497, 233, 22, 22, "#0D99FF");
+        draw_ellipse(497, 233, 18, 18, "#FFFFFF");
+        draw_ellipse(497, 233, 12, 12, "#0D99FF");
         draw_stroke([[486, 238], [476, 248], [492, 242]], "#0D99FF", 2);
 
-        // Feedback Card
+        // Feedback Card (x: 120, y: 38, w: 340, h: 228)
         draw_rounded_rect(123, 41, 340, 228, 6, "#000000", 0.25);
         draw_rounded_rect(120, 38, 340, 228, 6, "#FFFFFF");
         draw_rect(120, 38, 340, 1, "#CBD5E1");
@@ -366,40 +398,38 @@ html_content = '''<!DOCTYPE html>
         draw_rect(459, 38, 1, 228, "#CBD5E1");
         draw_rect(120, 265, 340, 1, "#CBD5E1");
 
-        // Header
+        // Card Header
         draw_rounded_rect(121, 39, 338, 28, 5, "#F8FAFC");
         draw_rect(120, 66, 340, 1, "#E2E8F0");
+
+        // Badges
         draw_rounded_rect(130, 44, 86, 18, 3, "#E0F2FE");
         draw_text("FEEDBACK #1", 136, 48, 0.75, "#0284C7", 1);
 
-        const badgeBg = state.statusBadge === 'COMMITTED' ? '#DCFCE7' : (state.statusBadge === 'EXECUTING...' ? '#DBEAFE' : '#DCFCE7');
-        const badgeColor = state.statusBadge === 'EXECUTING...' ? '#1D4ED8' : '#15803D';
-        draw_rounded_rect(222, 44, 98, 18, 3, badgeBg);
-        draw_text(state.statusBadge, 228, 48, 0.7, badgeColor, 1);
-        draw_text("X", 442, 47, 0.8, "#94A3B8", 1);
+        const isApplied = state.statusBadge === 'APPLIED';
+        draw_rounded_rect(222, 44, isApplied ? 62 : 94, 18, 3, "#DCFCE7");
+        draw_text(state.statusBadge, 228, 48, 0.75, "#15803D", 1);
 
-        // Thread Entry 1: Director
-        draw_ellipse(132, 76, 12, 12, "#3B82F6");
-        draw_text("DIRECTOR", 150, 78, 0.8, "#0F172A", 1);
-        draw_text("2M AGO", 216, 79, 0.7, "#94A3B8", 1);
-        draw_text("CLEAN TOOL BOX, CLARIFY ACTIVE LAYER,", 132, 98, 0.75, "#334155", 1);
-        draw_text("AND SHOW IN-APP FEEDBACK FLOW.", 132, 112, 0.75, "#334155", 1);
+        // Close X
+        draw_stroke([[442, 47], [446, 53]], "#94A3B8", 1);
+        draw_stroke([[446, 47], [442, 53]], "#94A3B8", 1);
 
-        // Thread Entry 2: Artist Agent
-        draw_rect(132, 130, 316, 1, "#F1F5F9");
-        draw_ellipse(132, 138, 12, 12, "#10B981");
-        draw_text("ARTIST AGENT", 150, 140, 0.8, "#047857", 1);
-        draw_text("JUST NOW", 236, 141, 0.7, "#94A3B8", 1);
-        draw_text("APPLIED IN V2: REMOVED CLUTTER,", 132, 160, 0.75, "#065F46", 1);
-        draw_text("EXPANDED WIDESCREEN, AND UNIFIED FLOW.", 132, 174, 0.75, "#065F46", 1);
+        // Thread entries
+        let ty = 76;
+        for (let i = 0; i < Math.min(2, state.thread.length); i++) {
+          const t = state.thread[i];
+          if (i > 0) draw_rect(132, ty - 8, 316, 1, "#F1F5F9");
+          draw_ellipse(132, ty, 12, 12, t.color);
+          draw_text(t.author, 150, ty + 2, 0.8, "#0F172A", 1);
+          draw_text(t.time, 236, ty + 3, 0.7, "#94A3B8", 1);
+          draw_text(t.lines[0], 132, ty + 22, 0.75, "#334155", 1);
+          if (t.lines[1]) draw_text(t.lines[1], 132, ty + 36, 0.75, "#334155", 1);
+          ty += 62;
+        }
 
         // Action Box
         draw_rect(120, 194, 340, 1, "#E2E8F0");
-        draw_rounded_rect(130, 202, 184, 24, 3, "#F8FAFC");
-        draw_rect(130, 202, 184, 1, "#CBD5E1");
-        draw_text(state.replyText || "WRITE A REPLY...", 138, 209, 0.75, state.replyText ? "#0F172A" : "#94A3B8", 1);
-
-        draw_rounded_rect(322, 202, 128, 24, 3, "#0D99FF");
+        draw_rounded_rect(322, 202, 128, 24, 3, "#0284C7");
         draw_text("SUBMIT & RESUME", 330, 209, 0.75, "#FFFFFF", 1);
 
         // Leader line
@@ -410,23 +440,38 @@ html_content = '''<!DOCTYPE html>
       if (!state.collapsed) {
         draw_rect(740, 0, 260, 700, "#FFFFFF");
 
-        // Header
+        // Header (y: 0..44)
         draw_text("STUDIO", 756, 20, 0.95, "#0F172A", 1);
-        draw_text("FB", 840, 20, 0.85, "#3B82F6", 1);
+
+        // Feedback Badge [FB]
+        draw_rounded_rect(818, 11, 36, 24, 3, state.feedbackOpen ? "#DBEAFE" : "#EFF6FF");
+        draw_rect(818, 11, 36, 1, state.feedbackOpen ? "#93C5FD" : "#BFDBFE");
+        draw_text("FB", 828, 18, 0.85, state.feedbackOpen ? "#1D4ED8" : "#2563EB", 1);
+
+        // Primary SAVE button [SAVE]
+        if (state.saved) {
+          draw_rounded_rect(872, 11, 62, 24, 3, "#10B981");
+          draw_text("SAVED", 884, 18, 0.85, "#FFFFFF", 1);
+        } else {
+          draw_rounded_rect(872, 11, 62, 24, 3, "#0284C7");
+          draw_text("SAVE", 888, 18, 0.85, "#FFFFFF", 1);
+        }
+
+        // Collapse toggle icon [>|]
         draw_stroke([[968, 16], [974, 22], [968, 28]], "#64748B", 1.5);
         draw_stroke([[978, 16], [978, 28]], "#64748B", 1.5);
 
         // Section 1: Tool Picker
         draw_text("TOOL", 756, 56, 0.85, "#64748B", 1);
-        draw_text("INK", 772, 79, 0.85, state.activeTool === 'INK' ? "#0D99FF" : "#94A3B8", 1);
-        draw_text("PENCIL", 824, 79, 0.85, state.activeTool === 'PENCIL' ? "#0D99FF" : "#94A3B8", 1);
-        draw_text("MARK", 882, 79, 0.85, state.activeTool === 'MARK' ? "#0D99FF" : "#94A3B8", 1);
-        draw_text("ERASE", 936, 79, 0.85, state.activeTool === 'ERASE' ? "#0D99FF" : "#94A3B8", 1);
+        draw_text("INK", 772, 79, 0.85, state.activeTool === 'INK' ? "#0284C7" : "#94A3B8", 1);
+        draw_text("PENCIL", 824, 79, 0.85, state.activeTool === 'PENCIL' ? "#0284C7" : "#94A3B8", 1);
+        draw_text("MARK", 882, 79, 0.85, state.activeTool === 'MARK' ? "#0284C7" : "#94A3B8", 1);
+        draw_text("ERASE", 936, 79, 0.85, state.activeTool === 'ERASE' ? "#0284C7" : "#94A3B8", 1);
 
         // Section 2: Stroke Properties
         draw_text("STROKE PROPERTIES", 756, 120, 0.85, "#64748B", 1);
         draw_text("SIZE", 756, 140, 0.85, "#475569", 1);
-        draw_text(`${state.size} PX`, 942, 140, 0.85, "#0F172A", 1);
+        draw_text(`${state.size} PX`, 936, 140, 0.85, "#0F172A", 1);
 
         draw_text("OPACITY", 756, 174, 0.85, "#475569", 1);
         draw_text(`${state.opacity}%`, 942, 174, 0.85, "#0F172A", 1);
@@ -434,30 +479,29 @@ html_content = '''<!DOCTYPE html>
         draw_text("SMOOTHING", 756, 210, 0.85, "#475569", 1);
         draw_text(`${state.smoothing}%`, 944, 210, 0.85, "#0F172A", 1);
 
-        draw_text("#2563EB", 802, 256, 0.85, "#475569", 1);
-        draw_text("INK PIGMENT", 896, 256, 0.75, "#64748B", 1);
+        // Tool Pigment info based on activeTool
+        const toolInfo = {
+          'INK': { hex: "#2563EB", label: "INK PIGMENT" },
+          'PENCIL': { hex: "#475569", label: "GRAPHITE 2B" },
+          'MARK': { hex: "#0284C7", label: "FELT MARKER" },
+          'ERASE': { hex: "#CBD5E1", label: "VINYL ERASER" }
+        }[state.activeTool] || { hex: "#2563EB", label: "INK PIGMENT" };
+
+        draw_text(toolInfo.hex, 802, 256, 0.85, "#475569", 1);
+        draw_text(toolInfo.label, 896, 256, 0.75, "#64748B", 1);
 
         // Section 3: Layers
         draw_text("LAYERS", 756, 302, 0.95, "#0F172A", 1);
         draw_text("+ NEW", 938, 302, 0.8, "#0284C7", 1);
 
-        const layers = [
-          { num: "05", name: "HIGHLIGHTS", op: "100%", vis: true },
-          { num: "04", name: "BRUSH SHADING", op: "80%", vis: true },
-          { num: "03", name: "LINEART", op: "100%", vis: true },
-          { num: "02", name: "PENCIL ROUGHS", op: "60%", vis: true },
-          { num: "01", name: "BACKDROP WASH", op: "100%", vis: true },
-          { num: "00", name: "CANVAS FILL", op: "100%", vis: true }
-        ];
-
         let ly = 328;
-        for (const l of layers) {
+        for (const l of state.layers) {
           const is_active = state.activeLayer === l.num;
-          const rowColor = is_active ? "#0284C7" : (l.vis ? "#475569" : "#94A3B8");
-          const eyeColor = is_active ? "#0284C7" : "#94A3B8";
+          const rowColor = is_active ? "#0284C7" : (l.vis ? "#475569" : "#CBD5E1");
+          const eyeColor = is_active ? "#0284C7" : (l.vis ? "#94A3B8" : "#CBD5E1");
 
           draw_text(`${l.num} ${l.name}`, 756, ly + 4, 0.85, rowColor, 1);
-          draw_text(l.op, 934, ly + 4, 0.8, is_active ? "#0284C7" : "#64748B", 1);
+          draw_text(l.op, 934, ly + 4, 0.8, is_active ? "#0284C7" : (l.vis ? "#64748B" : "#CBD5E1"), 1);
 
           // Inline Eye Icon
           const ex = 972;
@@ -467,94 +511,202 @@ html_content = '''<!DOCTYPE html>
           if (l.vis) {
             draw_stroke([[ex+5, ey+2], [ex+5.1, ey+2.1]], eyeColor, 1.5);
           } else {
-            draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#94A3B8", 1);
+            draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#EF4444", 1.2);
           }
 
           ly += 32;
         }
 
-
         // Footer
         draw_text("CODESKETCH ENGINE V2", 756, 668, 0.8, "#94A3B8", 1);
       } else {
-        draw_rounded_rect(910, 12, 80, 26, 4, "#FFFFFF");
-        draw_rect(910, 12, 80, 1, "#CBD5E1");
-        draw_text("STUDIO <", 918, 18, 0.8, "#0D99FF", 2);
+        // Collapsed floating button
+        draw_rounded_rect(896, 12, 94, 28, 4, "#FFFFFF");
+        draw_rect(896, 12, 94, 1, "#CBD5E1");
+        draw_text("STUDIO <", 908, 18, 0.85, "#0284C7", 1);
       }
     }
 
     renderStudio();
 
-    const toast = document.getElementById('toast');
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1800);
+    // 4. INTERACTION EVENT LISTENERS
+
+    // Primary SAVE Action
+    document.getElementById('btnHeaderSave').onclick = () => {
+      state.saved = true;
+      renderStudio();
+      setTimeout(() => {
+        state.saved = false;
+        renderStudio();
+      }, 1500);
+    };
+
+    // Tool switching
+    document.getElementById('btnToolInk').onclick = () => { state.activeTool = 'INK'; renderStudio(); };
+    document.getElementById('btnToolPencil').onclick = () => { state.activeTool = 'PENCIL'; renderStudio(); };
+    document.getElementById('btnToolMark').onclick = () => { state.activeTool = 'MARK'; renderStudio(); };
+    document.getElementById('btnToolErase').onclick = () => { state.activeTool = 'ERASE'; renderStudio(); };
+
+    // Properties Cycling
+    const sizePresets = [4, 8, 14, 20, 32, 48];
+    document.getElementById('btnPropSize').onclick = () => {
+      let idx = sizePresets.indexOf(state.size);
+      state.size = (idx === -1 || idx === sizePresets.length - 1) ? sizePresets[0] : sizePresets[idx + 1];
+      renderStudio();
+    };
+
+    const opPresets = [100, 80, 60, 40, 20];
+    document.getElementById('btnPropOpacity').onclick = () => {
+      let idx = opPresets.indexOf(state.opacity);
+      state.opacity = (idx === -1 || idx === opPresets.length - 1) ? opPresets[0] : opPresets[idx + 1];
+      renderStudio();
+    };
+
+    const smPresets = [0, 25, 50, 75, 100];
+    document.getElementById('btnPropSmoothing').onclick = () => {
+      let idx = smPresets.indexOf(state.smoothing);
+      state.smoothing = (idx === -1 || idx === smPresets.length - 1) ? smPresets[0] : smPresets[idx + 1];
+      renderStudio();
+    };
+
+    // Layer Selection and Eye Visibility Toggles
+    function bindLayers() {
+      ['05', '04', '03', '02', '01', '00'].forEach(num => {
+        const row = document.getElementById('layerRow' + num);
+        if (row) {
+          row.onclick = () => {
+            state.activeLayer = num;
+            renderStudio();
+          };
+        }
+        const eye = document.getElementById('layerEye' + num);
+        if (eye) {
+          eye.onclick = () => {
+            const l = state.layers.find(item => item.num === num);
+            if (l) l.vis = !l.vis;
+            renderStudio();
+          };
+        }
+      });
+    }
+    bindLayers();
+
+    document.getElementById('btnNewLayer').onclick = () => {
+      const nextNum = String(state.layers.length).padStart(2, '0');
+      state.layers.unshift({ num: nextNum, name: "DETAIL PASS", op: "100%", vis: true });
+      state.activeLayer = nextNum;
+      renderStudio();
+    };
+
+    // Feedback Toggle & Submit
+    function toggleFeedback(open) {
+      state.feedbackOpen = (open !== undefined) ? open : !state.feedbackOpen;
+      document.getElementById('cardInteractiveGroup').style.display = state.feedbackOpen ? 'block' : 'none';
+      renderStudio();
     }
 
-    document.getElementById('btnToolInk').onclick = () => { state.activeTool = 'INK'; renderStudio(); showToast('Tool: Ink Active'); };
-    document.getElementById('btnToolPencil').onclick = () => { state.activeTool = 'PENCIL'; renderStudio(); showToast('Tool: Pencil Active'); };
-    document.getElementById('btnToolMark').onclick = () => { state.activeTool = 'MARK'; renderStudio(); showToast('Tool: Marker Active'); };
-    document.getElementById('btnToolErase').onclick = () => { state.activeTool = 'ERASE'; renderStudio(); showToast('Tool: Eraser Active'); };
+    document.getElementById('btnHeaderFb').onclick = () => toggleFeedback();
+    document.getElementById('btnCommentPin').onclick = () => toggleFeedback();
+    document.getElementById('btnCloseCard').onclick = () => toggleFeedback(false);
 
-    document.getElementById('sliderSizeLess').onclick = () => { state.size = Math.max(2, state.size - 2); renderStudio(); };
-    document.getElementById('sliderSizeMore').onclick = () => { state.size = Math.min(50, state.size + 2); renderStudio(); };
-
-    document.getElementById('sliderOpLess').onclick = () => { state.opacity = Math.max(10, state.opacity - 10); renderStudio(); };
-    document.getElementById('sliderOpMore').onclick = () => { state.opacity = Math.min(100, state.opacity + 10); renderStudio(); };
-
-    document.getElementById('sliderSmLess').onclick = () => { state.smoothing = Math.max(0, state.smoothing - 10); renderStudio(); };
-    document.getElementById('sliderSmMore').onclick = () => { state.smoothing = Math.min(100, state.smoothing + 10); renderStudio(); };
-
-    document.getElementById('layer05').onclick = () => { state.activeLayer = '05'; renderStudio(); showToast('Active: 05 Highlights'); };
-    document.getElementById('layer04').onclick = () => { state.activeLayer = '04'; renderStudio(); showToast('Active: 04 Brush Shading'); };
-    document.getElementById('layer03').onclick = () => { state.activeLayer = '03'; renderStudio(); showToast('Active: 03 Lineart'); };
-    document.getElementById('layer02').onclick = () => { state.activeLayer = '02'; renderStudio(); showToast('Active: 02 Pencil Roughs'); };
-    document.getElementById('layer01').onclick = () => { state.activeLayer = '01'; renderStudio(); showToast('Active: 01 Backdrop Wash'); };
-    document.getElementById('layer00').onclick = () => { state.activeLayer = '00'; renderStudio(); showToast('Active: 00 Canvas Fill'); };
-
-    document.getElementById('btnHeaderExport').onclick = () => showToast('1000x700 PNG Rasterized & Saved!');
-    document.getElementById('btnHeaderCollapse').onclick = () => {
-      state.collapsed = !state.collapsed;
+    function submitFeedback() {
+      const inp = document.getElementById('replyInput');
+      const val = inp.value.trim().toUpperCase();
+      if (!val) return;
+      state.thread.push({
+        author: "YOU",
+        time: "JUST NOW",
+        color: "#0284C7",
+        lines: [val.slice(0, 36), val.slice(36, 72)]
+      });
+      state.statusBadge = 'APPLIED';
+      inp.value = '';
       renderStudio();
-    };
+    }
 
-    document.getElementById('btnHeaderFb').onclick = () => {
-      state.feedbackOpen = !state.feedbackOpen;
-      document.getElementById('cardInteractiveGroup').style.display = state.feedbackOpen ? 'block' : 'none';
-      renderStudio();
-    };
-    document.getElementById('btnCommentPin').onclick = () => {
-      state.feedbackOpen = !state.feedbackOpen;
-      document.getElementById('cardInteractiveGroup').style.display = state.feedbackOpen ? 'block' : 'none';
-      renderStudio();
-    };
-    document.getElementById('btnCloseCard').onclick = () => {
-      state.feedbackOpen = false;
-      document.getElementById('cardInteractiveGroup').style.display = 'none';
-      renderStudio();
-    };
+    document.getElementById('btnSubmitResume').onclick = submitFeedback;
+    document.getElementById('replyInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitFeedback();
+      }
+    });
 
-    document.getElementById('replyInput').addEventListener('input', (e) => {
-      state.replyText = e.target.value.toUpperCase();
+    // Panel Collapse & Expand
+    function setCollapsed(c) {
+      state.collapsed = c;
+      const sidebarBtns = [
+        'btnHeaderFb', 'btnHeaderSave', 'btnHeaderCollapse',
+        'btnToolInk', 'btnToolPencil', 'btnToolMark', 'btnToolErase',
+        'btnPropSize', 'btnPropOpacity', 'btnPropSmoothing',
+        'btnNewLayer',
+        'layerRow05', 'layerEye05', 'layerRow04', 'layerEye04',
+        'layerRow03', 'layerEye03', 'layerRow02', 'layerEye02',
+        'layerRow01', 'layerEye01', 'layerRow00', 'layerEye00'
+      ];
+      sidebarBtns.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = c ? 'none' : 'block';
+      });
+      document.getElementById('btnCollapsedStudio').style.display = c ? 'block' : 'none';
+      renderStudio();
+    }
+
+    document.getElementById('btnHeaderCollapse').onclick = () => setCollapsed(true);
+    document.getElementById('btnCollapsedStudio').onclick = () => setCollapsed(false);
+
+    // 5. LIVE CANVAS DRAWING (Pointer events)
+    let isDrawing = false;
+    let currentStroke = null;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const maxW = state.collapsed ? 1000 : 740;
+      if (x >= maxW) return;
+      if (state.feedbackOpen && x >= 120 && x <= 460 && y >= 38 && y <= 266) return;
+
+      isDrawing = true;
+      const toolColor = {
+        'INK': '#2563EB',
+        'PENCIL': '#475569',
+        'MARK': '#0284C7',
+        'ERASE': '#0F172A'
+      }[state.activeTool] || '#2563EB';
+
+      const strokeSize = state.activeTool === 'MARK' ? state.size * 1.6 : (state.activeTool === 'PENCIL' ? Math.max(2, Math.round(state.size / 3)) : state.size);
+      const strokeOpacity = state.activeTool === 'MARK' ? 0.4 : (state.opacity / 100);
+
+      currentStroke = {
+        tool: state.activeTool,
+        color: toolColor,
+        size: strokeSize,
+        opacity: strokeOpacity,
+        layer: state.activeLayer,
+        points: [[x, y]]
+      };
+      state.userStrokes.push(currentStroke);
       renderStudio();
     });
 
-    document.getElementById('btnSubmitResume').onclick = () => {
-      const inp = document.getElementById('replyInput');
-      const val = (state.replyText || inp.value).trim();
-      if (!val) return;
-      state.statusBadge = 'EXECUTING...';
-      state.replyText = '';
-      inp.value = '';
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDrawing || !currentStroke) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const maxW = state.collapsed ? 1000 : 740;
+      if (x > maxW) return;
+
+      currentStroke.points.push([x, y]);
       renderStudio();
-      showToast('Submitted: Executing & resuming playback...');
-      setTimeout(() => {
-        state.statusBadge = 'COMMITTED';
-        renderStudio();
-        showToast('Committed live to Codesketch canvas!');
-      }, 900);
-    };
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDrawing = false;
+      currentStroke = null;
+    });
+
   </script>
 </body>
 </html>
