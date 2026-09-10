@@ -90,8 +90,8 @@ test('each endpoint resolves only its current validated shape', async () => {
   await serve(pendingSnapshot(), async () => {
     const api = client();
     assert.ok((await api.fetchState()).instanceId);
-    assert.ok((await api.sendCommands([{ type: 'stroke' }])).instanceId);
-    assert.ok((await api.sendControl('pause')).instanceId);
+    assert.ok((await api.sendCommands([{ type: 'stroke' }], { expectedDocGeneration: 'generation-1' })).instanceId);
+    assert.ok((await api.sendControl('pause', { expectedDocGeneration: 'generation-1' })).instanceId);
     assert.ok((await api.createComment({
       requestId: 'request-9',
       text: 'note',
@@ -106,8 +106,8 @@ test('each endpoint resolves only its current validated shape', async () => {
       expectedDocGeneration: 'generation-1',
       expectedSeq: 1,
     })).instanceId);
-    assert.ok((await api.loadProject(project())).instanceId);
-    assert.ok((await api.loadDemo()).instanceId);
+    assert.ok((await api.loadProject(project(), { expectedDocGeneration: 'generation-1' })).instanceId);
+    assert.ok((await api.loadDemo({ expectedDocGeneration: 'generation-1' })).instanceId);
   });
   await serve(project(), async () => {
     const data = await client().fetchProject();
@@ -122,15 +122,15 @@ test('accepts an unchanged envelope only for a state read with instance context'
     const api = client();
     assert.equal((await api.fetchState(3, 'instance-1')).unchanged, true);
     await assert.rejects(api.fetchState(), (error) => error.name === 'ProtocolError');
-    await assert.rejects(api.sendControl('pause'), (error) => error.name === 'ProtocolError');
+    await assert.rejects(api.sendControl('pause', { expectedDocGeneration: 'generation-1' }), (error) => error.name === 'ProtocolError');
   });
 });
 
 test('rejects mutation responses shaped as project envelopes', async () => {
   await serve(project(), async () => {
     const api = client();
-    await assert.rejects(api.sendCommands([{ type: 'stroke' }]), (error) => error.name === 'ProtocolError');
-    await assert.rejects(api.loadDemo(), (error) => error.name === 'ProtocolError');
+    await assert.rejects(api.sendCommands([{ type: 'stroke' }], { expectedDocGeneration: 'generation-1' }), (error) => error.name === 'ProtocolError');
+    await assert.rejects(api.loadDemo({ expectedDocGeneration: 'generation-1' }), (error) => error.name === 'ProtocolError');
   });
 });
 

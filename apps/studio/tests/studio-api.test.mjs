@@ -120,7 +120,10 @@ test('cleans up the deadline timer after an HTTP error', async () => {
   await serve(async () => jsonResponse({ error: 'rejected' }, 409), async () => {
     const spy = spyOnClearTimeout();
     try {
-      await assert.rejects(api.sendCommands([{ type: 'stroke' }]), (error) => error.status === 409);
+      await assert.rejects(
+        api.sendCommands([{ type: 'stroke' }], { expectedDocGeneration: 'generation-1' }),
+        (error) => error.status === 409,
+      );
       assert.equal(spy.cleared.length, 1, 'deadline timer cleared once after failure');
     } finally {
       spy.restore();
@@ -173,7 +176,7 @@ test('preserves HTTP status on a JSON error and announces reachability', async (
   const { api, events } = recordingApi(500);
   api.setOffline(true);
   await serve(async () => jsonResponse({ error: 'stale generation' }, 409), async () => {
-    await assert.rejects(api.sendCommands([{ type: 'stroke' }]), (error) => {
+    await assert.rejects(api.sendCommands([{ type: 'stroke' }], { expectedDocGeneration: 'generation-1' }), (error) => {
       assert.equal(error.status, 409);
       assert.equal(error.message, 'stale generation');
       return true;

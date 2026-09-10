@@ -13,6 +13,13 @@ function normalizeTimeoutMs(value) {
   return value;
 }
 
+function requireGeneration(expectedDocGeneration) {
+  if (typeof expectedDocGeneration !== 'string' || !expectedDocGeneration) {
+    throw new TypeError('expectedDocGeneration must be a nonempty string');
+  }
+  return expectedDocGeneration;
+}
+
 function errorBodyMessage(data, text, response) {
   if (typeof data === 'object' && data !== null && !Array.isArray(data) && typeof data.error === 'string' && data.error) {
     return data.error;
@@ -27,6 +34,8 @@ export class StudioApi {
     this.onError = onError || (() => {});
     this.onReconnect = onReconnect || (() => {});
     this.timeoutMs = normalizeTimeoutMs(timeoutMs);
+    this.nextConnectionIssue = 1;
+    this.appliedConnectionIssue = 0;
     this.isOffline = false;
   }
 
@@ -45,6 +54,15 @@ export class StudioApi {
   }
 
   async request(path, { signal = null, expect = null, ...options } = {}) {
+    const issue = this.nextConnectionIssue++;
+    const applyConnection = (offline, error = null) => {
+      if (issue < this.appliedConnectionIssue) return;
+      this.appliedConnectionIssue = issue;
+      this.setOffline(offline, error);
+    };
+    const reserveConnection = () => {
+      this.appliedConnectionIssue = Math.max(this.appliedConnectionIssue, issue);
+    };
     const controller = new AbortController();
     let timedOut = false;
     let callerCancelled = false;
@@ -72,22 +90,26 @@ export class StudioApi {
       if (!response.ok) {
         const error = new Error(errorBodyMessage(data, text, response));
         error.status = response.status;
-        this.setOffline(false);
+        applyConnection(false);
         throw error;
       }
       if (data === undefined) {
+        reserveConnection();
         throw protocolError(text ? 'Malformed JSON in successful response' : 'Empty response body');
       }
       if (expect) {
         const problem = expect(data);
-        if (problem) throw protocolError(`Invalid response from ${path}: ${problem}`);
+        if (problem) {
+          reserveConnection();
+          throw protocolError(`Invalid response from ${path}: ${problem}`);
+        }
       }
-      this.setOffline(false);
+      applyConnection(false);
       return data;
     } catch (error) {
       if (callerCancelled) throw error;
       if (timedOut || error.name === 'TypeError') {
-        this.setOffline(true, OFFLINE_MESSAGE);
+        applyConnection(true, OFFLINE_MESSAGE);
       } else {
         this.onError(error.message);
       }
@@ -106,18 +128,24 @@ export class StudioApi {
     return await this.request(`/api/state${query}`, { expect: stateReadExpect(query !== '') });
   }
 
-  async sendCommands(commands, { replace = false, play = true, immediate = false } = {}) {
+  async sendCommands(commands, { expectedDocGeneration, replace = false, play = true, immediate = false } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/commands', {
       expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands, replace, play, immediate, source: 'human' }),
+      body: JSON.stringify({ commands, replace, play, immediate, source: 'human', expectedDocGeneration }),
     });
   }
 
-  async sendControl(action, speed = null) {
-    const payload = { action, source: 'human' };
-    if (action === 'speed' && speed !== null) {
+  async sendControl(action, context = {}) {
+    if (typeof context !== 'object' || context === null || Array.isArray(context)) {
+      throw new TypeError('sendControl expects a {expectedDocGeneration, speed} options object');
+    }
+    const { expectedDocGeneration, speed } = context;
+    requireGeneration(expectedDocGeneration);
+    const payload = { action, source: 'human', expectedDocGeneration };
+    if (action === 'speed' && speed !== undefined) {
       payload.speed = Number(speed);
     }
     return await this.request('/api/control', {
@@ -157,21 +185,23 @@ export class StudioApi {
     return await this.request('/api/project', { expect: projectProblem });
   }
 
-  async loadProject(projectData) {
+  async loadProject(projectData, { expectedDocGeneration } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/project', {
       expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project: projectData, source: 'human' }),
+      body: JSON.stringify({ project: projectData, source: 'human', expectedDocGeneration }),
     });
   }
 
-  async loadDemo() {
+  async loadDemo({ expectedDocGeneration } = {}) {
+    requireGeneration(expectedDocGeneration);
     return await this.request('/api/demo', {
       expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'human' }),
+      body: JSON.stringify({ source: 'human', expectedDocGeneration }),
     });
   }
 }
