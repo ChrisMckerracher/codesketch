@@ -1,6 +1,7 @@
 import { el, findLayer } from './dom.mjs';
-import { createToolPanel, isDrawingTool, toolTitle } from './tool-context.mjs';
+import { createToolPanel, isDrawingTool, isShapeTool, toolTitle } from './tool-context.mjs';
 import { createLayerPanel } from './layer-context.mjs';
+import { createDocumentPanel } from './document-context.mjs';
 
 export function mount({ root, model, dispatch }) {
   root.classList.add('cs-inspector');
@@ -29,13 +30,17 @@ export function mount({ root, model, dispatch }) {
 
   const toolPanel = createToolPanel({ dispatch, report, signal: options.signal });
   const layerPanel = createLayerPanel({ dispatch, report, signal: options.signal });
-  // Shape and document context panels join this map in the next unit.
-  const panels = { tool: toolPanel, layer: layerPanel };
-  body.append(toolPanel.root, layerPanel.root);
+  const documentPanel = createDocumentPanel({ dispatch, report, signal: options.signal });
+  const panels = { tool: toolPanel, layer: layerPanel, document: documentPanel };
+  body.append(toolPanel.root, layerPanel.root, documentPanel.root);
 
   function route(value) {
     if (value.context === 'layer') return 'layer';
-    if (value.context === 'tool' && isDrawingTool(value.tool)) return 'tool';
+    if (value.context === 'document') return 'document';
+    if (value.context === 'tool') {
+      if (isDrawingTool(value.tool) || isShapeTool(value.tool)) return 'tool';
+      if (value.tool === 'hand' || value.tool === 'comment') return 'document';
+    }
     return null;
   }
 
@@ -43,6 +48,7 @@ export function mount({ root, model, dispatch }) {
     if (options.signal.aborted) return;
     const active = route(current);
     if (active !== 'layer') layerPanel.cancel();
+    if (active !== 'document') documentPanel.cancel();
     for (const [name, panel] of Object.entries(panels)) {
       panel.root.hidden = name !== active;
     }
@@ -55,6 +61,10 @@ export function mount({ root, model, dispatch }) {
       title.textContent = 'Layer Properties';
       subtitle.textContent = layer ? `${layer.name} (Selected)` : 'No selected layer';
       layerPanel.render(current);
+    } else if (active === 'document') {
+      title.textContent = 'Document Properties';
+      subtitle.textContent = 'Canvas setup';
+      documentPanel.render(current);
     } else {
       title.textContent = 'Properties';
       subtitle.textContent = 'Contextual Tool Inspector';
