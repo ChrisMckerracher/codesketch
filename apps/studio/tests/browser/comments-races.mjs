@@ -1,246 +1,237 @@
-// Browser scenario: comment composer races — late pause ack vs Escape,
-// stale ack after generation rotation, network retry with stable request
-// id, keyboard cancel, and composer focus across viewport resize. All
-// network stalls are in-page fetch gates; no Playwright route mocks.
+// V2a browser race scenario over the current review UI (rewrite of the
+// obsolete selectors). In-page fetch gates hold or drop ACTUAL successful
+// responses; fixture writes isolate with the current document generation.
+// Covers: a held pause ack discarded after Escape (no late selection), a
+// held pause ack discarded after a document replacement (no activation and
+// no late mutation), a dropped first comment submission whose
+// explicit Retry replays a byte-identical payload and stores exactly one
+// comment, and a held region/draft that survives the supported desktop
+// compact resize before native Escape cancels it. Gates release the real
+// ok-verified Response and restore in finally; every step throws
+// immediately on failure.
 async (page) => {
-  const errors = [];
-  page.on('pageerror', (err) => errors.push(err.message));
+  const checks = [];
+  const done = (name) => checks.push(name);
+  const assert = (condition, message) => {
+    if (!condition) throw new Error(`COMMENT RACES FAILED: ${message}`);
+  };
+  const origin = page.url().split('/').slice(0, 3).join('/');
+  const state = async () => {
+    const response = await page.request.get(`${origin}/api/state`);
+    assert(response.ok(), `GET /api/state failed with ${response.status()}`);
+    return await response.json();
+  };
+  const human = async (path, body) => {
+    const snapshot = await state();
+    const response = await page.request.post(`${origin}${path}`, {
+      data: { source: 'human', expectedDocGeneration: snapshot.docGeneration, ...body },
+    });
+    const result = await response.json();
+    assert(response.ok(), `POST ${path} failed with ${response.status()}: ${JSON.stringify(result.error ?? result)}`);
+    return result;
+  };
+  const waitState = async (predicate, message, timeoutMs = 8000) => {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      const snapshot = await state();
+      if (predicate(snapshot)) return snapshot;
+      if (Date.now() > deadline) throw new Error(`COMMENT RACES FAILED: timed out waiting for ${message}`);
+      await page.waitForTimeout(100);
+    }
+  };
+  const composerLine = (text, timeoutMs = 8000) => page.waitForFunction((expected) =>
+    document.querySelector('#feedback-composer .review-status-line')?.textContent === expected,
+  text, { timeout: timeoutMs });
+  const composerClosed = () =>
+    page.locator('#feedback-composer .review-composer[hidden]').waitFor({ state: 'attached', timeout: 8000 });
+  const composerHidden = async (message) => {
+    assert(await page.locator('#feedback-composer .review-composer:not([hidden])').count() === 0, message);
+  };
+  const noActiveReview = async (message) => {
+    assert(await page.locator('#feedback-composer .review-textarea:not([hidden])').count() === 0, message);
+    const line = await page.locator('#feedback-composer .review-status-line').textContent();
+    assert(line !== selectingLine, `${message} (status line: ${JSON.stringify(line)})`);
+  };
+  const press = (selector) => page.locator(selector).click({ timeout: 8000 });
+  const dragRegion = async (from, to) => {
+    const box = await page.locator('#painting-canvas').boundingBox();
+    await page.mouse.move(box.x + box.width * from[0], box.y + box.height * from[1]);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * to[0], box.y + box.height * to[1], { steps: 6 });
+    await page.mouse.up();
+    await page.locator('#feedback-composer .review-textarea:not([hidden])').waitFor({ timeout: 8000 });
+    return await page.locator('#feedback-composer .review-card-title').textContent();
+  };
+  const typeDraft = async (text) => {
+    const area = page.locator('#feedback-composer .review-textarea');
+    await area.click({ timeout: 8000 });
+    await page.keyboard.type(text);
+  };
+  const area = page.locator('#feedback-composer .review-textarea');
+  const commentButton = '.cs-dock-btn[aria-label="Comment (C)"]';
+  const selectingLine = 'Drag a region on the canvas, or switch to the whole canvas.';
+
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.waitForSelector('#canvas');
-  const reset = () => page.evaluate(async () => {
-    await fetch('/api/control', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'new', source: 'human' }) });
-  });
+  await page.waitForSelector('.cs-dock');
+  await page.waitForFunction(() =>
+    document.querySelector('#global-header .cs-status-text')?.textContent !== 'Connecting',
+  null, { timeout: 15000 });
+
+  // Seed minimal artwork and start real playback so the pause race is real.
+  await human('/api/commands', { commands: [
+    { type: 'stroke', layer: 'paint', color: '#253d38', size: 10, points: [[80, 80], [220, 160]] },
+  ], immediate: true, play: false });
+  await human('/api/commands', { commands: [
+    { type: 'stroke', layer: 'paint', color: '#1c2f6b', size: 8, points: [[40, 620], [940, 640]] },
+    { type: 'stroke', layer: 'paint', color: '#1c2f6b', size: 8, points: [[40, 660], [940, 680]] },
+  ], play: true, immediate: false });
+  await human('/api/control', { action: 'resume' });
+  await waitState((snap) => snap.playback.status === 'playing', 'playback to start');
+
+  // In-page gate: hold the real successful pause response until released.
   const installPauseGate = () => page.evaluate(() => {
     window.__originalFetch = window.fetch.bind(window);
-    window.__pauseHeld = null;
+    window.__heldPause = null;
     window.fetch = async (input, init) => {
       const body = typeof init?.body === 'string' ? JSON.parse(init.body) : null;
       if (init?.method === 'POST' && String(input).endsWith('/api/control') && body?.action === 'pause') {
         const response = await window.__originalFetch(input, init);
+        if (!response.ok) return response;
         let release;
         const gate = new Promise((resolve) => { release = resolve; });
-        window.__pauseHeld = { response, release: () => release() };
+        window.__heldPause = { response, release: () => release(response) };
         return gate;
       }
       return window.__originalFetch(input, init);
     };
   });
-  const pauseHeld = () => page.waitForFunction(() => !!window.__pauseHeld,
-    undefined, { timeout: 5000 });
-  const releasePause = () => page.evaluate(() => {
-    if (window.__pauseHeld) { const held = window.__pauseHeld; window.__pauseHeld = null; held.release(); }
+  const pauseHeld = () => page.waitForFunction(() => !!window.__heldPause, null, { timeout: 8000 });
+  const releaseGate = () => page.evaluate(() => {
+    const held = window.__heldPause;
+    window.__heldPause = null;
+    if (held) held.release();
   });
   const restoreFetch = () => page.evaluate(() => {
-    if (window.__originalFetch) { window.fetch = window.__originalFetch; window.__originalFetch = null; }
-    window.__pauseHeld = null;
+    const held = window.__heldPause;
+    window.__heldPause = null;
+    if (held) held.release();
+    if (window.__originalFetch) window.fetch = window.__originalFetch;
+    window.__originalFetch = null;
+    window.__commentAttempts = null;
   });
-  const instructionHidden = () => page.waitForFunction(() =>
-    document.querySelector('.comment-instruction')?.hidden === true, undefined, { timeout: 3000 });
 
-  await reset();
+  try {
+    // 1. A held successful pause response must stay inert after Escape: no
+    // late region selection and no stored comment.
+    await installPauseGate();
+    await press(commentButton);
+    await pauseHeld();
+    await page.keyboard.press('Escape');
+    await composerClosed();
+    await releaseGate();
+    await page.waitForTimeout(400);
+    await composerHidden('a released late pause ack must not activate a cancelled selection');
+    await noActiveReview('a released late pause ack must stay inert');
+    assert((await state()).comments.length === 0, 'a cancelled pause race must not store comments');
+    done('held pause ack after Escape stays inert');
+  } finally {
+    await restoreFetch();
+  }
 
-  // 1. Escape while the pause ack is held: cancel wins, and the late ack is
-  // discarded by its activation token instead of activating a selection.
-  await installPauseGate();
-  await page.click('#btn-comment-region');
-  await pauseHeld();
+  try {
+    // 2. A held pause response across a document replacement must not
+    // activate, and a fresh review must start cleanly afterwards.
+    await installPauseGate();
+    await press(commentButton);
+    await pauseHeld();
+    const replaced = await human('/api/control', { action: 'new' });
+    await composerClosed();
+    await releaseGate();
+    await page.waitForTimeout(400);
+    await noActiveReview('a superseded pause ack must not reselect or compose after rotation');
+    const live = await state();
+    assert(live.docGeneration === replaced.docGeneration, 'the replacement generation must stand');
+    assert(live.comments.length === 0, 'no late comment mutation from a superseded ack');
+    await restoreFetch();
+    await press(commentButton);
+    await composerLine(selectingLine);
+    await press('#feedback-composer .review-actions button:has-text("Cancel")');
+    await composerClosed();
+    done('superseded pause ack stays inert and a fresh review starts');
+  } finally {
+    await restoreFetch();
+  }
+
+  try {
+    // 3. A dropped first submission response keeps the payload; the explicit
+    // Retry replays a byte-identical request and stores exactly one comment.
+    await press(commentButton);
+    await composerLine(selectingLine);
+    await dragRegion([0.2, 0.25], [0.5, 0.5]);
+    await typeDraft('Retry race note');
+    await page.evaluate(() => {
+      window.__originalFetch = window.fetch.bind(window);
+      window.__commentAttempts = [];
+      window.fetch = async (input, init) => {
+        if (init?.method === 'POST' && String(input).endsWith('/api/comments')) {
+          window.__commentAttempts.push(init.body);
+          const response = await window.__originalFetch(input, init);
+          if (window.__commentAttempts.length === 1) {
+            throw new TypeError('race scenario dropped the first response');
+          }
+          return response;
+        }
+        return window.__originalFetch(input, init);
+      };
+    });
+    await press('#feedback-composer .review-actions button:has-text("Send feedback")');
+    await composerLine('The response was lost. Retry sends the exact same feedback.');
+    await page.waitForFunction(() =>
+      ['Connected', 'Changes applied'].includes(
+        document.querySelector('#global-header .cs-status-text')?.textContent ?? ''),
+    null, { timeout: 8000 });
+    const midway = await state();
+    assert(midway.comments.length === 1, 'the server must have processed the dropped write');
+    await press('#feedback-composer .review-actions button:has-text("Retry same feedback")');
+    await composerClosed();
+    const settled = await state();
+    assert(settled.comments.length === 1, `retry must dedupe to exactly one comment: ${settled.comments.length}`);
+    const attempts = await page.evaluate(() => window.__commentAttempts);
+    assert(Array.isArray(attempts) && attempts.length === 2, `retry must send exactly twice: ${attempts?.length}`);
+    assert(attempts[0] === attempts[1], 'retry must replay a byte-identical payload');
+    const payload = JSON.parse(attempts[1]);
+    assert(payload.text === 'Retry race note' && payload.rect && payload.requestId,
+      'the replayed payload must keep text, rect, and request id');
+    const stored = settled.comments[0];
+    assert(stored.text === payload.text && stored.request.id === payload.requestId,
+      'the stored comment must carry the retried request id');
+    done('dropped submission retries byte-identically and stores one comment');
+  } finally {
+    await restoreFetch();
+  }
+
+  // 4. A held region and draft survive the supported desktop compact resize;
+  // native Escape cancels without storing anything.
+  await press(commentButton);
+  await composerLine(selectingLine);
+  const heldTitle = await dragRegion([0.3, 0.3], [0.6, 0.55]);
+  await typeDraft('resize hold');
+  const baseline = (await state()).comments.length;
+  await page.setViewportSize({ width: 1024, height: 768 });
+  assert(await page.locator('#feedback-composer .review-card-title').textContent() === heldTitle,
+    'the active region scope must survive the viewport resize');
+  assert(await area.inputValue() === 'resize hold', 'the draft must survive the viewport resize');
   await page.keyboard.press('Escape');
-  await instructionHidden();
-  await releasePause();
-  await page.waitForTimeout(300);
-  await restoreFetch();
-  if (!await page.evaluate(() => document.querySelector('.comment-instruction')?.hidden)) {
-    throw new Error('late pause ack activated a cancelled selection');
-  }
-  if (await page.locator('#comment-composer-input').isVisible()) {
-    throw new Error('composer opened from a cancelled pause ack');
-  }
-
-  // 2. A rotated generation supersedes the held pause ack: the UI resets to
-  // idle with an expiry notice, the released ack activates nothing, and a
-  // fresh Select area works immediately afterwards.
-  await page.evaluate(async () => {
-    const response = await fetch('/api/commands', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands: [{ type: 'stroke', layer: 'paint', color: '#222222',
-        size: 4, points: [[30, 30], [40, 40]] }], play: false, source: 'human' }) });
-    if (!response.ok) throw new Error('pause setup failed');
-  });
-  await page.waitForFunction(() =>
-    document.getElementById('status-label').textContent.trim() === 'Paused',
-  undefined, { timeout: 5000 });
-  await installPauseGate();
-  await page.click('#btn-comment-region');
-  await pauseHeld();
-  await page.evaluate(async () => {
-    const response = await fetch('/api/control', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'new', source: 'human' }) });
-    if (!response.ok) throw new Error('generation rotation failed');
-  });
-  await page.waitForFunction(() =>
-    (document.getElementById('notification-message')?.textContent ?? '').includes('expired'),
-  undefined, { timeout: 5000 });
-  await releasePause();
-  await page.waitForTimeout(300);
-  await restoreFetch();
-  if (!await page.evaluate(() => document.querySelector('.comment-instruction')?.hidden)) {
-    throw new Error('obsolete selection activated after generation rotation');
-  }
-  if (await page.locator('#comment-composer-input').isVisible()) {
-    throw new Error('composer opened from a stale pause ack');
-  }
-  await page.click('#btn-comment-region');
-  await page.waitForSelector('.comment-instruction', { state: 'visible', timeout: 5000 });
-  await page.keyboard.press('Escape');
-  await instructionHidden();
-
-  // 3. The C shortcut enters region comment mode from outside form controls.
-  await page.keyboard.press('c');
-  await page.waitForSelector('.comment-instruction', { state: 'visible', timeout: 5000 });
-  await page.keyboard.press('Escape');
-  await instructionHidden();
-
-  // 4. A stale 409 keeps the typed text, offers Reselect, and the composer
-  // reopens with the draft after a fresh pause and region drag.
-  const box = await page.locator('#canvas').boundingBox();
-  await page.click('#btn-comment-region');
-  await page.waitForSelector('.comment-instruction', { state: 'visible' });
-  await page.mouse.move(box.x + 100, box.y + 100);
-  await page.mouse.down();
-  await page.mouse.move(box.x + 200, box.y + 180, { steps: 5 });
-  await page.mouse.up();
-  await page.waitForSelector('#comment-composer-input', { state: 'visible' });
-  await page.fill('#comment-composer-input', 'Fix this corner');
-  await page.evaluate(async () => {
-    const response = await fetch('/api/commands', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commands: [{ type: 'stroke', layer: 'paint', color: '#3a2f2a',
-        size: 4, points: [[500, 500], [520, 520]] }], immediate: true, source: 'human' }) });
-    if (!response.ok) throw new Error('setup art mutation failed');
-  });
-  await page.locator('.comment-composer-footer button', { hasText: 'Send' }).click();
-  await page.waitForSelector('.comment-composer-error', { state: 'visible', timeout: 5000 });
-  if (!/changed/i.test(await page.textContent('.comment-composer-error'))) {
-    throw new Error('stale error text missing');
-  }
-  if (await page.inputValue('#comment-composer-input') !== 'Fix this corner') {
-    throw new Error('stale 409 lost the draft text');
-  }
-  await page.locator('.comment-composer-error-actions button', { hasText: 'Reselect' }).click();
-  await page.waitForSelector('#comment-composer-input', { state: 'hidden', timeout: 5000 });
-  await page.waitForSelector('.comment-instruction', { state: 'visible', timeout: 5000 });
-  await page.mouse.move(box.x + 300, box.y + 300);
-  await page.mouse.down();
-  await page.mouse.move(box.x + 380, box.y + 360, { steps: 5 });
-  await page.mouse.up();
-  await page.waitForSelector('#comment-composer-input', { state: 'visible' });
-  if (await page.inputValue('#comment-composer-input') !== 'Fix this corner') {
-    throw new Error('reselect lost the draft text');
-  }
-  await page.locator('.comment-composer-footer button', { hasText: 'Send' }).click();
-  await page.waitForSelector('.comment-card', undefined, { timeout: 5000 });
-
-  // 5. A network failure keeps the text and retries with the same request id.
-  await page.evaluate(() => {
-    window.__commentAttempts = [];
-    window.__originalFetch = window.fetch.bind(window);
-    window.fetch = async (input, init) => {
-      const body = typeof init?.body === 'string' ? JSON.parse(init.body) : null;
-      if (init?.method === 'POST' && String(input).endsWith('/api/comments')) {
-        window.__commentAttempts.push(body);
-        if (window.__commentAttempts.length === 1) throw new TypeError('test network failure');
-      }
-      return window.__originalFetch(input, init);
-    };
-  });
-  await page.click('#btn-comment-canvas');
-  await page.waitForSelector('#comment-composer-input', { state: 'visible' });
-  await page.fill('#comment-composer-input', 'Network retry probe');
-  await page.locator('.comment-composer-footer button', { hasText: 'Send' }).click();
-  await page.waitForFunction(() => {
-    const error = document.querySelector('.comment-composer-error');
-    return error && !error.hidden && /Could not send/.test(error.textContent);
-  }, undefined, { timeout: 5000 });
-  if (await page.inputValue('#comment-composer-input') !== 'Network retry probe') {
-    throw new Error('network failure lost the draft text');
-  }
-  await page.locator('.comment-composer-footer button', { hasText: 'Send' }).click();
-  await page.waitForFunction((text) => [...document.querySelectorAll('.comment-card-text')]
-    .some((node) => node.textContent === text), 'Network retry probe', { timeout: 5000 });
-  const attempts = await page.evaluate(() => window.__commentAttempts);
-  await restoreFetch();
-  if (attempts.length !== 2 || attempts[0].requestId !== attempts[1].requestId
-    || attempts[0].text !== attempts[1].text) {
-    throw new Error(`retry must reuse one request id, got ${JSON.stringify(attempts.map((a) => a.requestId))}`);
-  }
-  const retryComments = await page.evaluate(async (text) => {
-    const snap = await (await fetch('/api/state')).json();
-    return snap.comments.filter((item) => item.text === text).length;
-  }, 'Network retry probe');
-  if (retryComments !== 1) throw new Error(`retry created ${retryComments} comments, expected 1`);
-
-  // 6. A freshly opened composer keeps focus and stays inside the canvas
-  // across a viewport resize.
-  await page.click('#btn-comment-canvas');
-  await page.waitForSelector('#comment-composer-input', { state: 'visible' });
-  await page.waitForFunction(() =>
-    document.activeElement === document.getElementById('comment-composer-input'),
-  undefined, { timeout: 3000 });
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.waitForFunction(() => {
-    const composer = document.querySelector('.comment-composer').getBoundingClientRect();
-    const shadow = document.getElementById('canvas').parentElement.getBoundingClientRect();
-    return composer.left >= shadow.left && composer.right <= shadow.right
-      && composer.top >= shadow.top && composer.bottom <= shadow.bottom;
-  }, undefined, { timeout: 5000 });
-  if (!await page.evaluate(() =>
-    document.activeElement === document.getElementById('comment-composer-input'))) {
-    throw new Error('composer input lost focus after resize');
-  }
-  await page.keyboard.press('Escape');
-  await page.waitForSelector('#comment-composer-input', { state: 'hidden', timeout: 5000 });
+  await composerClosed();
+  assert((await state()).comments.length === baseline, 'escape must discard the held draft');
   await page.setViewportSize({ width: 1440, height: 900 });
+  done('held region and draft survive resize and Escape cancels');
 
-  // 7. A brush stroke still held when comment mode starts is discarded: no
-  // transient draft pixels in selection, and brush painting works afterwards.
-  await reset();
-  const marksBefore = await page.evaluate(async () =>
-    (await (await fetch('/api/state')).json()).document.marks.length);
-  const holdBox = await page.locator('#canvas').boundingBox();
-  await page.mouse.move(holdBox.x + 80, holdBox.y + 80);
-  await page.mouse.down();
-  await page.mouse.move(holdBox.x + 140, holdBox.y + 120, { steps: 4 });
-  await page.keyboard.press('c');
-  await page.waitForSelector('.comment-instruction', { state: 'visible', timeout: 5000 });
-  await page.mouse.move(holdBox.x + 200, holdBox.y + 160, { steps: 4 });
-  await page.mouse.up();
-  await page.keyboard.press('Escape');
-  await instructionHidden();
-  const pixelsBeforeSelection = await page.evaluate(() => document.getElementById('canvas').toDataURL());
-  await page.click('#btn-comment-region');
-  await page.waitForSelector('.comment-instruction', { state: 'visible', timeout: 5000 });
-  await page.mouse.move(holdBox.x + 300, holdBox.y + 300);
-  await page.mouse.down();
-  await page.mouse.move(holdBox.x + 420, holdBox.y + 380, { steps: 5 });
-  if (await page.evaluate(() => document.getElementById('canvas').toDataURL()) !== pixelsBeforeSelection) {
-    throw new Error('comment selection painted transient manual pixels');
-  }
-  await page.mouse.up();
-  await page.keyboard.press('Escape');
-  await instructionHidden();
-  await page.mouse.move(holdBox.x + 240, holdBox.y + 240);
-  await page.mouse.down();
-  await page.mouse.move(holdBox.x + 280, holdBox.y + 260, { steps: 4 });
-  await page.mouse.up();
-  await page.waitForFunction(async (before) => {
-    const snap = await (await fetch('/api/state')).json();
-    return snap.document.marks.length === before + 1;
-  }, marksBefore, { timeout: 5000 });
-
-  if (errors.length > 0) {
-    throw new Error(`Browser page error(s) detected:\n${errors.join('\n')}`);
-  }
-  return { success: true };
+  return {
+    success: true,
+    checks,
+    comments: (await state()).comments.map((item) => ({
+      number: item.number, status: item.status, scope: item.rect ? 'region' : 'whole',
+    })),
+  };
 }
