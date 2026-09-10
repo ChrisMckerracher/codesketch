@@ -216,6 +216,8 @@
 }
 
 .cs-hud-status-text {
+  display: inline-block;
+  min-width: 96px;
   font-size: 12px;
   font-weight: 600;
   color: var(--cs-text-secondary);
