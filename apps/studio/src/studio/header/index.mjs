@@ -14,7 +14,7 @@ function statusInfo(value, sending, applied) {
   const snap = value.snapshot;
   if (snap?.storageError) return { text: `Storage error: ${snap.storageError}`, tone: 'error' };
   if (snap?.playbackError) return { text: `Playback error: ${snap.playbackError}`, tone: 'error' };
-  if (value.connection === 'offline') return { text: 'Offline', tone: 'error' };
+  if (value.connection === 'offline') return { text: 'Offline', tone: 'offline' };
   if (value.connection === 'uncertain') return { text: 'Connection uncertain', tone: 'warn' };
   if (value.connection === 'connecting') return { text: 'Connecting', tone: 'muted' };
   if (sending) return { text: 'Sending…', tone: 'warn' };

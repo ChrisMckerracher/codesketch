@@ -57,7 +57,10 @@
 }
 
 .cs-tone-error { color: var(--cs-accent-crimson); }
-.cs-tone-warn, .cs-tone-ok, .cs-tone-muted, .cs-tone-playing { color: var(--cs-text-secondary); }
+.cs-tone-warn, .cs-tone-ok, .cs-tone-muted, .cs-tone-playing, .cs-tone-offline { color: var(--cs-text-secondary); }
+.cs-tone-offline .cs-dot {
+  background: var(--cs-accent-crimson);
+}
 .cs-tone-playing .cs-dot {
   background: var(--cs-accent-violet);
 }
