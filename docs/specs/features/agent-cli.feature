@@ -15,6 +15,15 @@ Feature: Complete agent painting CLI
     Then the stroke enters the observable playback queue
     And the CLI reports a concise acknowledgement
 
+  Scenario: Read the artist skill offline
+    Given the native executable is outside its source checkout
+    And no studio server is available
+    When I run paint with the artist-skill flag
+    Then I receive the complete paint-with-references skill and both referenced guides
+    And the instructions include reference inspection, pencil construction, sketch approval and native drawing rules
+    And the guide form prints the same bundle
+    And JSON output contains the complete bundle as text
+
   Scenario: Preserve a human pause
     Given the human has paused the painter
     When I submit another stroke or wait for playback

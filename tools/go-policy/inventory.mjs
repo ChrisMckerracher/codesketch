@@ -35,14 +35,17 @@ export function checkPackages(root, packages) {
 export function checkEmbeds(root, packages) {
   const declarations = [
     ['AgentGuide', 'docs/agent-guide.md'],
+    ['ArtistSkill', 'docs/artist-skill/SKILL.md'],
+    ['ArtistSkillReferenceStudy', 'docs/artist-skill/references/season-one-example.md'],
+    ['ArtistSkillCLICraft', 'docs/artist-skill/references/cli-craft.md'],
     ['RendererIndex', 'src/painting/rendering/index.mjs'],
     ['RendererStroke', 'src/painting/rendering/stroke.mjs'],
   ];
-  const expected = declarations.map(([, path]) => path);
+  const expected = declarations.map(([, path]) => path).sort();
   const assets = packages.find(pkg => pkg.ImportPath === MODULE);
   if (!assets || JSON.stringify([...(assets.EmbedPatterns ?? [])].sort()) !== JSON.stringify(expected) ||
       JSON.stringify([...(assets.EmbedFiles ?? [])].sort()) !== JSON.stringify(expected)) {
-    throw new Error('Root assets must embed exactly the canonical renderer modules and agent guide');
+    throw new Error('Root assets must embed exactly the canonical renderer modules, agent guide and artist skill bundle');
   }
   const code = readFileSync(resolve(root, 'assets.go'), 'utf8');
   for (const [name, path] of declarations) {
@@ -53,6 +56,9 @@ export function checkEmbeds(root, packages) {
     const allowed = pkg.ImportPath === `${MODULE}/internal/cli/capture` ? ['page.html', 'page.mjs'] : [];
     for (const pattern of pkg.EmbedPatterns ?? []) {
       if (!allowed.includes(pattern)) throw new Error(`${pkg.ImportPath}: unapproved embed ${pattern}`);
+    }
+    for (const file of pkg.EmbedFiles ?? []) {
+      if (!allowed.includes(file)) throw new Error(`${pkg.ImportPath}: unapproved embedded file ${file}`);
     }
   }
 }

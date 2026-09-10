@@ -98,7 +98,7 @@ var commandFlags = map[string]string{
 	"submit": "paused replace", "view": "crop scale browser", "export": "crop scale browser",
 	"wait": "timeout", "watch": "timeout interval", "pause": "", "resume": "", "step": "",
 	"clear": "", "undo": "", "redo": "", "new": "", "speed": "speed", "feedback": "",
-	"save": "", "load": "", "doctor": "browser", "help": "", "guide": "", "version": "", "completion": "",
+	"save": "", "load": "", "doctor": "browser", "help": "", "guide": "artist-skill", "version": "", "completion": "",
 }
 
 func (r Runner) dispatch(ctx context.Context, argv []string) error {
@@ -106,6 +106,10 @@ func (r Runner) dispatch(ctx context.Context, argv []string) error {
 		return r.text(helpText())
 	}
 	command := argv[0]
+	args := argv[1:]
+	if command == "--artist-skill" || strings.HasPrefix(command, "--artist-skill=") {
+		command, args = "guide", argv
+	}
 	if command == "--version" {
 		command = "version"
 	}
@@ -116,12 +120,17 @@ func (r Runner) dispatch(ctx context.Context, argv []string) error {
 	if !ok {
 		return usage("unknown command %q; run paint help", command)
 	}
-	a, err := parse.Args(argv[1:], strings.Fields(flags+" json help h"))
+	a, err := parse.Args(args, strings.Fields(flags+" json help h"))
 	if err != nil {
 		return usage("%s", err)
 	}
 	if a.Booleans["help"] && a.Booleans["h"] {
 		return usage("help provided twice")
+	}
+	if a.Booleans["artist-skill"] {
+		if err := count(a, 0, 0, "guide --artist-skill"); err != nil {
+			return err
+		}
 	}
 	if a.Booleans["help"] || a.Booleans["h"] {
 		return r.offlineText(a, commandHelp(command))

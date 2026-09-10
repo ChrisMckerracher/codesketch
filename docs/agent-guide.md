@@ -4,6 +4,8 @@ Codesketch is a local, dependency-free painting instrument designed for collabor
 
 This document is the complete guide for painting agents. You do not need to read the application source code to paint, observe, or respond to feedback.
 
+Read `paint --artist-skill` for the complete paint-with-references workflow: inspect visual references, construct a pencil drawing, incorporate sketch feedback, and develop the approved painting. The offline bundle includes its reference-study and CLI craft/recovery notes. `paint guide --artist-skill` is equivalent, and both support `--json`.
+
 ---
 
 ## 1. System Model & Operating Limits

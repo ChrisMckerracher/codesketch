@@ -79,3 +79,11 @@ The opacity controller preserves local edits and their starting layer, serialize
 | `npm run test:browser` | Studio, keyboard and opacity scenarios passed independently; valid 1000 × 700 PNG/project exports and isolated-session cleanup |
 
 Regression work demonstrated the original capture failures and playback overwriting held opacity before repair. Final JavaScript policy and browser checks were repeated after the keyboard-boundary addition. No external dependencies were added. Tests used isolated state and preserved the live painter.
+
+## Embedded artist skill
+
+Verified September 9, 2026. `paint --artist-skill` and `paint guide --artist-skill` print the complete paint-with-references skill plus both reference documents. The three repository Markdown files match the user's Codex skill byte-for-byte. Output identifies bundled reference sections and supports the existing JSON text envelope. Help and shell completions expose the boolean flag.
+
+The lead independently passed `npm run verify`: 66 JavaScript/policy tests, Go formatting, exact embed/dependency/context checks, vet and race tests. CLI regressions cover complete source content, both flag forms, JSON, offline execution, invalid arguments and ordinary guide output. Policy regressions reject missing references, renamed declarations, stray files and wildcard embeds. Bash completion behavior and available shell syntax checks passed; Fish runtime remains unavailable.
+
+`make build` passed its policy gate. From `/private/tmp`, the compiled executable printed identical complete bundles with invalid studio/browser settings and Node absent from PATH. JSON output with an empty executable search path matched the text bundle. No network access, skill installation, runtime home-directory reads or external packages are needed to print the skill. Astra implemented the bounded code and test changes through Herdr; the lead copied the source skill, reviewed the patch and verified delivery.

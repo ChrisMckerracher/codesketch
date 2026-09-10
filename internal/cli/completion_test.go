@@ -42,6 +42,8 @@ func TestBashCompletionOffersCommandsAndBrushes(t *testing.T) {
 		want  string
 	}{
 		{"paint str", 1, "stroke"}, {"paint stroke --brush pen", 3, "pencil"},
+		{"paint --art", 1, "--artist-skill"}, {"paint guide --art", 2, "--artist-skill"},
+		{"paint --artist-skill --j", 2, "--json"},
 	} {
 		suffix := fmt.Sprintf("\nCOMP_WORDS=(%s)\nCOMP_CWORD=%d\n_paint_complete\nprintf '%%s\\n' \"${COMPREPLY[@]}\"\n", tc.words, tc.index)
 		cmd := exec.Command(path, "--noprofile", "--norc")

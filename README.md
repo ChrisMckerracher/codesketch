@@ -16,11 +16,14 @@ Open <http://127.0.0.1:4317/>. The studio persists its session in `.studio/sessi
 
 ```sh
 make install
+paint --artist-skill
 paint guide
 paint doctor
 ```
 
 The default install directory is `~/.local/bin`; include it on your PATH. Use `make build` to create `bin/paint`. Builds use the installed Go toolchain with module networking and automatic toolchain downloads disabled. The compiled executable includes its guidance and renderer assets and works from any directory.
+
+`paint --artist-skill` prints the bundled [paint-with-references skill](docs/artist-skill/SKILL.md), including its reference-study and craft/recovery notes. It covers studying references, pencil construction, sketch feedback, and developing the final painting. `paint guide --artist-skill` prints the same bundle; add `--json` for a structured text response. The skill is embedded at build time and works offline.
 
 ```sh
 paint status

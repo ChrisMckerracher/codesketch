@@ -6,7 +6,7 @@ import (
 )
 
 func completion(shell string) (string, error) {
-	commands := strings.Join(commandNames(), " ")
+	commands := strings.Join(commandNames(), " ") + " --artist-skill"
 	switch shell {
 	case "bash":
 		var b strings.Builder
@@ -16,6 +16,7 @@ func completion(shell string) (string, error) {
 		for _, command := range commandNames() {
 			fmt.Fprintf(&b, "      %s) opts='%s';;\n", command, completionWords(command))
 		}
+		b.WriteString("      --artist-skill) opts='--help --json';;\n")
 		b.WriteString("    esac\n  fi\n  COMPREPLY=( $(compgen -W \"$opts\" -- \"$cur\") )\n}\ncomplete -o default -F _paint_complete paint\n")
 		// macOS ships Bash 3.2, which has neither mapfile nor compopt.
 		return strings.ReplaceAll(b.String(), "compopt -o filenames; mapfile -t COMPREPLY < <(compgen -f -- \"$cur\"); return", "while IFS= read -r candidate; do COMPREPLY+=(\"$candidate\"); done < <(compgen -f -- \"$cur\"); return"), nil
@@ -26,15 +27,17 @@ func completion(shell string) (string, error) {
 		for _, command := range commandNames() {
 			fmt.Fprintf(&b, "    %s) opts=(%s);;\n", command, completionWords(command))
 		}
+		b.WriteString("    --artist-skill) opts=(--help --json);;\n")
 		b.WriteString("  esac\n  compadd -- $opts\n  _files\n}\ncompdef _paint paint\n")
 		return b.String(), nil
 	case "fish":
 		var b strings.Builder
-		fmt.Fprintf(&b, "complete -c paint -n '__fish_use_subcommand' -a '%s'\n", commands)
+		fmt.Fprintf(&b, "complete -c paint -n '__fish_use_subcommand' -a '%s'\n", strings.Join(commandNames(), " "))
+		b.WriteString("complete -c paint -n '__fish_use_subcommand' -l artist-skill\n")
 		for _, command := range commandNames() {
 			for _, flag := range strings.Fields(commandFlags[command] + " json help") {
 				extra := " -r"
-				if flag == "json" || flag == "help" || flag == "paused" || flag == "replace" {
+				if flag == "json" || flag == "help" || flag == "paused" || flag == "replace" || flag == "artist-skill" {
 					extra = ""
 				}
 				if flag == "brush" {

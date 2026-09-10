@@ -7,11 +7,12 @@ import (
 )
 
 var booleanFlags = map[string]bool{
-	"paused":  true,
-	"replace": true,
-	"json":    true,
-	"help":    true,
-	"h":       true,
+	"artist-skill": true,
+	"paused":       true,
+	"replace":      true,
+	"json":         true,
+	"help":         true,
+	"h":            true,
 }
 
 type Result struct {

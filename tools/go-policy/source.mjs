@@ -5,7 +5,11 @@ export const MODULE = 'github.com/ChrisMckerracher/codesketch';
 const IGNORED = new Set(['.git', '.beads', '.studio', '.playwright-cli', '.dolt', 'node_modules', 'bin', 'artifacts']);
 const FORBIDDEN = new Set(['go.sum', 'go.work', 'go.work.sum', 'vendor']);
 const EMBEDS = {
-  'assets.go': new Set(['docs/agent-guide.md', 'src/painting/rendering/index.mjs', 'src/painting/rendering/stroke.mjs']),
+  'assets.go': new Set([
+    'docs/agent-guide.md', 'src/painting/rendering/index.mjs', 'src/painting/rendering/stroke.mjs',
+    'docs/artist-skill/SKILL.md', 'docs/artist-skill/references/season-one-example.md',
+    'docs/artist-skill/references/cli-craft.md',
+  ]),
   'internal/cli/capture/server.go': new Set(['page.html', 'page.mjs']),
 };
 

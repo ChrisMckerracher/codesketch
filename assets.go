@@ -20,3 +20,18 @@ var RendererStroke string
 //
 //go:embed docs/agent-guide.md
 var AgentGuide string
+
+// ArtistSkill contains the offline painting workflow.
+//
+//go:embed docs/artist-skill/SKILL.md
+var ArtistSkill string
+
+// ArtistSkillReferenceStudy contains the bundled reference-study example.
+//
+//go:embed docs/artist-skill/references/season-one-example.md
+var ArtistSkillReferenceStudy string
+
+// ArtistSkillCLICraft contains the bundled native CLI craft and recovery reference.
+//
+//go:embed docs/artist-skill/references/cli-craft.md
+var ArtistSkillCLICraft string

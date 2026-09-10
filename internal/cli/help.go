@@ -34,7 +34,7 @@ var descriptions = map[string]string{
 	"load":       "load FILE|-\nRestore project JSON from a regular file or stdin, with pending playback paused. Input: 8 MiB, 10 seconds.",
 	"doctor":     "doctor [--browser PATH]\nCheck executable/build information, loopback endpoint, studio reachability, and installed Chromium availability. Failed checks exit 1.",
 	"help":       "help [COMMAND]\nPrint offline command help. Every command accepts --help or -h.",
-	"guide":      "guide\nPrint the complete embedded agent integration guide, including renderer mechanics, limits, and the collaborative painting workflow.",
+	"guide":      "guide [--artist-skill]\nPrint the complete embedded agent integration guide, including renderer mechanics, limits, and the collaborative painting workflow.\n--artist-skill prints the complete offline artist skill and both references. paint --artist-skill is an alias.",
 	"version":    "version\nPrint the executable version. --version is an alias. Doctor reports build details.",
 	"completion": "completion bash|zsh|fish\nPrint shell completion definitions for paint. Source the output using your shell's completion setup.",
 }
@@ -54,6 +54,7 @@ func helpText() string {
 		syntax, _, _ := strings.Cut(descriptions[command], "\n")
 		lines = append(lines, "  "+syntax)
 	}
+	lines = append(lines, "  --artist-skill (alias for guide --artist-skill; complete offline skill and references)")
 	return strings.Join(lines, "\n") + "\n\nDrawing: --paused stages work, --replace replaces pending work. All commands accept --json.\nEnvironment: PAINT_URL (default http://127.0.0.1:4317), PAINT_BROWSER (Chromium executable).\nExit status: 0 success, 1 runtime failure, 2 invalid invocation, 130 interruption.\nStart with paint guide. Preserve human pauses until continuation is authorized."
 }
 
@@ -85,6 +86,9 @@ func (r Runner) offline(command string, a *parse.Result) (bool, error) {
 			return true, err
 		}
 		if command == "guide" {
+			if a.Booleans["artist-skill"] {
+				return true, r.offlineText(a, artistSkillBundle())
+			}
 			return true, r.offlineText(a, assets.AgentGuide)
 		}
 		if a.Booleans["json"] {

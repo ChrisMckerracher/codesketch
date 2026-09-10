@@ -12,7 +12,8 @@ import { checkManifest, checkModules, checkPackages, checkEmbeds } from '../tool
 const assets = readFileSync(new URL('../assets.go', import.meta.url), 'utf8');
 const guide = 'docs/agent-guide.md';
 const renderer = ['src/painting/rendering/index.mjs', 'src/painting/rendering/stroke.mjs'];
-const embeds = [guide, ...renderer];
+const artistSkill = ['docs/artist-skill/SKILL.md', 'docs/artist-skill/references/season-one-example.md', 'docs/artist-skill/references/cli-craft.md'];
+const embeds = [guide, ...renderer, ...artistSkill];
 
 function fixture(t, changes = {}) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'codesketch-go-policy-')));
@@ -20,7 +21,8 @@ function fixture(t, changes = {}) {
   const files = {
     'go.mod': `module ${MODULE}\n\ngo 1.25.7\n`, 'assets.go': assets,
     [guide]: 'Fixture instructions.\n', [renderer[0]]: 'export const fixture = true;\n',
-    [renderer[1]]: 'export const fixture = true;\n', ...changes,
+    [renderer[1]]: 'export const fixture = true;\n',
+    ...Object.fromEntries(artistSkill.map(path => [path, `Fixture ${path}.\n`])), ...changes,
   };
   for (const [path, body] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), { recursive: true });
@@ -100,7 +102,7 @@ test('enforces package dependency direction for assets, entrypoint and nested co
   for (const [from, to] of [['internal/cli', '/internal/cli/capture'], ['cmd/paint', '/internal/cli'], ['internal/cli/capture', ''], ['internal/cli', '']]) checkDirection(from, MODULE + to);
 });
 
-test('requires exact canonical renderer and guide embeds', t => {
+test('requires exact canonical renderer, guide and artist skill embeds', t => {
   const root = fixture(t);
   checkEmbeds(root, [packageAt(root)]);
   for (const patterns of [[], [...embeds, 'copy.mjs'], [guide, 'src/painting/rendering/*']]) {
@@ -108,9 +110,48 @@ test('requires exact canonical renderer and guide embeds', t => {
   }
   const renamed = fixture(t, { 'assets.go': assets.replace('var AgentGuide string', 'var CopiedGuide string') });
   assert.throws(() => checkEmbeds(renamed, [packageAt(renamed)]), /Missing canonical AgentGuide/);
-  assert.throws(() => checkEmbeds(root, [packageAt(root), packageAt(root, { ImportPath: `${MODULE}/internal/cli/capture`, EmbedPatterns: ['copied-renderer.mjs'] })]), /unapproved embed/);
+  assert.throws(() => checkEmbeds(root, [packageAt(root), packageAt(root, { ImportPath: `${MODULE}/internal/cli/capture`, EmbedPatterns: ['copied-renderer.mjs'], EmbedFiles: ['copied-renderer.mjs'] })]), /unapproved embed/);
   const hidden = fixture(t, { 'internal/cli/capture/hidden.go': '//go:build plan9\npackage capture\nimport _ "embed"\n//go:embed *.mjs\nvar hidden string\n' });
   assert.throws(() => checkSources(hidden, repositoryFiles(hidden), new Set(['embed'])), /unapproved embed/);
+});
+
+test('artist skill policy rejects missing references, extra resolved files and renamed declarations', t => {
+  const root = fixture(t);
+  for (const field of ['EmbedPatterns', 'EmbedFiles']) {
+    for (const paths of [...artistSkill.map(missing => embeds.filter(path => path !== missing)), [...embeds, 'docs/artist-skill/stray.md']]) {
+      assert.throws(() => checkEmbeds(root, [packageAt(root, { [field]: paths })]), /exactly the canonical/);
+    }
+  }
+  for (const name of ['ArtistSkill', 'ArtistSkillReferenceStudy', 'ArtistSkillCLICraft', 'RendererIndex', 'RendererStroke']) {
+    const renamed = fixture(t, { 'assets.go': assets.replace(`var ${name} string`, 'var Copied string') });
+    assert.throws(() => checkEmbeds(renamed, [packageAt(renamed)]), new RegExp(`Missing canonical ${name}`));
+  }
+  for (const context of ['internal/cli', 'internal/cli/capture']) {
+    const pkg = packageAt(root, { ImportPath: `${MODULE}/${context}`, EmbedPatterns: [], EmbedFiles: ['stray.md'] });
+    assert.throws(() => checkEmbeds(root, [packageAt(root), pkg]), /unapproved embedded file/);
+  }
+});
+
+test('source allowlist rejects stray and wildcard artist skill embeds including excluded sources', t => {
+  for (const path of ['docs/artist-skill/stray.md', 'docs/artist-skill/*', 'docs/artist-skill/references/*.md', 'docs/artist-skill', 'all:docs/artist-skill']) {
+    const root = fixture(t, { 'assets.go': `${assets}\n//go:embed ${path}\nvar Stray string\n` });
+    assert.throws(() => checkSources(root, repositoryFiles(root), new Set(['embed'])), /unapproved embed/);
+  }
+  const root = fixture(t, {
+    'internal/cli/hidden.go': '//go:build plan9\npackage cli\nimport _ "embed"\n//go:embed stray.md\nvar hidden string\n',
+  });
+  assert.throws(() => checkSources(root, repositoryFiles(root), new Set(['embed'])), /unapproved embed/);
+});
+
+test('real inventory rejects an additional artist skill embed', t => {
+  const root = fixture(t, {
+    'assets.go': `${assets}\n//go:embed docs/artist-skill/stray.md\nvar Stray string\n`,
+    'docs/artist-skill/stray.md': 'Unapproved extra instructions.\n',
+  });
+  const result = spawnSync('go', ['list', '-json', '.'], { cwd: root, env: goEnvironment(), encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.throws(() => checkEmbeds(root, jsonObjects(result.stdout)), /exactly the canonical/);
+  assert.throws(() => verifyGoPolicy(root), /unapproved embed/);
 });
 
 test('Make shares one policy prerequisite across build, install and verification', t => {
