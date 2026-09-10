@@ -95,31 +95,28 @@ html_content = '''<!DOCTYPE html>
       <button class="interactive-btn" id="btnToolMark" style="top: 70px; left: 875px; width: 50px; height: 28px;" title="Tool: Marker"></button>
       <button class="interactive-btn" id="btnToolErase" style="top: 70px; left: 930px; width: 55px; height: 28px;" title="Tool: Eraser"></button>
 
-      <!-- Stroke Properties Cycle/Step Hotspots -->
-      <button class="interactive-btn" id="btnPropSize" style="top: 132px; left: 752px; width: 236px; height: 24px;" title="Cycle Brush Size"></button>
-      <button class="interactive-btn" id="btnPropOpacity" style="top: 166px; left: 752px; width: 236px; height: 24px;" title="Cycle Opacity"></button>
-      <button class="interactive-btn" id="btnPropSmoothing" style="top: 202px; left: 752px; width: 236px; height: 24px;" title="Cycle Smoothing"></button>
+      <!-- Stroke Sliders Direct Touch Zones -->
+      <button class="interactive-btn" id="sliderTrackSize" style="top: 132px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Brush Size (1-100px)"></button>
+      <button class="interactive-btn" id="sliderTrackOpacity" style="top: 162px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Stroke Opacity (1-100%)"></button>
+      <button class="interactive-btn" id="sliderTrackSmoothing" style="top: 192px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Smoothing (0-100%)"></button>
 
-      <!-- Layers: Separate Row Select and Eye Visibility Toggle -->
-      <button class="interactive-btn" id="btnNewLayer" style="top: 294px; left: 932px; width: 56px; height: 24px;" title="Add New Layer"></button>
+      <!-- Pigment Chips Touch Zone (x: 750..990, y: 242..272) -->
+      <div id="pigmentChipsGroup">
+        <button class="interactive-btn" id="chip0" style="top: 246px; left: 754px; width: 22px; height: 22px; border-radius: 50%;" title="Lamp Black"></button>
+        <button class="interactive-btn" id="chip1" style="top: 246px; left: 784px; width: 22px; height: 22px; border-radius: 50%;" title="Graphite Slate"></button>
+        <button class="interactive-btn" id="chip2" style="top: 244px; left: 812px; width: 24px; height: 24px; border-radius: 50%;" title="Cobalt Blue"></button>
+        <button class="interactive-btn" id="chip3" style="top: 246px; left: 844px; width: 22px; height: 22px; border-radius: 50%;" title="Cerulean Cyan"></button>
+        <button class="interactive-btn" id="chip4" style="top: 246px; left: 874px; width: 22px; height: 22px; border-radius: 50%;" title="Emerald Green"></button>
+        <button class="interactive-btn" id="chip5" style="top: 246px; left: 904px; width: 22px; height: 22px; border-radius: 50%;" title="Yellow Ochre"></button>
+        <button class="interactive-btn" id="chip6" style="top: 246px; left: 934px; width: 22px; height: 22px; border-radius: 50%;" title="Cadmium Red"></button>
+        <button class="interactive-btn" id="chip7" style="top: 246px; left: 964px; width: 22px; height: 22px; border-radius: 50%;" title="Titanium White"></button>
+      </div>
 
-      <button class="interactive-btn" id="layerRow05" style="top: 324px; left: 752px; width: 208px; height: 28px;" title="Select 05 Highlights"></button>
-      <button class="interactive-btn" id="layerEye05" style="top: 324px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 05"></button>
+      <!-- Layers Header -->
+      <button class="interactive-btn" id="btnNewLayer" style="top: 288px; left: 932px; width: 56px; height: 24px;" title="Add New Layer"></button>
 
-      <button class="interactive-btn" id="layerRow04" style="top: 356px; left: 752px; width: 208px; height: 28px;" title="Select 04 Brush Shading"></button>
-      <button class="interactive-btn" id="layerEye04" style="top: 356px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 04"></button>
-
-      <button class="interactive-btn" id="layerRow03" style="top: 388px; left: 752px; width: 208px; height: 28px;" title="Select 03 Lineart"></button>
-      <button class="interactive-btn" id="layerEye03" style="top: 388px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 03"></button>
-
-      <button class="interactive-btn" id="layerRow02" style="top: 420px; left: 752px; width: 208px; height: 28px;" title="Select 02 Pencil Roughs"></button>
-      <button class="interactive-btn" id="layerEye02" style="top: 420px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 02"></button>
-
-      <button class="interactive-btn" id="layerRow01" style="top: 452px; left: 752px; width: 208px; height: 28px;" title="Select 01 Backdrop Wash"></button>
-      <button class="interactive-btn" id="layerEye01" style="top: 452px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 01"></button>
-
-      <button class="interactive-btn" id="layerRow00" style="top: 484px; left: 752px; width: 208px; height: 28px;" title="Select 00 Canvas Fill"></button>
-      <button class="interactive-btn" id="layerEye00" style="top: 484px; left: 964px; width: 26px; height: 28px;" title="Toggle Visibility 00"></button>
+      <!-- Dynamic Layer Touch Container -->
+      <div id="layersTouchContainer"></div>
 
       <!-- Canvas Comment Pin -->
       <button class="interactive-btn" id="btnCommentPin" style="top: 215px; left: 478px; width: 34px; height: 34px; border-radius: 50%;" title="Toggle Feedback Pin"></button>
@@ -229,24 +226,36 @@ html_content = '''<!DOCTYPE html>
       ctx.globalAlpha = 1.0;
     }
 
+    const PIGMENTS = [
+      { id: 0, x: 764, col: "#0F172A", name: "LAMP BLACK" },
+      { id: 1, x: 794, col: "#64748B", name: "GRAPHITE 2B" },
+      { id: 2, x: 824, col: "#2563EB", name: "COBALT BLUE" },
+      { id: 3, x: 854, col: "#0EA5E9", name: "CERULEAN CYAN" },
+      { id: 4, x: 884, col: "#10B981", name: "EMERALD GREEN" },
+      { id: 5, x: 914, col: "#F59E0B", name: "YELLOW OCHRE" },
+      { id: 6, x: 944, col: "#EF4444", name: "CADMIUM RED" },
+      { id: 7, x: 974, col: "#FFFFFF", name: "TITANIUM WHITE" }
+    ];
+
     // State
     const state = {
       activeTool: 'INK',
       size: 14,
       opacity: 100,
       smoothing: 75,
+      color: '#2563EB',
       activeLayer: '03',
       saved: false,
       feedbackOpen: true,
       statusBadge: 'ACKNOWLEDGED',
       collapsed: false,
       layers: [
-        { num: "05", name: "HIGHLIGHTS", op: "100%", vis: true },
-        { num: "04", name: "BRUSH SHADING", op: "80%", vis: true },
-        { num: "03", name: "LINEART", op: "100%", vis: true },
-        { num: "02", name: "PENCIL ROUGHS", op: "60%", vis: true },
-        { num: "01", name: "BACKDROP WASH", op: "100%", vis: true },
-        { num: "00", name: "CANVAS FILL", op: "100%", vis: true }
+        { num: "05", name: "HIGHLIGHTS", op: "100%", opacityNum: 100, vis: true },
+        { num: "04", name: "BRUSH SHADING", op: "80%", opacityNum: 80, vis: true },
+        { num: "03", name: "LINEART", op: "100%", opacityNum: 100, vis: true },
+        { num: "02", name: "PENCIL ROUGHS", op: "60%", opacityNum: 60, vis: true },
+        { num: "01", name: "BACKDROP WASH", op: "100%", opacityNum: 100, vis: true },
+        { num: "00", name: "CANVAS FILL", op: "100%", opacityNum: 100, vis: true }
       ],
       thread: [
         { author: "DIRECTOR", time: "2M AGO", color: "#3B82F6", lines: ["CLEAN TOOL BOX, CLARIFY ACTIVE LAYER,", "AND SHOW IN-APP FEEDBACK FLOW."] },
@@ -326,16 +335,19 @@ html_content = '''<!DOCTYPE html>
         if (rx < cw) draw_rect(rx, ry, Math.min(rw, cw - rx), 3, "#38BDF8", 0.45);
       }
 
-      // Active Live Stroke on Canvas
-      const live_stroke = [
-        [60, 330], [160, 310], [280, 260], [380, 290], [480, 240], [570, 275]
-      ];
-      draw_stroke(live_stroke, "#2563EB", 14, 0.95);
+      // Active Live Stroke on Canvas (03 Lineart layer)
+      const lLineart = state.layers.find(l => l.num === '03');
+      if (lLineart && lLineart.vis) {
+        const live_stroke = [
+          [60, 330], [160, 310], [280, 260], [380, 290], [480, 240], [570, 275]
+        ];
+        draw_stroke(live_stroke, "#2563EB", 14, 0.95 * (lLineart.opacityNum / 100));
 
-      // Tool cursor crosshair
-      draw_ellipse(570, 275, 12, 12, "#FFFFFF", 0.6);
-      draw_stroke([[570, 265], [570, 285]], "#FFFFFF", 1);
-      draw_stroke([[560, 275], [580, 275]], "#FFFFFF", 1);
+        // Tool cursor crosshair
+        draw_ellipse(570, 275, 12, 12, "#FFFFFF", 0.6);
+        draw_stroke([[570, 265], [570, 285]], "#FFFFFF", 1);
+        draw_stroke([[560, 275], [580, 275]], "#FFFFFF", 1);
+      }
 
       // Render interactive user-painted strokes
       if (state.userStrokes && state.userStrokes.length > 0) {
@@ -343,11 +355,12 @@ html_content = '''<!DOCTYPE html>
           const lObj = state.layers.find(l => l.num === strk.layer);
           if (lObj && !lObj.vis) continue;
 
+          const layerOp = lObj ? (lObj.opacityNum / 100) : 1.0;
           ctx.save();
           ctx.beginPath();
           ctx.strokeStyle = strk.color;
           ctx.lineWidth = strk.size;
-          ctx.globalAlpha = strk.opacity;
+          ctx.globalAlpha = strk.opacity * layerOp;
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
           if (strk.points.length === 1) {
@@ -367,25 +380,23 @@ html_content = '''<!DOCTYPE html>
 
       // 2. IN-APP FEEDBACK PIN & CARD
       if (state.feedbackOpen) {
-        // Target Anchor Pin at (486, 222)
+        // Comment Pin at (486, 222)
         draw_ellipse(497, 233, 22, 22, "#0D99FF");
         draw_ellipse(497, 233, 18, 18, "#FFFFFF");
         draw_ellipse(497, 233, 12, 12, "#0D99FF");
         draw_stroke([[486, 238], [476, 248], [492, 242]], "#0D99FF", 2);
 
         // Feedback Card (x: 120, y: 38, w: 340, h: 228)
-        draw_rounded_rect(123, 41, 340, 228, 6, "#000000", 0.25);
+        draw_rounded_rect(123, 41, 340, 228, 6, "rgba(0,0,0,0.25)");
         draw_rounded_rect(120, 38, 340, 228, 6, "#FFFFFF");
         draw_rect(120, 38, 340, 1, "#CBD5E1");
         draw_rect(120, 38, 1, 228, "#CBD5E1");
         draw_rect(459, 38, 1, 228, "#CBD5E1");
         draw_rect(120, 265, 340, 1, "#CBD5E1");
 
-        // Card Header
+        // Header
         draw_rounded_rect(121, 39, 338, 28, 5, "#F8FAFC");
         draw_rect(120, 66, 340, 1, "#E2E8F0");
-
-        // Badges
         draw_rounded_rect(130, 44, 86, 18, 3, "#E0F2FE");
         draw_text("FEEDBACK #1", 136, 48, 0.75, "#0284C7", 1);
 
@@ -402,7 +413,7 @@ html_content = '''<!DOCTYPE html>
         for (let i = 0; i < Math.min(2, state.thread.length); i++) {
           const t = state.thread[i];
           if (i > 0) draw_rect(132, ty - 8, 316, 1, "#F1F5F9");
-          draw_ellipse(132, ty, 12, 12, t.color);
+          draw_ellipse(138, ty + 6, 12, 12, t.color);
           draw_text(t.author, 150, ty + 2, 0.8, "#0F172A", 1);
           draw_text(t.time, 236, ty + 3, 0.7, "#94A3B8", 1);
           draw_text(t.lines[0], 132, ty + 22, 0.75, "#334155", 1);
@@ -453,54 +464,133 @@ html_content = '''<!DOCTYPE html>
         draw_text("MARK", 882, 79, 0.85, state.activeTool === 'MARK' ? "#0284C7" : "#94A3B8", 1);
         draw_text("ERASE", 936, 79, 0.85, state.activeTool === 'ERASE' ? "#0284C7" : "#94A3B8", 1);
 
-        // Section 2: Stroke Properties
-        draw_text("STROKE PROPERTIES", 756, 120, 0.85, "#64748B", 1);
-        draw_text("SIZE", 756, 140, 0.85, "#475569", 1);
-        draw_text(`${state.size} PX`, 936, 140, 0.85, "#0F172A", 1);
+        // Section 2: Stroke Properties & Sliders
+        draw_text("STROKE PROPERTIES", 756, 116, 0.85, "#64748B", 1);
 
-        draw_text("OPACITY", 756, 174, 0.85, "#475569", 1);
-        draw_text(`${state.opacity}%`, 942, 174, 0.85, "#0F172A", 1);
+        // SIZE Slider (1..100 PX)
+        draw_text("SIZE", 756, 136, 0.8, "#475569", 1);
+        draw_text(`${state.size} PX`, 942, 136, 0.8, "#0F172A", 1);
+        draw_rect(756, 150, 228, 2, "#E2E8F0");
+        const sizeRatio = Math.max(0, Math.min(1, (state.size - 1) / 99));
+        const sizeFillW = Math.round(sizeRatio * 228);
+        draw_rect(756, 150, sizeFillW, 2, "#0284C7");
+        const sizeThumbX = 756 + sizeFillW;
+        draw_ellipse(sizeThumbX, 151, 8, 8, "#0284C7");
+        draw_ellipse(sizeThumbX, 151, 2, 2, "#FFFFFF");
 
-        draw_text("SMOOTHING", 756, 210, 0.85, "#475569", 1);
-        draw_text(`${state.smoothing}%`, 944, 210, 0.85, "#0F172A", 1);
+        // OPACITY Slider (1..100%)
+        draw_text("OPACITY", 756, 166, 0.8, "#475569", 1);
+        draw_text(`${state.opacity}%`, 948, 166, 0.8, "#0F172A", 1);
+        draw_rect(756, 180, 228, 2, "#E2E8F0");
+        const opRatio = Math.max(0, Math.min(1, state.opacity / 100));
+        const opFillW = Math.round(opRatio * 228);
+        draw_rect(756, 180, opFillW, 2, "#0284C7");
+        const opThumbX = 756 + opFillW;
+        draw_ellipse(opThumbX, 181, 8, 8, "#0284C7");
+        draw_ellipse(opThumbX, 181, 2, 2, "#FFFFFF");
 
-        // Tool Pigment info based on activeTool
-        const toolInfo = {
-          'INK': { hex: "#2563EB", label: "INK PIGMENT" },
-          'PENCIL': { hex: "#475569", label: "GRAPHITE 2B" },
-          'MARK': { hex: "#0284C7", label: "FELT MARKER" },
-          'ERASE': { hex: "#CBD5E1", label: "VINYL ERASER" }
-        }[state.activeTool] || { hex: "#2563EB", label: "INK PIGMENT" };
+        // SMOOTHING Slider (0..100%)
+        draw_text("SMOOTHING", 756, 196, 0.8, "#475569", 1);
+        draw_text(`${state.smoothing}%`, 952, 196, 0.8, "#0F172A", 1);
+        draw_rect(756, 210, 228, 2, "#E2E8F0");
+        const smRatio = Math.max(0, Math.min(1, state.smoothing / 100));
+        const smFillW = Math.round(smRatio * 228);
+        draw_rect(756, 210, smFillW, 2, "#0284C7");
+        const smThumbX = 756 + smFillW;
+        draw_ellipse(smThumbX, 211, 8, 8, "#0284C7");
+        draw_ellipse(smThumbX, 211, 2, 2, "#FFFFFF");
 
-        draw_text(toolInfo.hex, 802, 256, 0.85, "#475569", 1);
-        draw_text(toolInfo.label, 896, 256, 0.75, "#64748B", 1);
+        // INK PIGMENT & PALETTE
+        draw_text("INK PIGMENT", 756, 230, 0.8, "#64748B", 1);
+        draw_text(state.color.toUpperCase(), 924, 230, 0.8, "#0F172A", 1);
 
-        // Section 3: Layers
-        draw_text("LAYERS", 756, 302, 0.95, "#0F172A", 1);
-        draw_text("+ NEW", 938, 302, 0.8, "#0284C7", 1);
+        for (const p of PIGMENTS) {
+          const is_sel = state.color.toUpperCase() === p.col.toUpperCase();
+          if (is_sel) {
+            draw_ellipse(p.x, 256, 20, 20, "#0284C7");
+            draw_ellipse(p.x, 256, 16, 16, "#FFFFFF");
+            draw_ellipse(p.x, 256, 12, 12, p.col);
+          } else if (p.col === '#FFFFFF') {
+            draw_ellipse(p.x, 256, 14, 14, "#CBD5E1");
+            draw_ellipse(p.x, 256, 12, 12, "#FFFFFF");
+          } else {
+            draw_ellipse(p.x, 256, 12, 12, p.col);
+          }
+        }
 
-        let ly = 328;
+        // Divider
+        draw_rect(756, 276, 228, 1, "#F1F5F9");
+
+        // Section 3: Layers Stack
+        draw_text("LAYERS", 756, 296, 0.9, "#0F172A", 1);
+        draw_text("+ NEW", 938, 296, 0.8, "#0284C7", 1);
+
+        let ly = 320;
+        state.renderedLayerRows = [];
+
         for (const l of state.layers) {
           const is_active = state.activeLayer === l.num;
           const rowColor = is_active ? "#0284C7" : (l.vis ? "#475569" : "#CBD5E1");
           const eyeColor = is_active ? "#0284C7" : (l.vis ? "#94A3B8" : "#CBD5E1");
+          const rowHeight = is_active ? 48 : 30;
 
-          draw_text(`${l.num} ${l.name}`, 756, ly + 4, 0.85, rowColor, 1);
-          draw_text(l.op, 934, ly + 4, 0.8, is_active ? "#0284C7" : (l.vis ? "#64748B" : "#CBD5E1"), 1);
+          state.renderedLayerRows.push({
+            num: l.num,
+            top: ly,
+            height: rowHeight,
+            isActive: is_active,
+            layer: l
+          });
 
-          // Inline Eye Icon
-          const ex = 972;
-          const ey = ly + 4;
-          draw_stroke([[ex, ey+2], [ex+3, ey], [ex+7, ey], [ex+10, ey+2]], eyeColor, 1);
-          draw_stroke([[ex, ey+2], [ex+3, ey+4], [ex+7, ey+4], [ex+10, ey+2]], eyeColor, 1);
-          if (l.vis) {
-            draw_stroke([[ex+5, ey+2], [ex+5.1, ey+2.1]], eyeColor, 1.5);
+          if (is_active) {
+            draw_rect(740, ly - 2, 3, 44, "#0284C7");
+            draw_rect(743, ly - 2, 257, 44, "#F0F9FF");
+            draw_text(`${l.num} ${l.name}`, 756, ly + 4, 0.85, "#0284C7", 1);
+            draw_text(l.op, 934, ly + 4, 0.8, "#0284C7", 1);
+
+            // Eye Icon
+            const ex = 972, ey = ly + 4;
+            draw_stroke([[ex, ey+2], [ex+3, ey], [ex+7, ey], [ex+10, ey+2]], eyeColor, 1);
+            draw_stroke([[ex, ey+2], [ex+3, ey+4], [ex+7, ey+4], [ex+10, ey+2]], eyeColor, 1);
+            if (l.vis) {
+              draw_stroke([[ex+5, ey+2], [ex+5.1, ey+2.1]], eyeColor, 1.5);
+            } else {
+              draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#EF4444", 1.2);
+            }
+
+            // Inline Micro-slider for Layer Opacity
+            draw_text("OPACITY", 756, ly + 24, 0.65, "#0369A1", 1);
+            draw_rect(810, ly + 26, 124, 2, "#BAE6FD");
+            const layerOpVal = l.opacityNum;
+            const layerOpRatio = Math.max(0, Math.min(1, layerOpVal / 100));
+            const layerFillW = Math.round(layerOpRatio * 124);
+            draw_rect(810, ly + 26, layerFillW, 2, "#0284C7");
+            const layerThumbX = 810 + layerFillW;
+            draw_ellipse(layerThumbX, ly + 27, 6, 6, "#0284C7");
+            draw_ellipse(layerThumbX, ly + 27, 2, 2, "#FFFFFF");
+            draw_text(`${layerOpVal}%`, 944, ly + 24, 0.65, "#0284C7", 1);
+
+            ly += 48;
           } else {
-            draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#EF4444", 1.2);
-          }
+            draw_text(`${l.num} ${l.name}`, 756, ly + 4, 0.85, rowColor, 1);
+            draw_text(l.op, 934, ly + 4, 0.8, l.vis ? "#64748B" : "#CBD5E1", 1);
 
-          ly += 32;
+            // Eye Icon
+            const ex = 972, ey = ly + 4;
+            draw_stroke([[ex, ey+2], [ex+3, ey], [ex+7, ey], [ex+10, ey+2]], eyeColor, 1);
+            draw_stroke([[ex, ey+2], [ex+3, ey+4], [ex+7, ey+4], [ex+10, ey+2]], eyeColor, 1);
+            if (l.vis) {
+              draw_stroke([[ex+5, ey+2], [ex+5.1, ey+2.1]], eyeColor, 1.5);
+            } else {
+              draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#EF4444", 1.2);
+            }
+
+            ly += 30;
+          }
         }
+
+        // Update layer touch hotspots in HTML overlay
+        updateLayerTouchZones();
 
         // Footer
         draw_text("CODESKETCH ENGINE V2", 756, 668, 0.8, "#94A3B8", 1);
@@ -510,6 +600,79 @@ html_content = '''<!DOCTYPE html>
         draw_rect(896, 12, 94, 1, "#CBD5E1");
         draw_text("STUDIO <", 908, 18, 0.85, "#0284C7", 1);
       }
+    }
+
+    function updateLayerTouchZones() {
+      const container = document.getElementById('layersTouchContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      if (state.collapsed) return;
+
+      state.renderedLayerRows.forEach(row => {
+        // Row selection button
+        const btnRow = document.createElement('button');
+        btnRow.className = 'interactive-btn';
+        btnRow.style.top = (row.top - 2) + 'px';
+        btnRow.style.left = '740px';
+        btnRow.style.width = '218px';
+        btnRow.style.height = (row.isActive ? 24 : 28) + 'px';
+        btnRow.title = 'Select ' + row.layer.num + ' ' + row.layer.name;
+        btnRow.onclick = (e) => {
+          e.stopPropagation();
+          state.activeLayer = row.layer.num;
+          renderStudio();
+        };
+        container.appendChild(btnRow);
+
+        // Eye visibility button
+        const btnEye = document.createElement('button');
+        btnEye.className = 'interactive-btn';
+        btnEye.style.top = (row.top - 2) + 'px';
+        btnEye.style.left = '960px';
+        btnEye.style.width = '30px';
+        btnEye.style.height = '24px';
+        btnEye.title = 'Toggle ' + row.layer.name + ' Visibility';
+        btnEye.onclick = (e) => {
+          e.stopPropagation();
+          row.layer.vis = !row.layer.vis;
+          renderStudio();
+        };
+        container.appendChild(btnEye);
+
+        // Active layer micro-slider touch zone
+        if (row.isActive) {
+          const btnSlider = document.createElement('button');
+          btnSlider.className = 'interactive-btn';
+          btnSlider.style.top = (row.top + 20) + 'px';
+          btnSlider.style.left = '800px';
+          btnSlider.style.width = '180px';
+          btnSlider.style.height = '22px';
+          btnSlider.style.cursor = 'ew-resize';
+          btnSlider.title = 'Drag Layer Opacity (0-100%)';
+          
+          btnSlider.onpointerdown = (e) => {
+            e.stopPropagation();
+            const setLayerOp = (clientX) => {
+              const rect = canvas.getBoundingClientRect();
+              const cx = clientX - rect.left;
+              const ratio = Math.max(0, Math.min(1, (cx - 810) / 124));
+              const val = Math.round(ratio * 100);
+              row.layer.opacityNum = val;
+              row.layer.op = val + '%';
+              renderStudio();
+            };
+            setLayerOp(e.clientX);
+            const moveHandler = (moveEvent) => setLayerOp(moveEvent.clientX);
+            const upHandler = () => {
+              window.removeEventListener('pointermove', moveHandler);
+              window.removeEventListener('pointerup', upHandler);
+            };
+            window.addEventListener('pointermove', moveHandler);
+            window.addEventListener('pointerup', upHandler);
+          };
+          container.appendChild(btnSlider);
+        }
+      });
     }
 
     renderStudio();
@@ -532,53 +695,58 @@ html_content = '''<!DOCTYPE html>
     document.getElementById('btnToolMark').onclick = () => { state.activeTool = 'MARK'; renderStudio(); };
     document.getElementById('btnToolErase').onclick = () => { state.activeTool = 'ERASE'; renderStudio(); };
 
-    // Properties Cycling
-    const sizePresets = [4, 8, 14, 20, 32, 48];
-    document.getElementById('btnPropSize').onclick = () => {
-      let idx = sizePresets.indexOf(state.size);
-      state.size = (idx === -1 || idx === sizePresets.length - 1) ? sizePresets[0] : sizePresets[idx + 1];
-      renderStudio();
-    };
-
-    const opPresets = [100, 80, 60, 40, 20];
-    document.getElementById('btnPropOpacity').onclick = () => {
-      let idx = opPresets.indexOf(state.opacity);
-      state.opacity = (idx === -1 || idx === opPresets.length - 1) ? opPresets[0] : opPresets[idx + 1];
-      renderStudio();
-    };
-
-    const smPresets = [0, 25, 50, 75, 100];
-    document.getElementById('btnPropSmoothing').onclick = () => {
-      let idx = smPresets.indexOf(state.smoothing);
-      state.smoothing = (idx === -1 || idx === smPresets.length - 1) ? smPresets[0] : smPresets[idx + 1];
-      renderStudio();
-    };
-
-    // Layer Selection and Eye Visibility Toggles
-    function bindLayers() {
-      ['05', '04', '03', '02', '01', '00'].forEach(num => {
-        const row = document.getElementById('layerRow' + num);
-        if (row) {
-          row.onclick = () => {
-            state.activeLayer = num;
-            renderStudio();
-          };
-        }
-        const eye = document.getElementById('layerEye' + num);
-        if (eye) {
-          eye.onclick = () => {
-            const l = state.layers.find(item => item.num === num);
-            if (l) l.vis = !l.vis;
-            renderStudio();
-          };
-        }
-      });
+    // Continuous Slider Dragging Implementations
+    function setupSlider(elemId, getVal, setVal) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      el.onpointerdown = (e) => {
+        e.stopPropagation();
+        const update = (clientX) => {
+          const rect = canvas.getBoundingClientRect();
+          const cx = clientX - rect.left;
+          const ratio = Math.max(0, Math.min(1, (cx - 756) / 228));
+          setVal(ratio);
+          renderStudio();
+        };
+        update(e.clientX);
+        const moveHandler = (moveEvent) => update(moveEvent.clientX);
+        const upHandler = () => {
+          window.removeEventListener('pointermove', moveHandler);
+          window.removeEventListener('pointerup', upHandler);
+        };
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('pointerup', upHandler);
+      };
     }
-    bindLayers();
 
+    setupSlider('sliderTrackSize', null, (ratio) => {
+      state.size = Math.max(1, Math.min(100, Math.round(1 + ratio * 99)));
+    });
+
+    setupSlider('sliderTrackOpacity', null, (ratio) => {
+      state.opacity = Math.max(1, Math.min(100, Math.round(1 + ratio * 99)));
+    });
+
+    setupSlider('sliderTrackSmoothing', null, (ratio) => {
+      state.smoothing = Math.max(0, Math.min(100, Math.round(ratio * 100)));
+    });
+
+    // Pigment Chips Selection
+    PIGMENTS.forEach((p, idx) => {
+      const chip = document.getElementById('chip' + idx);
+      if (chip) {
+        chip.onclick = (e) => {
+          e.stopPropagation();
+          state.color = p.col;
+          renderStudio();
+        };
+      }
+    });
+
+    // New Layer
     document.getElementById('btnNewLayer').onclick = () => {
       const nextNum = String(state.layers.length).padStart(2, '0');
-      state.layers.unshift({ num: nextNum, name: "DETAIL PASS", op: "100%", vis: true });
+      state.layers.unshift({ num: nextNum, name: "DETAIL PASS", op: "100%", opacityNum: 100, vis: true });
       state.activeLayer = nextNum;
       renderStudio();
     };
@@ -625,16 +793,13 @@ html_content = '''<!DOCTYPE html>
     // Panel Collapse & Expand
     function setCollapsed(c) {
       state.collapsed = c;
-      const sidebarBtns = [
+      const sidebarElements = [
         'btnHeaderFb', 'btnHeaderSave', 'btnHeaderCollapse',
         'btnToolInk', 'btnToolPencil', 'btnToolMark', 'btnToolErase',
-        'btnPropSize', 'btnPropOpacity', 'btnPropSmoothing',
-        'btnNewLayer',
-        'layerRow05', 'layerEye05', 'layerRow04', 'layerEye04',
-        'layerRow03', 'layerEye03', 'layerRow02', 'layerEye02',
-        'layerRow01', 'layerEye01', 'layerRow00', 'layerEye00'
+        'sliderTrackSize', 'sliderTrackOpacity', 'sliderTrackSmoothing',
+        'pigmentChipsGroup', 'btnNewLayer', 'layersTouchContainer'
       ];
-      sidebarBtns.forEach(id => {
+      sidebarElements.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = c ? 'none' : 'block';
       });
@@ -658,19 +823,16 @@ html_content = '''<!DOCTYPE html>
       if (state.feedbackOpen && x >= 120 && x <= 460 && y >= 38 && y <= 266) return;
 
       isDrawing = true;
-      const toolColor = {
-        'INK': '#2563EB',
-        'PENCIL': '#475569',
-        'MARK': '#0284C7',
-        'ERASE': '#0F172A'
-      }[state.activeTool] || '#2563EB';
+      let strokeColor = state.color;
+      if (state.activeTool === 'PENCIL') strokeColor = '#475569';
+      else if (state.activeTool === 'ERASE') strokeColor = '#0F172A';
 
       const strokeSize = state.activeTool === 'MARK' ? state.size * 1.6 : (state.activeTool === 'PENCIL' ? Math.max(2, Math.round(state.size / 3)) : state.size);
       const strokeOpacity = state.activeTool === 'MARK' ? 0.4 : (state.opacity / 100);
 
       currentStroke = {
         tool: state.activeTool,
-        color: toolColor,
+        color: strokeColor,
         size: strokeSize,
         opacity: strokeOpacity,
         layer: state.activeLayer,
@@ -705,4 +867,4 @@ html_content = '''<!DOCTYPE html>
 with open('/private/tmp/codesketch-designer-20260910-fresh/artifacts/mockup/index.html', 'w') as f:
     f.write(html_content)
 
-print("Generated exact native mockup at /private/tmp/codesketch-designer-20260910-fresh/artifacts/mockup/index.html")
+print("Generated exact interactive mockup at /private/tmp/codesketch-designer-20260910-fresh/artifacts/mockup/index.html")
