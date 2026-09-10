@@ -329,22 +329,67 @@ draw_text("typography", "MARK", 882, 79, scale=0.85, color="#94A3B8", size=1)
 draw_text("typography", "ERASE", 936, 79, scale=0.85, color="#94A3B8", size=1)
 
 # 3. Stroke Properties
-draw_text("typography", "STROKE PROPERTIES", 756, 120, scale=0.85, color="#64748B", size=1)
-draw_text("typography", "SIZE", 756, 140, scale=0.85, color="#475569", size=1)
-draw_text("typography", "14 PX", 942, 140, scale=0.85, color="#0F172A", size=1)
+draw_text("typography", "STROKE PROPERTIES", 756, 116, scale=0.85, color="#64748B", size=1)
 
-draw_text("typography", "OPACITY", 756, 174, scale=0.85, color="#475569", size=1)
-draw_text("typography", "100%", 942, 174, scale=0.85, color="#0F172A", size=1)
+# SIZE (14 PX)
+draw_text("typography", "SIZE", 756, 136, scale=0.8, color="#475569", size=1)
+draw_text("typography", "14 PX", 942, 136, scale=0.8, color="#0F172A", size=1)
+draw_rect("typography", 756, 150, 228, 2, "#E2E8F0")   # background track
+draw_rect("typography", 756, 150, 32, 2, "#0284C7")    # active progress
+draw_ellipse("typography", 784, 147, 8, 8, "#0284C7")  # slider knob (centered at 788)
+draw_ellipse("typography", 787, 150, 2, 2, "#FFFFFF")  # white center pip
 
-draw_text("typography", "SMOOTHING", 756, 210, scale=0.85, color="#475569", size=1)
-draw_text("typography", "75%", 944, 210, scale=0.85, color="#0F172A", size=1)
+# OPACITY (100%)
+draw_text("typography", "OPACITY", 756, 166, scale=0.8, color="#475569", size=1)
+draw_text("typography", "100%", 948, 166, scale=0.8, color="#0F172A", size=1)
+draw_rect("typography", 756, 180, 228, 2, "#0284C7")   # 100% full active track
+draw_ellipse("typography", 978, 177, 8, 8, "#0284C7")  # slider knob at 100%
+draw_ellipse("typography", 981, 180, 2, 2, "#FFFFFF")
 
-draw_text("typography", "#2563EB", 802, 256, scale=0.85, color="#475569", size=1)
-draw_text("typography", "INK PIGMENT", 896, 256, scale=0.75, color="#64748B", size=1)
+# SMOOTHING (75%)
+draw_text("typography", "SMOOTHING", 756, 196, scale=0.8, color="#475569", size=1)
+draw_text("typography", "75%", 952, 196, scale=0.8, color="#0F172A", size=1)
+# 75% of 228 = 171px. 756 + 171 = 927.
+draw_rect("typography", 756, 210, 228, 2, "#E2E8F0")
+draw_rect("typography", 756, 210, 171, 2, "#0284C7")
+draw_ellipse("typography", 923, 207, 8, 8, "#0284C7")  # knob centered at 927
+draw_ellipse("typography", 926, 210, 2, 2, "#FFFFFF")
 
-# 4. Layers Stack with Inline Eye Icons
-draw_text("typography", "LAYERS", 756, 302, scale=0.95, color="#0F172A", size=1)
-draw_text("typography", "+ NEW", 938, 302, scale=0.8, color="#0284C7", size=1)
+# INK PIGMENT & PALETTE
+draw_text("typography", "INK PIGMENT", 756, 230, scale=0.8, color="#64748B", size=1)
+draw_text("typography", "#2563EB", 924, 230, scale=0.8, color="#0F172A", size=1)
+
+# Curated Pigment Chips (8 circular swatches across x: 756..984)
+# Centers: x = 764, 794, 824 (ACTIVE), 854, 884, 914, 944, 974. cy = 256
+pigments = [
+    (764, "#0F172A", False),  # Lamp Black
+    (794, "#64748B", False),  # Slate / Graphite
+    (824, "#2563EB", True),   # Cobalt Blue (ACTIVE)
+    (854, "#0EA5E9", False),  # Cyan
+    (884, "#10B981", False),  # Emerald Green
+    (914, "#F59E0B", False),  # Amber
+    (944, "#EF4444", False),  # Vermilion Red
+    (974, "#FFFFFF", False),  # White
+]
+for cx, col, is_sel in pigments:
+    if is_sel:
+        # Outer focus ring for selected pigment chip (20px outer, 16px white gap, 12px core)
+        draw_ellipse("typography", cx - 10, 246, 20, 20, "#0284C7")
+        draw_ellipse("typography", cx - 8, 248, 16, 16, "#FFFFFF")
+        draw_ellipse("typography", cx - 6, 250, 12, 12, col)
+    elif col == "#FFFFFF":
+        # Subtle border for white swatch so it is visible on white background
+        draw_ellipse("typography", cx - 7, 249, 14, 14, "#CBD5E1")
+        draw_ellipse("typography", cx - 6, 250, 12, 12, "#FFFFFF")
+    else:
+        draw_ellipse("typography", cx - 6, 250, 12, 12, col)
+
+# Divider line
+draw_rect("typography", 756, 276, 228, 1, "#F1F5F9")
+
+# 4. Layers Stack with Inline Eye Icons & Active Layer Opacity Modifier
+draw_text("typography", "LAYERS", 756, 296, scale=0.9, color="#0F172A", size=1)
+draw_text("typography", "+ NEW", 938, 296, scale=0.8, color="#0284C7", size=1)
 
 def draw_eye_icon(layer, x, y, vis=True, color="#94A3B8"):
     draw_stroke(layer, [[x, y+2], [x+3, y], [x+7, y], [x+10, y+2]], color=color, size=1)
@@ -363,14 +408,30 @@ layers_stack = [
     ("00", "CANVAS FILL", "100%", False)
 ]
 
-ly = 328
+ly = 320
 for num, name, op, is_active in layers_stack:
-    row_color = "#0284C7" if is_active else "#475569"
-    eye_color = "#0284C7" if is_active else "#94A3B8"
-    draw_text("typography", f"{num} {name}", 756, ly + 4, scale=0.85, color=row_color, size=1)
-    draw_text("typography", op, 934, ly + 4, scale=0.8, color="#0284C7" if is_active else "#64748B", size=1)
-    draw_eye_icon("typography", 972, ly + 4, vis=True, color=eye_color)
-    ly += 32
+    if is_active:
+        # Active selected layer has soft Sky background + 3px accent bar + inline opacity slider
+        draw_rect("typography", 740, ly - 2, 3, 44, "#0284C7")
+        draw_rect("typography", 743, ly - 2, 257, 44, "#F0F9FF")
+        draw_text("typography", f"{num} {name}", 756, ly + 4, scale=0.85, color="#0284C7", size=1)
+        draw_text("typography", op, 934, ly + 4, scale=0.8, color="#0284C7", size=1)
+        draw_eye_icon("typography", 972, ly + 4, vis=True, color="#0284C7")
+        
+        # Inline Micro-slider for Layer Opacity
+        draw_text("typography", "OPACITY", 756, ly + 24, scale=0.65, color="#0369A1", size=1)
+        draw_rect("typography", 810, ly + 26, 124, 2, "#BAE6FD")  # track
+        draw_rect("typography", 810, ly + 26, 124, 2, "#0284C7")  # 100% active fill
+        draw_ellipse("typography", 931, ly + 24, 6, 6, "#0284C7")  # thumb knob
+        draw_ellipse("typography", 933, ly + 26, 2, 2, "#FFFFFF")  # inner white pip
+        draw_text("typography", "100%", 944, ly + 24, scale=0.65, color="#0284C7", size=1)
+        
+        ly += 48
+    else:
+        draw_text("typography", f"{num} {name}", 756, ly + 4, scale=0.85, color="#475569", size=1)
+        draw_text("typography", op, 934, ly + 4, scale=0.8, color="#0284C7" if is_active else "#64748B", size=1)
+        draw_eye_icon("typography", 972, ly + 4, vis=True, color="#94A3B8")
+        ly += 30
 
 # 5. Footer
 draw_text("typography", "CODESKETCH ENGINE V2", 756, 668, scale=0.8, color="#94A3B8", size=1)
