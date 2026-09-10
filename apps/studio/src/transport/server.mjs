@@ -32,7 +32,8 @@ export async function createStudio({ root, persistence, lifecycle: options } = {
         }
         if (url.pathname === '/api/comments') return pollComments(response, comments, null);
         if (url.pathname === '/api/project') return send(response, 200, session.project());
-        return await serveStatic(response, url.pathname, root);
+        const target = request.url.split('?')[0].split('#')[0];
+        return await serveStatic(response, target, root);
       }
       if (request.method !== 'POST') return send(response, 405, { error: 'Method not allowed' });
       lifecycle?.gate();
