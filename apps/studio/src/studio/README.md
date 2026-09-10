@@ -1,19 +1,23 @@
-# Studio UI
+# Studio source map
 
-The browser interaction UI was removed for the from-zero reconstruction.
-Only retained logic modules remain:
+`src/studio` owns browser interaction, presentation, and the HTTP client.
+The bootstrap entrypoint is [`index.mjs`](index.mjs); it composes state,
+application dispatch, renderer, and mounted UI contexts.
 
-- [`api.mjs`](api.mjs) is the HTTP client for state, commands, controls, projects, and comments.
-- [`state.mjs`](state.mjs) tracks snapshots, instance revisions, drafts, and notifications.
-- [`renderer.mjs`](renderer.mjs) is the painting renderer seam.
-- [`comments/`](comments/README.md) retains geometry and the pause handshake.
+Core contexts:
 
-Presentation modules (bootstrap, canvas controller, tools, playback,
-layers, dialogs, icons) and the comments UI workflow are gone; a fresh
-creative session will author the rebuilt hierarchy without the old layout.
+- [`application/`](application/README.md) routes intents and tracks work.
+- [`documents/`](documents/README.md) handles projects and PNG export.
+- [`gesture/`](gesture/README.md) turns pointer input into commands.
+- [`header/`](header/README.md), [`tools/`](tools/README.md), and [`viewport/`](viewport/README.md) mount workspace controls.
+- [`inspector/`](inspector/README.md) edits tool, layer, and document properties.
+- [`layers/`](layers/README.md) renders layer state; [`playback/`](playback/README.md) renders queue controls.
+- [`model/`](model/README.md), [`requests/`](requests/README.md), and [`review/`](review/README.md) provide state, transport, and feedback flows.
 
-## Verification
+`api.mjs`, `response.mjs`, and `response-artwork.mjs` define the browser-facing
+HTTP and response seams. `renderer.mjs` delegates pixels to painting’s public
+renderer. Contexts communicate through public `index.mjs` entrypoints.
 
-Browser verification is pending until the reconstructed UI lands.
-Run [`npm run verify`](../../../../package.json) for non-UI checks.
-Relevant retained coverage is in [`../../tests/`](../../tests/README.md).
+Named coverage is in [`../../tests/`](../../tests/README.md), especially
+`studio-application.test.mjs`, `studio-model.test.mjs`, and focused request,
+gesture, document, and review suites.

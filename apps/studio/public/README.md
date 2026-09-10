@@ -1,13 +1,23 @@
 # Studio public assets
 
-The browser shell and static workspace assets were removed for the
-from-zero UI reconstruction. This folder currently holds only this
-guidance document. No static runtime assets remain in this folder.
+This folder is the dependency-free browser shell served by the studio.
+[`index.html`](index.html) defines the workspace landmarks: header, layer and
+feedback sidebar, canvas stage, contextual inspector, drawers, and notice area.
 
-Markdown documentation in this folder is not a runtime asset and is
-excluded from native embedding.
+Stylesheet entrypoints are [`tokens.css`](tokens.css),
+[`workspace.css`](workspace.css), [`controls.css`](controls.css),
+[`stage.css`](stage.css), [`layers.css`](layers.css), [`inspector.css`](inspector.css),
+and [`feedback.css`](feedback.css). They share `--cs-*` tokens and system
+typography, with light and dark appearance rules.
 
-## Verification
+[`icon.svg`](icon.svg) supplies the studio’s static icon asset.
 
-Browser verification is pending until the reconstructed UI lands.
-Run [`npm run verify`](../../../package.json) for non-UI checks.
+The canvas remains the primary workspace. The shell keeps the 1000 × 700
+canvas, compact desktop controls, neutral surfaces, keyboard focus rings,
+responsive side rails/drawers, and reduced-motion behavior visible in the
+committed markup and CSS.
+
+Native embedding treats Markdown as documentation rather than runtime asset
+content. The static contract is covered by
+[`../tests/static-ui.test.mjs`](../tests/static-ui.test.mjs) and browser
+scenarios under [`../tests/browser/`](../tests/browser/README.md).
