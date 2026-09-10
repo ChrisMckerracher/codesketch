@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codesketch — Local Painting Studio</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%23007aff'/></svg>">
+  <link rel="stylesheet" href="/public/base.css">
+  <link rel="stylesheet" href="/public/layout.css">
+  <link rel="stylesheet" href="/public/tools.css">
+  <link rel="stylesheet" href="/public/inspector.css">
+  <link rel="stylesheet" href="/public/comments.css">
+  <link rel="stylesheet" href="/public/dialogs.css">
+  <link rel="stylesheet" href="/public/responsive.css">
+</head>
+<body class="studio-root">
+  <header class="studio-header" role="banner">
+    <div class="header-brand">
+      <h1 class="brand-title">Codesketch</h1>
+    </div>
+
+    <div class="header-status">
+      <span id="status-indicator" class="status-pill status-idle" aria-label="Playback status">
+        <span class="status-dot"></span>
+        <span id="status-label" class="status-text">Idle</span>
+      </span>
+      <span id="queue-indicator" class="queue-pill" title="Pending commands in queue">
+        <span class="queue-icon-slot" id="queue-icon-slot"></span>
+        <span id="queue-count">0</span> pending
+      </span>
+    </div>
+
+    <div class="header-actions">
+      <div class="btn-group" role="group" aria-label="History">
+        <button type="button" id="btn-undo" class="btn-action" aria-label="Undo" title="Undo (Cmd+Z / Ctrl+Z)">
+          <span class="btn-icon" data-icon="undo"></span>
+          <span class="btn-label">Undo</span>
+        </button>
+        <button type="button" id="btn-redo" class="btn-action" aria-label="Redo" title="Redo (Cmd+Shift+Z / Ctrl+Y)">
+          <span class="btn-icon" data-icon="redo"></span>
+          <span class="btn-label">Redo</span>
+        </button>
+      </div>
+
+      <div class="btn-group" role="group" aria-label="Document actions">
+        <button type="button" id="btn-new" class="btn-action" aria-label="Start new project" title="Start new project">
+          <span class="btn-icon" data-icon="new"></span>
+          <span class="btn-label">New</span>
+        </button>
+        <button type="button" id="btn-demo" class="btn-action" aria-label="Load landscape demo" title="Load sample landscape">
+          <span class="btn-icon" data-icon="demo"></span>
+          <span class="btn-label">Sample</span>
+        </button>
+      </div>
+
+      <div class="btn-group" role="group" aria-label="Project files">
+        <button type="button" id="btn-load-trigger" class="btn-action" aria-label="Load project from JSON file" title="Open project file">
+          <span class="btn-icon" data-icon="load"></span>
+          <span class="btn-label">Open</span>
+        </button>
+        <button type="button" id="btn-save" class="btn-action" aria-label="Save project as JSON" title="Save project file">
+          <span class="btn-icon" data-icon="save"></span>
+          <span class="btn-label">Save</span>
+        </button>
+        <input type="file" id="file-input-project" accept=".json,application/json" class="visually-hidden" aria-hidden="true">
+        <button type="button" id="btn-export" class="btn-action" aria-label="Export composite PNG image" title="Export composite PNG">
+          <span class="btn-icon" data-icon="export"></span>
+          <span class="btn-label">Export</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="studio-layout">
+    <aside class="studio-sidebar sidebar-tools" aria-label="Drawing tools">
+      <section class="tool-section">
+        <h2 class="section-title">Tools</h2>
+        <div class="tool-grid" role="group" aria-label="Drawing tool selection">
+          <button type="button" class="tool-btn active" data-tool="brush" aria-label="Brush tool" aria-pressed="true" title="Brush (1 / B)">
+            <span class="tool-icon" data-icon="brush"></span>
+            <span class="tool-name">Brush</span>
+          </button>
+          <button type="button" class="tool-btn" data-tool="pencil" aria-label="Pencil tool" aria-pressed="false" title="Pencil (2 / P)">
+            <span class="tool-icon" data-icon="pencil"></span>
+            <span class="tool-name">Pencil</span>
+          </button>
+          <button type="button" class="tool-btn" data-tool="marker" aria-label="Marker tool" aria-pressed="false" title="Marker (3 / M)">
+            <span class="tool-icon" data-icon="marker"></span>
+            <span class="tool-name">Marker</span>
+          </button>
+          <button type="button" class="tool-btn" data-tool="eraser" aria-label="Eraser tool" aria-pressed="false" title="Eraser (4 / E)">
+            <span class="tool-icon" data-icon="eraser"></span>
+            <span class="tool-name">Eraser</span>
+          </button>
+        </div>
+        <div class="tool-utility-row" role="group" aria-label="Utility tool">
+          <button type="button" class="tool-btn" data-tool="comment" aria-label="Comment tool" aria-pressed="false" title="Comment (C)">
+            <span class="tool-icon" data-icon="comment"></span>
+            <span class="tool-name">Comment</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="tool-section">
+        <div class="slider-header">
+          <label for="slider-size" class="slider-label">Size</label>
+          <span id="label-size" class="slider-value">12px</span>
+        </div>
+        <input type="range" id="slider-size" min="1" max="100" value="12" class="range-slider" aria-label="Stroke size">
+      </section>
+
+      <section class="tool-section">
+        <div class="slider-header">
+          <label for="slider-opacity" class="slider-label">Opacity</label>
+          <span id="label-opacity" class="slider-value">100%</span>
+        </div>
+        <input type="range" id="slider-opacity" min="5" max="100" value="100" class="range-slider" aria-label="Stroke opacity">
+      </section>
+
+      <section class="tool-section">
+        <h2 class="section-title">Color</h2>
+        <div class="palette-grid" id="palette-grid" role="group" aria-label="Color swatches"></div>
+        <div class="color-picker-row">
+          <label for="input-color" class="custom-color-label">
+            <canvas id="color-preview-canvas" width="28" height="28" class="preview-swatch"></canvas>
+            <span class="custom-color-text">Custom:</span>
+            <span id="hex-display" class="hex-text">#253d38</span>
+          </label>
+          <input type="color" id="input-color" value="#253d38" class="native-color-input" aria-label="Custom color picker">
+        </div>
+      </section>
+
+      <section class="tool-section">
+        <h2 class="section-title">Background</h2>
+        <div class="bg-picker-row">
+        <div class="bg-swatches" id="bg-swatches" role="group" aria-label="Background swatches"></div>
+          <input type="color" id="input-bg-color" value="#f7f3e8" class="native-color-input" aria-label="Background fill color picker">
+          <button type="button" id="btn-apply-bg" class="btn-small btn-secondary" aria-label="Fill background with chosen color" title="Fill background with chosen color">Fill</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="studio-viewport" id="studio-viewport" aria-label="Canvas workspace">
+      <div class="canvas-mount">
+        <div class="canvas-shadow">
+          <canvas id="canvas" width="1000" height="700" class="main-canvas" aria-label="Artwork canvas (1000 by 700 pixels)"></canvas>
+        </div>
+        <div id="canvas-welcome" class="canvas-welcome">
+          <p class="welcome-desc">Select a tool to begin drawing, or load the sample landscape.</p>
+          <button type="button" id="btn-welcome-demo" class="btn-small btn-secondary welcome-btn" aria-label="Load landscape demo">Load Landscape Demo</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="studio-sidebar sidebar-inspector" aria-label="Inspector and Queue">
+      <section class="inspector-section">
+        <h2 class="section-title">Playback</h2>
+        <div class="playback-controls">
+          <button type="button" id="btn-play-pause" class="btn-playback btn-playback-primary" aria-label="Play or pause queue" title="Play / Pause (Space)">
+            <span class="btn-icon" data-icon="play"></span>
+            <span id="label-play-pause" class="btn-label">Play</span>
+          </button>
+          <button type="button" id="btn-step" class="btn-playback" aria-label="Step forward one command" title="Step one command">
+            <span class="btn-icon" data-icon="step"></span>
+            <span class="btn-label">Step</span>
+          </button>
+          <button type="button" id="btn-clear" class="btn-playback" aria-label="Clear pending queue" title="Clear pending queue">
+            <span class="btn-icon" data-icon="clear"></span>
+            <span class="btn-label">Clear</span>
+          </button>
+          <button type="button" id="btn-finish" class="btn-playback btn-finish" aria-label="Skip to end: finish the active stroke and all queued commands" title="Skip to end">
+            <span class="btn-icon" data-icon="finish"></span>
+            <span class="btn-label">Skip to end</span>
+          </button>
+        </div>
+        <div class="speed-row">
+          <label for="select-speed" class="speed-label">Speed:</label>
+          <select id="select-speed" class="speed-select" aria-label="Playback speed">
+            <option value="0.25">0.25×</option>
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+            <option value="8">8×</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="inspector-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Layers</h2>
+          <button type="button" id="btn-add-layer" class="btn-small" aria-label="Add artwork layer" title="Add a new artwork layer">
+            <span class="btn-icon" data-icon="plus"></span> Add
+          </button>
+        </div>
+        <div class="layer-list" id="layer-list" role="radiogroup" aria-label="Artwork layers"></div>
+        <div class="layer-opacity-box">
+          <div class="slider-header">
+            <label for="slider-layer-opacity" class="slider-label">Layer Opacity</label>
+            <span id="label-layer-opacity" class="slider-value">100%</span>
+          </div>
+          <input type="range" id="slider-layer-opacity" min="0" max="100" value="100" class="range-slider" aria-label="Active layer opacity">
+        </div>
+      </section>
+
+      <section class="inspector-section comments-section">
+        <div class="section-header-row">
+          <h2 class="section-title">Comments</h2>
+          <span id="comment-listening" class="comment-listening" role="status" aria-label="Agent listening status">Not listening</span>
+        </div>
+        <p class="comments-hint">Comment on the visible canvas.</p>
+        <div class="comment-actions">
+          <button type="button" id="btn-comment-canvas" class="btn-small btn-secondary" aria-label="Comment on the whole canvas">Comment on canvas</button>
+          <button type="button" id="btn-comment-region" class="btn-small btn-secondary" aria-label="Select a canvas area to comment on">Select area</button>
+        </div>
+        <div id="comment-list" class="comment-list" role="list" aria-label="Comments"></div>
+      </section>
+    </aside>
+  </div>
+
+  <div id="notification-banner" class="notification-banner" hidden aria-live="assertive">
+    <span class="notification-icon" data-icon="alert"></span>
+    <span id="notification-message" class="notification-text"></span>
+    <button type="button" id="btn-dismiss-notification" class="btn-dismiss" aria-label="Dismiss notification">×</button>
+  </div>
+
+  <dialog id="modal-dialog" class="studio-modal">
+    <div class="modal-card">
+      <h3 id="modal-title" class="modal-title">Confirm Action</h3>
+      <p id="modal-message" class="modal-message"></p>
+      <div id="modal-input-wrap" class="modal-input-wrap" hidden>
+        <label for="modal-input-field" id="modal-input-label" class="modal-input-label">Layer name:</label>
+        <input type="text" id="modal-input-field" class="modal-text-input" maxlength="80">
+      </div>
+      <div class="modal-buttons">
+        <button type="button" id="modal-btn-cancel" class="btn-secondary" aria-label="Cancel modal action">Cancel</button>
+        <button type="button" id="modal-btn-confirm" class="btn-accent" aria-label="Confirm modal action">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="/src/studio/index.mjs"></script>
+</body>
+</html>

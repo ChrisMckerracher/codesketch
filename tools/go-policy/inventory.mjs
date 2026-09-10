@@ -1,6 +1,7 @@
 import { readFileSync, realpathSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
 import { MODULE, checkDirection } from './source.mjs';
+import { studioRuntimeFiles } from './runtime-inventory.mjs';
 
 export function checkManifest(root) {
   const text = readFileSync(resolve(root, 'go.mod'), 'utf8').replace(/\/\/[^\n]*/g, '').trim();
@@ -25,7 +26,7 @@ export function checkPackages(root, packages) {
     }
     if (pkg.CgoFiles?.length) throw new Error(`${pkg.ImportPath}: shipped CGo sources forbidden`);
     if (pkg.ImportPath.endsWith('.test')) continue;
-    const from = relative(root, pkg.Dir).split(sep).join('/');
+    const from = relative(root, realpathSync(pkg.Dir)).split(sep).join('/');
     for (const spec of [...pkg.Imports ?? [], ...pkg.TestImports ?? [], ...pkg.XTestImports ?? []]) {
       checkDirection(from, spec.replace(/ \[.*\]$/, ''));
     }
@@ -33,32 +34,46 @@ export function checkPackages(root, packages) {
 }
 
 export function checkEmbeds(root, packages) {
-  const declarations = [
-    ['AgentGuide', 'docs/agent-guide.md'],
-    ['ArtistSkill', 'docs/artist-skill/SKILL.md'],
-    ['ArtistSkillReferenceStudy', 'docs/artist-skill/references/season-one-example.md'],
-    ['ArtistSkillCLICraft', 'docs/artist-skill/references/cli-craft.md'],
-    ['RendererIndex', 'src/painting/rendering/index.mjs'],
-    ['RendererStroke', 'src/painting/rendering/stroke.mjs'],
+  const runtime = studioRuntimeFiles(root);
+  const owners = [
+    ['apps/studio/assets.go', `${MODULE}/apps/studio`, 'Studio runtime assets', [
+      ['RendererIndex', 'src/painting/rendering/index.mjs'],
+      ['RendererStroke', 'src/painting/rendering/stroke.mjs'],
+    ], runtime],
+    ['docs/assets.go', `${MODULE}/docs`, 'Docs assets', [
+      ['AgentGuide', 'agent-guide.md'],
+      ['ArtistSkill', 'artist-skill/SKILL.md'],
+      ['ArtistSkillReferenceStudy', 'artist-skill/references/season-one-example.md'],
+      ['ArtistSkillCLICraft', 'artist-skill/references/cli-craft.md'],
+    ], null],
   ];
-  const expected = declarations.map(([, path]) => path).sort();
-  const assets = packages.find(pkg => pkg.ImportPath === MODULE);
-  if (!assets || JSON.stringify([...(assets.EmbedPatterns ?? [])].sort()) !== JSON.stringify(expected) ||
-      JSON.stringify([...(assets.EmbedFiles ?? [])].sort()) !== JSON.stringify(expected)) {
-    throw new Error('Root assets must embed exactly the canonical renderer modules, agent guide and artist skill bundle');
+  for (const [file, importPath, label, declarations, exact] of owners) {
+    const expected = [...new Set(exact ?? declarations.map(([, path]) => path))].sort();
+    const assets = packages.find(pkg => pkg.ImportPath === importPath);
+    if (!assets) throw new Error(`${label} must embed exactly the canonical assets bundle`);
+    const patterns = [...new Set(assets.EmbedPatterns ?? [])].sort();
+    const files = [...new Set(assets.EmbedFiles ?? [])].sort();
+    if (JSON.stringify(patterns) !== JSON.stringify(expected) || JSON.stringify(files) !== JSON.stringify(expected)) {
+      const missing = expected.filter(path => !patterns.includes(path) || !files.includes(path));
+      const unexpected = [...new Set([...patterns, ...files])].filter(path => !expected.includes(path));
+      throw new Error(`${label} must embed exactly the canonical assets bundle (missing [${missing.join(', ')}], unexpected [${unexpected.join(', ')}])`);
+    }
+    const code = readFileSync(resolve(root, file), 'utf8');
+    for (const [name, path] of declarations) {
+      if (!code.includes(`//go:embed ${path}\nvar ${name} string`)) throw new Error(`Missing canonical ${name} embed declaration`);
+    }
   }
-  const code = readFileSync(resolve(root, 'assets.go'), 'utf8');
-  for (const [name, path] of declarations) {
-    if (!code.includes(`//go:embed ${path}\nvar ${name} string`)) throw new Error(`Missing canonical ${name} embed declaration`);
-  }
+  const allowed = new Map([
+    ...owners.map(([, importPath, , declarations, exact]) => [importPath, exact ?? declarations.map(([, path]) => path)]),
+    [`${MODULE}/apps/paint/internal/cli/capture`, ['page.html', 'page.mjs']],
+  ]);
   for (const pkg of packages.filter(pkg => pkg.Module?.Path === MODULE && !pkg.ForTest && !pkg.ImportPath.endsWith('.test'))) {
-    if (pkg.ImportPath === MODULE) continue;
-    const allowed = pkg.ImportPath === `${MODULE}/internal/cli/capture` ? ['page.html', 'page.mjs'] : [];
+    const permitted = allowed.get(pkg.ImportPath) ?? [];
     for (const pattern of pkg.EmbedPatterns ?? []) {
-      if (!allowed.includes(pattern)) throw new Error(`${pkg.ImportPath}: unapproved embed ${pattern}`);
+      if (!permitted.includes(pattern)) throw new Error(`${pkg.ImportPath}: unapproved embed ${pattern}`);
     }
     for (const file of pkg.EmbedFiles ?? []) {
-      if (!allowed.includes(file)) throw new Error(`${pkg.ImportPath}: unapproved embedded file ${file}`);
+      if (!permitted.includes(file)) throw new Error(`${pkg.ImportPath}: unapproved embedded file ${file}`);
     }
   }
 }

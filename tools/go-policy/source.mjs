@@ -1,17 +1,26 @@
 import { readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
+import { studioRuntimeFiles } from './runtime-inventory.mjs';
 
 export const MODULE = 'github.com/ChrisMckerracher/codesketch';
+const STUDIO_ASSETS = 'apps/studio/assets.go';
+const STUDIO_ASSETS_TEST = 'apps/studio/assets_test.go';
+const DOCS_ASSETS = 'docs/assets.go';
 const IGNORED = new Set(['.git', '.beads', '.studio', '.playwright-cli', '.dolt', 'node_modules', 'bin', 'artifacts']);
 const FORBIDDEN = new Set(['go.sum', 'go.work', 'go.work.sum', 'vendor']);
-const EMBEDS = {
-  'assets.go': new Set([
-    'docs/agent-guide.md', 'src/painting/rendering/index.mjs', 'src/painting/rendering/stroke.mjs',
-    'docs/artist-skill/SKILL.md', 'docs/artist-skill/references/season-one-example.md',
-    'docs/artist-skill/references/cli-craft.md',
+const STATIC_EMBEDS = {
+  [DOCS_ASSETS]: new Set([
+    'agent-guide.md', 'artist-skill/SKILL.md',
+    'artist-skill/references/season-one-example.md', 'artist-skill/references/cli-craft.md',
   ]),
-  'internal/cli/capture/server.go': new Set(['page.html', 'page.mjs']),
+  'apps/paint/internal/cli/capture/server.go': new Set(['page.html', 'page.mjs']),
 };
+
+// The studio asset inventory is derived from the source/public tree so the
+// reviewed embed declarations and policy share one canonical expected list.
+function embedsFor(root) {
+  return { ...STATIC_EMBEDS, [STUDIO_ASSETS]: new Set(studioRuntimeFiles(root)) };
+}
 
 export function repositoryFiles(root) {
   const files = [];
@@ -64,31 +73,36 @@ export function importsOf(code) {
 export function checkDirection(from, target) {
   if (target !== MODULE && !target.startsWith(`${MODULE}/`)) return;
   const to = target.slice(MODULE.length).replace(/^\//, '');
-  if (from === '' || (from === 'cmd/paint' && to !== 'internal/cli')) {
+  if (from === '' || (from === 'apps/paint/cmd/paint' && to !== 'apps/paint/internal/cli')) {
     throw new Error(`${from || 'assets'} cannot import ${target}`);
   }
-  if (from === 'internal/cli') {
-    if (to !== '' && !to.startsWith('internal/cli/')) throw new Error(`CLI orchestration cannot import ${target}`);
+  if (from === 'apps/paint/internal/cli') {
+    if (to !== 'docs' && to !== 'apps/paint/internal/cli' && !to.startsWith('apps/paint/internal/cli/')) {
+      throw new Error(`CLI orchestration cannot import ${target}`);
+    }
     return;
   }
-  if (from === 'cmd/paint') return;
-  const context = from.split('/').slice(0, 3).join('/');
-  if (context === 'internal/cli/capture' && to === '') return;
+  if (from === 'apps/paint/cmd/paint') return;
+  const context = from.split('/').slice(0, 5).join('/');
+  if (context === 'apps/paint/internal/cli/capture' && to === 'apps/studio') return;
+  if (context === 'apps/paint/internal/cli/lifecycle' && to === 'apps/studio') return;
   if (to !== context && !to.startsWith(`${context}/`)) throw new Error(`${from} cannot import ${target}`);
 }
 
 export function checkSources(root, files, standard) {
   const sources = files.filter(file => file.endsWith('.go'));
+  const embeds = embedsFor(root);
   for (const file of sources) {
     const rel = relative(root, file).split(sep).join('/');
-    if (rel !== 'assets.go' && !/^(?:cmd\/paint|internal\/cli|internal\/cli\/(?:capture|input|parse|transport)(?:\/[^/]+)*)\/[^/]+\.go$/.test(rel)) {
+    if (rel !== STUDIO_ASSETS && rel !== STUDIO_ASSETS_TEST && rel !== DOCS_ASSETS &&
+        !/^apps\/paint\/(?:cmd\/paint|internal\/cli|internal\/cli\/(?:capture|input|parse|transport|lifecycle)(?:\/[^/]+)*)\/[^/]+\.go$/.test(rel)) {
       throw new Error(`${rel}: unapproved Go source context`);
     }
     const code = readFileSync(file, 'utf8');
     const lines = code.split('\n').length - Number(code.endsWith('\n'));
     if (lines > 300) throw new Error(`${rel}: exceeds 300 Go source lines (${lines})`);
     for (const [, pattern] of code.matchAll(/^\/\/go:embed\s+([^\r\n]+)$/gm)) {
-      if (!EMBEDS[rel]?.has(pattern)) throw new Error(`${rel}: unapproved embed ${pattern}`);
+      if (!embeds[rel]?.has(pattern)) throw new Error(`${rel}: unapproved embed ${pattern}`);
     }
     const from = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
     for (const spec of importsOf(code)) {

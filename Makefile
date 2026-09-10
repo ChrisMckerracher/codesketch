@@ -5,7 +5,7 @@ GO_ENV = GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOWORK=off GOFLAGS= GOENV=off
 
 build: policy-go
 	@mkdir -p bin
-	$(GO_ENV) CGO_ENABLED=0 go build -trimpath -o bin/paint ./cmd/paint
+	$(GO_ENV) CGO_ENABLED=0 go build -trimpath -o bin/paint ./apps/paint/cmd/paint
 
 install: build
 	install -d "$(PREFIX)/bin"

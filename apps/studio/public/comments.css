@@ -1,0 +1,286 @@
+/* Comments inspector, canvas overlay, and anchored composer */
+
+/* The overlay and composer anchor to the canvas shadow box */
+.canvas-shadow {
+  position: relative;
+}
+
+/* Canvas overlay: never intercepts painting; only pins are interactive */
+.comment-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.comment-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-system);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.comment-pin:hover {
+  background: var(--accent-hover);
+}
+
+.comment-region {
+  position: absolute;
+  background: var(--selection-bg);
+  border: 1.5px solid var(--selection-border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.comment-region-draft {
+  position: absolute;
+  background: var(--selection-bg);
+  border: 1.5px dashed var(--selection-border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* In-canvas instruction while a region selection is armed */
+.comment-instruction {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  background: var(--mac-panel-bg);
+  border: 1px solid var(--mac-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popup);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.35;
+  padding: 4px 10px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.comment-instruction[hidden] {
+  display: none;
+}
+
+/* Inspector section */
+.comments-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.comment-listening {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.comment-listening::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: currentColor;
+}
+
+.comment-listening.is-listening {
+  color: var(--status-playing);
+}
+
+.comment-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.comment-empty {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.comment-card {
+  background: var(--control-bg);
+  border: 1px solid var(--mac-separator);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+
+.comment-card-selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.comment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.comment-card-num {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
+.comment-card-num:hover {
+  text-decoration: underline;
+}
+
+.comment-card-status {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.comment-card-text {
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.comment-card-changed {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--status-paused);
+}
+
+.comment-card-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+/* Anchored composer */
+.comment-composer {
+  position: absolute;
+  z-index: 30;
+  width: min(320px, calc(100% - 16px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--mac-panel-bg);
+  border: 1px solid var(--mac-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popup);
+  padding: 10px;
+  line-height: 1.35;
+}
+
+.comment-composer[hidden] {
+  display: none;
+}
+
+.comment-composer-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.comment-composer-input {
+  width: 100%;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-family: var(--font-system);
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.35;
+  resize: none;
+  outline: none;
+}
+
+.comment-composer-input:focus {
+  border-color: var(--mac-border-focus);
+}
+
+.comment-composer-error {
+  font-size: 11px;
+  color: var(--status-error);
+}
+
+.comment-composer-error[hidden] {
+  display: none;
+}
+
+.comment-composer-error-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.comment-composer-error-actions[hidden] {
+  display: none;
+}
+
+.comment-composer-footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.char-counter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.comment-composer-footer .char-counter {
+  margin-right: auto;
+}
+
+/* base.css declares .btn-small after .btn-accent, so its gray background
+   wins at equal specificity. Re-assert the accent appearance with a scoped
+   descendant selector so Apply & Continue stays high-contrast. */
+.comment-composer .btn-accent {
+  background-color: var(--accent);
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.comment-composer .btn-accent:hover {
+  background-color: var(--accent-hover);
+  color: #fff;
+}
+
+.comment-composer .btn-accent:active {
+  background-color: var(--accent-active);
+  color: #fff;
+}
+
+.comment-composer .btn-accent:focus-visible {
+  outline: 2px solid var(--mac-border-focus);
+  outline-offset: 1px;
+}

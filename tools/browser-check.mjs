@@ -5,10 +5,11 @@
 import { resolve } from 'node:path';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
-import { createStudio } from '../src/transport/index.mjs';
+import { createStudio } from '../apps/studio/src/transport/index.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const SCENARIOS = ['studio.mjs', 'layers-keyboard.mjs', 'layers-opacity.mjs'];
+const STUDIO_ROOT = resolve(ROOT, 'apps', 'studio');
+const SCENARIOS = ['studio.mjs', 'layers-keyboard.mjs', 'layers-opacity.mjs', 'comments.mjs', 'comments-races.mjs', 'finish.mjs'];
 const ARTIFACTS_DIR = resolve(ROOT, 'artifacts/browser-check');
 
 // 1. Verify playwright-cli availability
@@ -20,7 +21,7 @@ if (checkCli.status !== 0) {
 }
 
 for (const name of SCENARIOS) {
-  if (!existsSync(resolve(ROOT, 'tests/browser', name))) {
+  if (!existsSync(resolve(STUDIO_ROOT, 'tests/browser', name))) {
     console.error(`Browser test scenario not found: ${name}`);
     process.exit(1);
   }
@@ -67,8 +68,10 @@ function verifyArtifacts() {
   const jsonPath = resolve(ARTIFACTS_DIR, 'project.json');
   if (!existsSync(jsonPath)) throw new Error(`Expected downloaded project JSON at ${jsonPath}`);
   const projectData = JSON.parse(readFileSync(jsonPath, 'utf8'));
-  if (!projectData || (!projectData.commands && !projectData.document)) {
-    throw new Error('Downloaded project JSON is missing commands or document structure');
+  if (!projectData || projectData.format !== 'codesketch' || projectData.version !== 2 ||
+      !Array.isArray(projectData.commands) || !Array.isArray(projectData.queue) ||
+      !Array.isArray(projectData.comments) || !Number.isInteger(projectData.cursor)) {
+    throw new Error('Downloaded project JSON does not match the current codesketch v2 project format');
   }
 
   const pngPath = resolve(ARTIFACTS_DIR, 'artwork.png');
@@ -89,7 +92,7 @@ function verifyArtifacts() {
 
 async function run() {
   console.log('Starting ephemeral studio server (no persistence)...');
-  const { server } = await createStudio({ root: ROOT });
+  const { server } = await createStudio({ root: STUDIO_ROOT });
   serverInstance = server;
 
   await new Promise((resolveListen, rejectListen) => {
@@ -109,7 +112,7 @@ async function run() {
 
   for (const name of SCENARIOS) {
     console.log(`Running browser scenario: ${name}...`);
-    const file = resolve(ROOT, 'tests/browser', name);
+    const file = resolve(STUDIO_ROOT, 'tests/browser', name);
     const result = await execCli(['run-code', '--filename', file], 60_000);
     if (result.code !== 0 || result.out.includes('### Error') || result.err.includes('### Error')) {
       throw new Error(`${name} failed:\n${result.out}\n${result.err}`);
@@ -134,7 +137,7 @@ try {
   } catch {}
   if (serverInstance) {
     try {
-      serverInstance.closeAllConnections?.();
+      serverInstance.closeAllConnections();
       await new Promise((resolveClose) => serverInstance.close(resolveClose));
     } catch {}
   }

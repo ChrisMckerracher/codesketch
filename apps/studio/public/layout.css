@@ -1,0 +1,257 @@
+/* Apple macOS Unified Toolbar & Application Workspace Layout */
+
+.studio-header {
+  height: 50px;
+  background-color: var(--mac-toolbar-bg);
+  border-bottom: 1px solid var(--mac-separator);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 14px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.brand-title {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.brand-tag {
+  display: none;
+}
+
+/* Center status & queue indicator */
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--status-idle);
+  flex-shrink: 0;
+}
+
+.status-playing .status-dot { background-color: var(--status-playing); }
+.status-paused .status-dot { background-color: var(--status-paused); }
+.status-offline .status-dot { background-color: var(--status-error); }
+
+.queue-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-system);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Segmented desktop control styling */
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 1px;
+}
+
+.btn-group .btn-action {
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-group .btn-action:hover {
+  background-color: var(--control-hover);
+}
+
+.btn-group .btn-action:active {
+  background-color: var(--control-active);
+}
+
+/* Main workspace layout */
+.studio-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Sidebars */
+.studio-sidebar {
+  background-color: var(--mac-panel-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.sidebar-tools {
+  width: 210px;
+  border-right: 1px solid var(--mac-separator);
+}
+
+.sidebar-inspector {
+  width: 260px;
+  border-left: 1px solid var(--mac-separator);
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.section-header-row .section-title {
+  margin-bottom: 0;
+}
+
+/* Canvas Viewport: neutral desk matte */
+.studio-viewport {
+  flex: 1;
+  background-color: var(--mac-workspace-bg);
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+
+.canvas-mount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  position: relative;
+  width: 100%;
+  max-width: min(1000px, 100%, calc((100vh - 50px - 48px) * (1000 / 700)));
+  aspect-ratio: 1000 / 700;
+}
+
+.canvas-shadow {
+  box-shadow: var(--shadow-canvas);
+  border-radius: 2px;
+  line-height: 0;
+  background-color: var(--paper-bg);
+  border: 1px solid var(--canvas-border);
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.main-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 700;
+  cursor: crosshair;
+}
+
+.main-canvas.cursor-eraser {
+  cursor: cell;
+}
+
+/* Modest in-context hint on empty canvas (borderless, shadowless text on paper) */
+.canvas-welcome {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.canvas-welcome[hidden] {
+  display: none;
+}
+
+.welcome-title {
+  display: none;
+}
+
+.welcome-desc {
+  font-size: 13px;
+  color: #3a3a3c;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.canvas-welcome button,
+.welcome-btn {
+  pointer-events: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  background-color: var(--mac-panel-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-btn:hover {
+  background-color: var(--mac-toolbar-bg);
+}

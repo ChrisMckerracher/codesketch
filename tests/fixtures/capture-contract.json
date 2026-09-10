@@ -5,14 +5,14 @@
   ],
   "tickMilliseconds": 60,
   "snapshot": {
-    "instanceId":"synthetic","revision":5,"artRevision":5,
+    "instanceId":"synthetic","revision":5,"artRevision":2,
     "document": {
       "version":1,"width":1000,"height":700,"background":"#ffffff",
       "layers":[{"id":"paint","name":"Painting","visible":true,"opacity":1}],
       "marks":[{"type":"rect","layer":"paint","color":"#ff0000","opacity":1,"x":10,"y":10,"width":80,"height":60}]
     },
     "playback":{"status":"paused","speed":1,"remaining":1,"active":null},
-    "history":{"cursor":2,"total":2},"feedback":[],"storageError":null,"playbackError":null
+    "history":{"cursor":2,"total":2},"storageError":null,"playbackError":null
   },
   "cases": [
     {

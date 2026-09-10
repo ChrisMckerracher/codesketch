@@ -17,25 +17,28 @@ const errors = [];
 
 function fail(msg) { errors.push(msg); }
 
-function checkSupplyChain() {
-  const pkgPath = resolve(ROOT, 'package.json');
-  if (existsSync(pkgPath)) {
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-    for (const key of DEPENDENCY_KEYS) {
-      if (pkg[key] && Object.keys(pkg[key]).length > 0) fail(`package.json: ${key} entries forbidden`);
+function checkSupplyChain(files) {
+  for (const file of files) {
+    const name = basename(file);
+    const rel = relative(ROOT, file).split(sep).join('/');
+    if (name === 'package.json') {
+      const pkg = JSON.parse(readFileSync(file, 'utf8'));
+      for (const key of DEPENDENCY_KEYS) {
+        if (pkg[key] && Object.keys(pkg[key]).length > 0) fail(`${rel}: ${key} entries forbidden`);
+      }
+      if (pkg.workspaces) fail(`${rel}: npm workspaces forbidden`);
+    } else if (name === 'package-lock.json') {
+      if (file !== resolve(ROOT, 'package-lock.json')) {
+        fail(`${rel}: nested lockfile forbidden`);
+        continue;
+      }
+      const lock = JSON.parse(readFileSync(file, 'utf8'));
+      const pkgs = Object.keys(lock.packages || {}).filter((k) => k !== '');
+      if (pkgs.length > 0) fail(`${rel}: third-party packages forbidden beyond root`);
+      if (lock.dependencies && Object.keys(lock.dependencies).length > 0) fail(`${rel}: dependencies forbidden`);
+    } else if (ALTERNATE_LOCKFILES.includes(name)) {
+      fail(`${rel}: Alternate lockfile '${name}' forbidden`);
     }
-  }
-
-  for (const lock of ALTERNATE_LOCKFILES) {
-    if (existsSync(resolve(ROOT, lock))) fail(`Alternate lockfile '${lock}' forbidden`);
-  }
-
-  const lockPath = resolve(ROOT, 'package-lock.json');
-  if (existsSync(lockPath)) {
-    const lock = JSON.parse(readFileSync(lockPath, 'utf8'));
-    const pkgs = Object.keys(lock.packages || {}).filter((k) => k !== '');
-    if (pkgs.length > 0) fail('package-lock.json: third-party packages forbidden beyond root');
-    if (lock.dependencies && Object.keys(lock.dependencies).length > 0) fail('package-lock.json: dependencies forbidden');
   }
 }
 
@@ -103,8 +106,8 @@ function checkSourceFile(file, code, rel, srcDir) {
 
     // This embedded page serves the canonical module through its local route.
     // Match both the importer and specifier; all other imports resolve on disk.
-    const targetPath = rel.split(sep).join('/') === 'internal/cli/capture/page.mjs' && spec === './rendering/index.mjs'
-      ? resolve(ROOT, 'src/painting/rendering/index.mjs') : resolve(dirname(file), spec);
+    const targetPath = rel.split(sep).join('/') === 'apps/paint/internal/cli/capture/page.mjs' && spec === './rendering/index.mjs'
+      ? resolve(ROOT, 'apps', 'studio', 'src/painting/rendering/index.mjs') : resolve(dirname(file), spec);
     if (!existsSync(targetPath)) {
       fail(`${rel}: Target '${spec}' does not exist on disk`);
       continue;
@@ -138,10 +141,9 @@ function checkAssetFile(file, code, rel) {
 }
 
 function main() {
-  checkSupplyChain();
-  const srcDir = resolve(ROOT, 'src');
-
+  const srcDir = resolve(ROOT, 'apps', 'studio', 'src');
   const files = walk(ROOT);
+  checkSupplyChain(files);
   for (const file of files) {
     const rel = relative(ROOT, file);
     if (SOURCE_EXTENSIONS.some(ext => file.endsWith(ext))) {

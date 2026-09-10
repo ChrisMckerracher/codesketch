@@ -1,6 +1,6 @@
 ---
 name: paint-with-references
-description: Draw and paint in Codesketch with the native paint CLI, using inspected visual references, pencil construction, and user feedback before final rendering. Use for collaborative painting sessions where the user wants to watch actual drawing develop and approve the sketch.
+description: Draw and paint in Codesketch with the native paint CLI, using inspected visual references, pencil construction, and user comments before final rendering. Use for collaborative painting sessions where the user wants to watch actual drawing develop and approve the sketch.
 ---
 
 # Paint with references
@@ -9,7 +9,7 @@ Work as a painter in conversation with the person commissioning the picture. Est
 
 ## Medium and scope
 
-- Begin with `paint guide` and `paint status`. Use the installed CLI and its current guide for drawing, layers, feedback, inspection, and project files.
+- Begin with `paint guide` and `paint status`. Use the installed CLI and its current guide for drawing, layers, comments, inspection, and project files. Port 4317 is sole production running newest released code; outage sev0. For feature development, staging, or automated tests, use isolated ephemeral loopback ports and temporary persistence, never `.studio/session.json`. Keep served production files under release control; use an isolated checkout for future development. Use no persistent staging runtime.
 - Draw through native marks. **Image generation is banned unless the user explicitly approves its use for this painting.** This includes generated visual references and image-model edits. Do not trace generated artwork or convert it into native strokes to bypass the ban. Requests for higher quality, more detail, a professional finish, or a final painting do not grant approval to use image generation.
 - Reference images support observation and deliberate drawing. A small reference study can help establish proportions or technique; keep it distinct from the user's original composition.
 - Painting scripts may express hand-designed paths, curves, hatching, and batches. Their job is to operate the instrument. Keep application code and dependencies outside the painting task.
@@ -62,7 +62,28 @@ Capture with `paint view`, then open its returned image path with the image read
 
 Give concise observations grounded in the image. Describe improvements only after visually checking them. Avoid promises such as "the next pass will be professional" or claiming success from a stroke count, source script, or completed tool call.
 
-Ask for feedback on a coherent sketch or a clearly scoped study. If the user says to finish the sketch before requesting feedback, complete that pass first. Keep questions focused on the decisions that remain unresolved.
+Run `paint status` and `paint comments list --json` before each short batch to baseline control fields (`docGeneration`, `controlEpoch`), check grant requirements, and obtain the initial opaque cursor (`envelope.cursor`). Every guarded agent mutation requires explicit `--generation G --epoch E` matching current context, plus `--grant T` when granted execution is required. Process any existing pending comments from this initial list before awaiting new ones. During an intentional review pause:
+
+1. **Listen actively with opaque cursor**: Retain the latest opaque cursor from the comments envelope (`envelope.cursor`). Repeatedly execute bounded `paint comments wait --since '<cursor>' --json --timeout 30`:
+   - Without `--since '<cursor>'`, existing comments return immediately on every invocation.
+   - On timeout (`COMMENTS_TIMEOUT`): run `paint comments list --json` (or `paint status --json` plus list) to inspect current grant and epoch, process any pending open or acknowledged work, retain the latest returned cursor, and re-enter wait when still awaiting comments. This catches human Resume actions occurring between bounded invocations.
+   - On reset (`envelope.reset == true`), adopt the new document generation and control epoch, discard stale grants, and update the retained cursor.
+   - The external runtime must keep the agent turn running; Codesketch does not automatically wake or launch agents after exit. Only explicit comments polling marks the studio status as "Listening" (expires after 5 seconds).
+2. **Inspect region bounds**: Directors provide spatial critiques by selecting canvas regions (`rect: {x,y,width,height}`) on the 1000×700 canvas or whole canvas (`rect: null`), evaluating the visible canvas composite across all visible layers (`visibleLayers` with opacity > 0).
+3. **Inspect visible composite**: Inspect only the current visible composite:
+   - For region comments, use `paint view --crop x,y,w,h`.
+   - For whole-canvas comments (`rect: null`), use `paint view` without `--crop`.
+   - Open and examine the returned image with the image reader.
+4. **Acknowledge critique**: Acknowledge the open comment with current document generation and sequence: `paint comments ack <id> --generation <docGeneration> --seq <seq>`. The JSON response returns a state snapshot without a poll cursor; run `paint comments list --json` after each `ack` to obtain the newest opaque cursor and sequence.
+5. **Formulate corrections and handle staging vs execution**:
+   - *If an active grant is available* (issued via Apply & continue or human Resume): execute the correction batch with the active grant token (`paint submit revisions.json --generation <docGeneration> --epoch <epoch> --grant <grantToken>`) and wait for playback to settle (`paint wait --timeout 30`).
+   - *If no grant is active* (e.g. human Send): stage the correction batch while paused without a grant token (`paint submit revisions.json --paused --replace --generation <docGeneration> --epoch <epoch>`).
+   - Staged commands have not yet rendered to the canvas. Stay in the listening state (`paint comments wait --since '<cursor>' --json --timeout 30`) until human direction authorizes execution (e.g. human clicks Resume, issuing an active grant). Once authorized and playback completes (`paint wait`), proceed to visual verification.
+6. **Verify revision**: Once marks have rendered to the canvas, inspect the result (`paint view --crop x,y,w,h` for regions, or `paint view` without crop for whole canvas) and confirm the fix visually.
+7. **Address critique**: Mark the comment addressed using the latest sequence number: `paint comments address <id> --generation <docGeneration> --seq <latestSeq>`. Run `paint comments list --json` after each `address` to obtain the newest opaque cursor and sequence.
+8. **Wait for human review**: Return to calling bounded `paint comments wait --since '<cursor>' --json --timeout 30` to await the director's review (resolve, reopen, or further comments). Never assume playback auto-resumes or that an agent is launched automatically.
+
+Ask for review on a coherent sketch or a clearly scoped study. If the user says to finish the sketch before requesting review, complete that pass first. Keep questions focused on the decisions that remain unresolved.
 
 Treat criticism as direction for the active picture. Identify the underlying issue accurately: anatomy, proportions, contour control, staging, style fidelity, or rendering. A complaint about amateur draftsmanship calls for construction work. If the foundations repeatedly fail, save the pass and restart from the reference and proportions.
 
