@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>Codesketch</title>
+    <link rel="stylesheet" href="/public/tokens.css">
+    <link rel="stylesheet" href="/public/workspace.css">
+    <link rel="stylesheet" href="/public/controls.css">
+    <link rel="stylesheet" href="/public/layers.css">
+    <link rel="stylesheet" href="/public/inspector.css">
+    <link rel="stylesheet" href="/public/stage.css">
+    <link rel="stylesheet" href="/public/feedback.css">
+    <script type="module" src="/src/studio/index.mjs"></script>
+  </head>
+  <body>
+    <div id="studio-app">
+      <header id="global-header"></header>
+      <aside id="left-sidebar">
+        <nav class="sidebar-tabs" aria-label="Sidebar panels">
+          <button type="button" class="sidebar-tab" data-tab="layers">Layers</button>
+          <button type="button" class="sidebar-tab" data-tab="feedback">Feedback</button>
+        </nav>
+        <div class="sidebar-rail">
+          <button type="button" class="rail-trigger" data-drawer-open="left" data-tab="layers" aria-controls="compact-layers-drawer" aria-expanded="false" aria-label="Layers">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>
+          </button>
+          <button type="button" class="rail-trigger" data-drawer-open="left" data-tab="feedback" aria-controls="compact-layers-drawer" aria-expanded="false" aria-label="Feedback">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H10l-6 4V5Z"/></svg>
+          </button>
+        </div>
+        <div id="compact-layers-drawer" class="drawer drawer-left">
+          <div class="drawer-header">
+            <button type="button" class="drawer-close" data-drawer-close="left" aria-controls="compact-layers-drawer" aria-expanded="false" aria-label="Close layers drawer">&times;</button>
+          </div>
+          <section id="layer-panel" aria-label="Layers"></section>
+          <section id="feedback-panel" aria-label="Feedback"></section>
+        </div>
+      </aside>
+      <main id="stage-viewport">
+        <div id="director-hud"></div>
+        <div id="canvas-wrapper">
+          <canvas id="painting-canvas" width="1000" height="700" tabindex="0" role="img" aria-label="Painting canvas"></canvas>
+          <svg id="stage-overlay" viewBox="0 0 1000 700"></svg>
+        </div>
+        <section id="feedback-composer" aria-label="Feedback composer"></section>
+        <div id="tool-dock"></div>
+      </main>
+      <div class="inspector-dock">
+        <div class="sidebar-rail">
+          <button type="button" class="rail-trigger" data-drawer-open="right" aria-controls="compact-inspector-drawer" aria-expanded="false" aria-label="Brush properties">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9"/><path d="M19 7h1"/><circle cx="16" cy="7" r="2.5"/><path d="M4 17h3"/><path d="M13 17h7"/><circle cx="10" cy="17" r="2.5"/></svg>
+          </button>
+          <button type="button" class="rail-trigger" data-drawer-open="right" aria-controls="compact-inspector-drawer" aria-expanded="false" aria-label="Color">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/></svg>
+          </button>
+        </div>
+        <div id="compact-inspector-drawer" class="drawer drawer-right">
+          <div class="drawer-header">
+            <button type="button" class="drawer-close" data-drawer-close="right" aria-controls="compact-inspector-drawer" aria-expanded="false" aria-label="Close properties drawer">&times;</button>
+          </div>
+          <section id="right-inspector" aria-label="Contextual inspector"></section>
+        </div>
+      </div>
+      <div id="studio-notice" role="status" aria-live="polite"></div>
+    </div>
+  </body>
+</html>
