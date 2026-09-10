@@ -1,10 +1,32 @@
 // Studio HTTP client communicating with local loopback server
 
+import { snapshotProblem, projectProblem, stateReadExpect, protocolError } from './response.mjs';
+
+const DEFAULT_TIMEOUT_MS = 10000;
+const OFFLINE_MESSAGE = 'Studio server unreachable. Check connection.';
+
+function normalizeTimeoutMs(value) {
+  if (value === undefined) return DEFAULT_TIMEOUT_MS;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    throw new TypeError('timeoutMs must be a positive finite number');
+  }
+  return value;
+}
+
+function errorBodyMessage(data, text, response) {
+  if (typeof data === 'object' && data !== null && !Array.isArray(data) && typeof data.error === 'string' && data.error) {
+    return data.error;
+  }
+  if (data === undefined && text) return text;
+  return `HTTP ${response.status} ${response.statusText}`;
+}
+
 export class StudioApi {
-  constructor({ onOfflineChange, onError, onReconnect } = {}) {
+  constructor({ onOfflineChange, onError, onReconnect, timeoutMs } = {}) {
     this.onOfflineChange = onOfflineChange || (() => {});
     this.onError = onError || (() => {});
     this.onReconnect = onReconnect || (() => {});
+    this.timeoutMs = normalizeTimeoutMs(timeoutMs);
     this.isOffline = false;
   }
 
@@ -22,42 +44,57 @@ export class StudioApi {
     }
   }
 
-  async request(path, options = {}) {
+  async request(path, { signal = null, expect = null, ...options } = {}) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10000);
+    let timedOut = false;
+    let callerCancelled = false;
+    const onCallerAbort = () => {
+      callerCancelled = true;
+      controller.abort();
+    };
+    if (signal) {
+      if (signal.aborted) onCallerAbort();
+      else signal.addEventListener('abort', onCallerAbort, { once: true });
+    }
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, this.timeoutMs);
     try {
-      const response = await fetch(path, {
-        signal: controller.signal,
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-        },
-      });
-      clearTimeout(timer);
-      this.setOffline(false);
+      const response = await fetch(path, { ...options, signal: controller.signal });
       const text = await response.text();
       let data;
       try {
         data = JSON.parse(text);
       } catch {
-        data = { error: text || 'Invalid JSON response' };
+        data = undefined;
       }
       if (!response.ok) {
-        const message = data.error || `HTTP ${response.status} ${response.statusText}`;
-        const error = new Error(message);
+        const error = new Error(errorBodyMessage(data, text, response));
         error.status = response.status;
+        this.setOffline(false);
         throw error;
       }
+      if (data === undefined) {
+        throw protocolError(text ? 'Malformed JSON in successful response' : 'Empty response body');
+      }
+      if (expect) {
+        const problem = expect(data);
+        if (problem) throw protocolError(`Invalid response from ${path}: ${problem}`);
+      }
+      this.setOffline(false);
       return data;
     } catch (error) {
-      clearTimeout(timer);
-      const isNetError = error.name === 'AbortError' || error.name === 'TypeError';
-      if (isNetError) {
-        this.setOffline(true, 'Studio server unreachable. Check connection.');
+      if (callerCancelled) throw error;
+      if (timedOut || error.name === 'TypeError') {
+        this.setOffline(true, OFFLINE_MESSAGE);
       } else {
         this.onError(error.message);
       }
       throw error;
+    } finally {
+      clearTimeout(timer);
+      if (signal) signal.removeEventListener('abort', onCallerAbort);
     }
   }
 
@@ -66,11 +103,12 @@ export class StudioApi {
     if (sinceRevision !== null && sinceRevision >= 0 && instanceId) {
       query = `?since=${sinceRevision}&instanceId=${encodeURIComponent(instanceId)}`;
     }
-    return await this.request(`/api/state${query}`);
+    return await this.request(`/api/state${query}`, { expect: stateReadExpect(query !== '') });
   }
 
   async sendCommands(commands, { replace = false, play = true, immediate = false } = {}) {
     return await this.request('/api/commands', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ commands, replace, play, immediate, source: 'human' }),
@@ -83,6 +121,7 @@ export class StudioApi {
       payload.speed = Number(speed);
     }
     return await this.request('/api/control', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -91,6 +130,7 @@ export class StudioApi {
 
   async createComment({ requestId, text, rect, continuePlayback, expectedDocGeneration, expectedArtRevision }) {
     return await this.request('/api/comments', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -106,6 +146,7 @@ export class StudioApi {
 
   async resolveComment({ id, reopen, expectedDocGeneration, expectedSeq }) {
     return await this.request('/api/comments/resolve', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, reopen, expectedDocGeneration, expectedSeq }),
@@ -113,11 +154,12 @@ export class StudioApi {
   }
 
   async fetchProject() {
-    return await this.request('/api/project');
+    return await this.request('/api/project', { expect: projectProblem });
   }
 
   async loadProject(projectData) {
     return await this.request('/api/project', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ project: projectData, source: 'human' }),
@@ -126,6 +168,7 @@ export class StudioApi {
 
   async loadDemo() {
     return await this.request('/api/demo', {
+      expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'human' }),
