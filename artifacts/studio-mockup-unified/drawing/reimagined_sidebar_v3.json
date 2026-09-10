@@ -1,0 +1,9712 @@
+[
+  {
+    "type": "rect",
+    "layer": "typography",
+    "x": 740,
+    "y": 0,
+    "width": 260,
+    "height": 700,
+    "color": "#FFFFFF",
+    "opacity": 1.0
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        761,
+        21
+      ],
+      [
+        759,
+        20
+      ],
+      [
+        757,
+        20
+      ],
+      [
+        756,
+        21
+      ],
+      [
+        757,
+        23
+      ],
+      [
+        760,
+        23
+      ],
+      [
+        761,
+        25
+      ],
+      [
+        760,
+        27
+      ],
+      [
+        758,
+        27
+      ],
+      [
+        756,
+        26
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        20
+      ],
+      [
+        768,
+        20
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        766,
+        20
+      ],
+      [
+        766,
+        27
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        771,
+        20
+      ],
+      [
+        771,
+        25
+      ],
+      [
+        773,
+        27
+      ],
+      [
+        774,
+        27
+      ],
+      [
+        776,
+        25
+      ],
+      [
+        776,
+        20
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        779,
+        27
+      ],
+      [
+        779,
+        20
+      ],
+      [
+        782,
+        20
+      ],
+      [
+        784,
+        22
+      ],
+      [
+        784,
+        25
+      ],
+      [
+        782,
+        27
+      ],
+      [
+        779,
+        27
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        789,
+        20
+      ],
+      [
+        789,
+        27
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        796,
+        20
+      ],
+      [
+        797,
+        20
+      ],
+      [
+        799,
+        22
+      ],
+      [
+        799,
+        25
+      ],
+      [
+        797,
+        27
+      ],
+      [
+        796,
+        27
+      ],
+      [
+        794,
+        25
+      ],
+      [
+        794,
+        22
+      ],
+      [
+        796,
+        20
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#3B82F6",
+    "opacity": 1.0,
+    "points": [
+      [
+        840,
+        26
+      ],
+      [
+        840,
+        20
+      ],
+      [
+        844,
+        20
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#3B82F6",
+    "opacity": 1.0,
+    "points": [
+      [
+        840,
+        23
+      ],
+      [
+        843,
+        23
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#3B82F6",
+    "opacity": 1.0,
+    "points": [
+      [
+        847,
+        26
+      ],
+      [
+        847,
+        20
+      ],
+      [
+        850,
+        20
+      ],
+      [
+        851,
+        21
+      ],
+      [
+        850,
+        23
+      ],
+      [
+        847,
+        23
+      ],
+      [
+        850,
+        23
+      ],
+      [
+        851,
+        24
+      ],
+      [
+        850,
+        26
+      ],
+      [
+        847,
+        26
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        968,
+        16
+      ],
+      [
+        974,
+        22
+      ],
+      [
+        968,
+        28
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        978,
+        16
+      ],
+      [
+        978,
+        28
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        756,
+        56
+      ],
+      [
+        760,
+        56
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        56
+      ],
+      [
+        758,
+        62
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        56
+      ],
+      [
+        765,
+        56
+      ],
+      [
+        767,
+        58
+      ],
+      [
+        767,
+        60
+      ],
+      [
+        765,
+        62
+      ],
+      [
+        764,
+        62
+      ],
+      [
+        763,
+        60
+      ],
+      [
+        763,
+        58
+      ],
+      [
+        764,
+        56
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        771,
+        56
+      ],
+      [
+        772,
+        56
+      ],
+      [
+        774,
+        58
+      ],
+      [
+        774,
+        60
+      ],
+      [
+        772,
+        62
+      ],
+      [
+        771,
+        62
+      ],
+      [
+        770,
+        60
+      ],
+      [
+        770,
+        58
+      ],
+      [
+        771,
+        56
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        56
+      ],
+      [
+        776,
+        62
+      ],
+      [
+        781,
+        62
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0D99FF",
+    "opacity": 1.0,
+    "points": [
+      [
+        774,
+        79
+      ],
+      [
+        774,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0D99FF",
+    "opacity": 1.0,
+    "points": [
+      [
+        779,
+        85
+      ],
+      [
+        779,
+        79
+      ],
+      [
+        783,
+        85
+      ],
+      [
+        783,
+        79
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0D99FF",
+    "opacity": 1.0,
+    "points": [
+      [
+        786,
+        79
+      ],
+      [
+        786,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0D99FF",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        79
+      ],
+      [
+        786,
+        82
+      ],
+      [
+        790,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        85
+      ],
+      [
+        824,
+        79
+      ],
+      [
+        827,
+        79
+      ],
+      [
+        828,
+        80
+      ],
+      [
+        827,
+        82
+      ],
+      [
+        824,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        835,
+        79
+      ],
+      [
+        831,
+        79
+      ],
+      [
+        831,
+        85
+      ],
+      [
+        835,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        831,
+        82
+      ],
+      [
+        834,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        85
+      ],
+      [
+        838,
+        79
+      ],
+      [
+        842,
+        85
+      ],
+      [
+        842,
+        79
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        849,
+        80
+      ],
+      [
+        847,
+        79
+      ],
+      [
+        846,
+        79
+      ],
+      [
+        844,
+        81
+      ],
+      [
+        844,
+        83
+      ],
+      [
+        846,
+        85
+      ],
+      [
+        847,
+        85
+      ],
+      [
+        849,
+        84
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        853,
+        79
+      ],
+      [
+        853,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        858,
+        79
+      ],
+      [
+        858,
+        85
+      ],
+      [
+        862,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        882,
+        85
+      ],
+      [
+        882,
+        79
+      ],
+      [
+        884,
+        82
+      ],
+      [
+        886,
+        79
+      ],
+      [
+        886,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        889,
+        85
+      ],
+      [
+        889,
+        81
+      ],
+      [
+        890,
+        79
+      ],
+      [
+        891,
+        79
+      ],
+      [
+        893,
+        81
+      ],
+      [
+        893,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        889,
+        82
+      ],
+      [
+        893,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        896,
+        85
+      ],
+      [
+        896,
+        79
+      ],
+      [
+        899,
+        79
+      ],
+      [
+        900,
+        80
+      ],
+      [
+        899,
+        82
+      ],
+      [
+        896,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        898,
+        82
+      ],
+      [
+        900,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        902,
+        79
+      ],
+      [
+        902,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        907,
+        79
+      ],
+      [
+        902,
+        82
+      ],
+      [
+        907,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        940,
+        79
+      ],
+      [
+        936,
+        79
+      ],
+      [
+        936,
+        85
+      ],
+      [
+        940,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        936,
+        82
+      ],
+      [
+        939,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        943,
+        85
+      ],
+      [
+        943,
+        79
+      ],
+      [
+        946,
+        79
+      ],
+      [
+        947,
+        80
+      ],
+      [
+        946,
+        82
+      ],
+      [
+        943,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        945,
+        82
+      ],
+      [
+        947,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        85
+      ],
+      [
+        950,
+        81
+      ],
+      [
+        951,
+        79
+      ],
+      [
+        952,
+        79
+      ],
+      [
+        954,
+        81
+      ],
+      [
+        954,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        82
+      ],
+      [
+        954,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        961,
+        80
+      ],
+      [
+        959,
+        79
+      ],
+      [
+        957,
+        79
+      ],
+      [
+        956,
+        80
+      ],
+      [
+        957,
+        82
+      ],
+      [
+        960,
+        82
+      ],
+      [
+        961,
+        84
+      ],
+      [
+        960,
+        85
+      ],
+      [
+        958,
+        85
+      ],
+      [
+        956,
+        84
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        967,
+        79
+      ],
+      [
+        963,
+        79
+      ],
+      [
+        963,
+        85
+      ],
+      [
+        967,
+        85
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        963,
+        82
+      ],
+      [
+        967,
+        82
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        760,
+        121
+      ],
+      [
+        759,
+        120
+      ],
+      [
+        757,
+        120
+      ],
+      [
+        756,
+        121
+      ],
+      [
+        757,
+        123
+      ],
+      [
+        759,
+        123
+      ],
+      [
+        760,
+        125
+      ],
+      [
+        759,
+        126
+      ],
+      [
+        758,
+        126
+      ],
+      [
+        756,
+        125
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        120
+      ],
+      [
+        767,
+        120
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        765,
+        120
+      ],
+      [
+        765,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        770,
+        126
+      ],
+      [
+        770,
+        120
+      ],
+      [
+        773,
+        120
+      ],
+      [
+        774,
+        121
+      ],
+      [
+        773,
+        123
+      ],
+      [
+        770,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        772,
+        123
+      ],
+      [
+        774,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        778,
+        120
+      ],
+      [
+        779,
+        120
+      ],
+      [
+        781,
+        122
+      ],
+      [
+        781,
+        124
+      ],
+      [
+        779,
+        126
+      ],
+      [
+        778,
+        126
+      ],
+      [
+        776,
+        124
+      ],
+      [
+        776,
+        122
+      ],
+      [
+        778,
+        120
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        120
+      ],
+      [
+        783,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        787,
+        120
+      ],
+      [
+        783,
+        123
+      ],
+      [
+        787,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        794,
+        120
+      ],
+      [
+        790,
+        120
+      ],
+      [
+        790,
+        126
+      ],
+      [
+        794,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        123
+      ],
+      [
+        793,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        126
+      ],
+      [
+        804,
+        120
+      ],
+      [
+        807,
+        120
+      ],
+      [
+        808,
+        121
+      ],
+      [
+        807,
+        123
+      ],
+      [
+        804,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        810,
+        126
+      ],
+      [
+        810,
+        120
+      ],
+      [
+        814,
+        120
+      ],
+      [
+        815,
+        121
+      ],
+      [
+        814,
+        123
+      ],
+      [
+        810,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        813,
+        123
+      ],
+      [
+        815,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        819,
+        120
+      ],
+      [
+        820,
+        120
+      ],
+      [
+        821,
+        122
+      ],
+      [
+        821,
+        124
+      ],
+      [
+        820,
+        126
+      ],
+      [
+        819,
+        126
+      ],
+      [
+        817,
+        124
+      ],
+      [
+        817,
+        122
+      ],
+      [
+        819,
+        120
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        126
+      ],
+      [
+        824,
+        120
+      ],
+      [
+        827,
+        120
+      ],
+      [
+        828,
+        121
+      ],
+      [
+        827,
+        123
+      ],
+      [
+        824,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        835,
+        120
+      ],
+      [
+        831,
+        120
+      ],
+      [
+        831,
+        126
+      ],
+      [
+        835,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        831,
+        123
+      ],
+      [
+        834,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        126
+      ],
+      [
+        838,
+        120
+      ],
+      [
+        841,
+        120
+      ],
+      [
+        842,
+        121
+      ],
+      [
+        841,
+        123
+      ],
+      [
+        838,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        840,
+        123
+      ],
+      [
+        842,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        844,
+        120
+      ],
+      [
+        849,
+        120
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        847,
+        120
+      ],
+      [
+        847,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        853,
+        120
+      ],
+      [
+        853,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        862,
+        120
+      ],
+      [
+        858,
+        120
+      ],
+      [
+        858,
+        126
+      ],
+      [
+        862,
+        126
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        858,
+        123
+      ],
+      [
+        861,
+        123
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        869,
+        121
+      ],
+      [
+        867,
+        120
+      ],
+      [
+        866,
+        120
+      ],
+      [
+        865,
+        121
+      ],
+      [
+        866,
+        123
+      ],
+      [
+        868,
+        123
+      ],
+      [
+        869,
+        125
+      ],
+      [
+        868,
+        126
+      ],
+      [
+        866,
+        126
+      ],
+      [
+        865,
+        125
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        760,
+        141
+      ],
+      [
+        759,
+        140
+      ],
+      [
+        757,
+        140
+      ],
+      [
+        756,
+        141
+      ],
+      [
+        757,
+        143
+      ],
+      [
+        759,
+        143
+      ],
+      [
+        760,
+        145
+      ],
+      [
+        759,
+        146
+      ],
+      [
+        758,
+        146
+      ],
+      [
+        756,
+        145
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        765,
+        140
+      ],
+      [
+        765,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        770,
+        140
+      ],
+      [
+        774,
+        140
+      ],
+      [
+        770,
+        146
+      ],
+      [
+        774,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        781,
+        140
+      ],
+      [
+        776,
+        140
+      ],
+      [
+        776,
+        146
+      ],
+      [
+        781,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        143
+      ],
+      [
+        780,
+        143
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        142
+      ],
+      [
+        944,
+        140
+      ],
+      [
+        944,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        943,
+        146
+      ],
+      [
+        945,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        952,
+        146
+      ],
+      [
+        952,
+        140
+      ],
+      [
+        949,
+        144
+      ],
+      [
+        953,
+        144
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        962,
+        146
+      ],
+      [
+        962,
+        140
+      ],
+      [
+        966,
+        140
+      ],
+      [
+        967,
+        141
+      ],
+      [
+        966,
+        143
+      ],
+      [
+        962,
+        143
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        969,
+        140
+      ],
+      [
+        973,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        973,
+        140
+      ],
+      [
+        969,
+        146
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        174
+      ],
+      [
+        759,
+        174
+      ],
+      [
+        760,
+        176
+      ],
+      [
+        760,
+        178
+      ],
+      [
+        759,
+        180
+      ],
+      [
+        758,
+        180
+      ],
+      [
+        756,
+        178
+      ],
+      [
+        756,
+        176
+      ],
+      [
+        758,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        180
+      ],
+      [
+        763,
+        174
+      ],
+      [
+        766,
+        174
+      ],
+      [
+        767,
+        175
+      ],
+      [
+        766,
+        177
+      ],
+      [
+        763,
+        177
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        770,
+        180
+      ],
+      [
+        770,
+        176
+      ],
+      [
+        771,
+        174
+      ],
+      [
+        772,
+        174
+      ],
+      [
+        774,
+        176
+      ],
+      [
+        774,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        770,
+        177
+      ],
+      [
+        774,
+        177
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        781,
+        175
+      ],
+      [
+        779,
+        174
+      ],
+      [
+        778,
+        174
+      ],
+      [
+        776,
+        176
+      ],
+      [
+        776,
+        178
+      ],
+      [
+        778,
+        180
+      ],
+      [
+        779,
+        180
+      ],
+      [
+        781,
+        179
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        785,
+        174
+      ],
+      [
+        785,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        174
+      ],
+      [
+        794,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        792,
+        174
+      ],
+      [
+        792,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        174
+      ],
+      [
+        799,
+        177
+      ],
+      [
+        801,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        799,
+        177
+      ],
+      [
+        799,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        176
+      ],
+      [
+        944,
+        174
+      ],
+      [
+        944,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        943,
+        180
+      ],
+      [
+        945,
+        180
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        174
+      ],
+      [
+        951,
+        174
+      ],
+      [
+        953,
+        176
+      ],
+      [
+        953,
+        178
+      ],
+      [
+        951,
+        180
+      ],
+      [
+        950,
+        180
+      ],
+      [
+        949,
+        178
+      ],
+      [
+        949,
+        176
+      ],
+      [
+        950,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        952,
+        175
+      ],
+      [
+        950,
+        179
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        957,
+        174
+      ],
+      [
+        958,
+        174
+      ],
+      [
+        960,
+        176
+      ],
+      [
+        960,
+        178
+      ],
+      [
+        958,
+        180
+      ],
+      [
+        957,
+        180
+      ],
+      [
+        956,
+        178
+      ],
+      [
+        956,
+        176
+      ],
+      [
+        957,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        959,
+        175
+      ],
+      [
+        956,
+        179
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        962,
+        175
+      ],
+      [
+        963,
+        175
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        966,
+        179
+      ],
+      [
+        967,
+        179
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        962,
+        180
+      ],
+      [
+        967,
+        174
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        760,
+        211
+      ],
+      [
+        759,
+        210
+      ],
+      [
+        757,
+        210
+      ],
+      [
+        756,
+        211
+      ],
+      [
+        757,
+        213
+      ],
+      [
+        759,
+        213
+      ],
+      [
+        760,
+        215
+      ],
+      [
+        759,
+        216
+      ],
+      [
+        758,
+        216
+      ],
+      [
+        756,
+        215
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        216
+      ],
+      [
+        763,
+        210
+      ],
+      [
+        765,
+        213
+      ],
+      [
+        767,
+        210
+      ],
+      [
+        767,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        771,
+        210
+      ],
+      [
+        772,
+        210
+      ],
+      [
+        774,
+        212
+      ],
+      [
+        774,
+        214
+      ],
+      [
+        772,
+        216
+      ],
+      [
+        771,
+        216
+      ],
+      [
+        770,
+        214
+      ],
+      [
+        770,
+        212
+      ],
+      [
+        771,
+        210
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        778,
+        210
+      ],
+      [
+        779,
+        210
+      ],
+      [
+        781,
+        212
+      ],
+      [
+        781,
+        214
+      ],
+      [
+        779,
+        216
+      ],
+      [
+        778,
+        216
+      ],
+      [
+        776,
+        214
+      ],
+      [
+        776,
+        212
+      ],
+      [
+        778,
+        210
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        210
+      ],
+      [
+        787,
+        210
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        785,
+        210
+      ],
+      [
+        785,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        210
+      ],
+      [
+        790,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        794,
+        210
+      ],
+      [
+        794,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        213
+      ],
+      [
+        794,
+        213
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        799,
+        210
+      ],
+      [
+        799,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        216
+      ],
+      [
+        804,
+        210
+      ],
+      [
+        808,
+        216
+      ],
+      [
+        808,
+        210
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        815,
+        211
+      ],
+      [
+        813,
+        210
+      ],
+      [
+        812,
+        210
+      ],
+      [
+        810,
+        212
+      ],
+      [
+        810,
+        214
+      ],
+      [
+        812,
+        216
+      ],
+      [
+        814,
+        216
+      ],
+      [
+        815,
+        215
+      ],
+      [
+        815,
+        213
+      ],
+      [
+        813,
+        213
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        210
+      ],
+      [
+        948,
+        210
+      ],
+      [
+        946,
+        216
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        955,
+        210
+      ],
+      [
+        951,
+        210
+      ],
+      [
+        951,
+        213
+      ],
+      [
+        954,
+        213
+      ],
+      [
+        955,
+        214
+      ],
+      [
+        954,
+        216
+      ],
+      [
+        952,
+        216
+      ],
+      [
+        951,
+        215
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        958,
+        211
+      ],
+      [
+        958,
+        211
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        961,
+        215
+      ],
+      [
+        962,
+        215
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        958,
+        216
+      ],
+      [
+        962,
+        210
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        803,
+        256
+      ],
+      [
+        803,
+        262
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        805,
+        256
+      ],
+      [
+        805,
+        262
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        802,
+        258
+      ],
+      [
+        806,
+        258
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        802,
+        260
+      ],
+      [
+        806,
+        260
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        809,
+        258
+      ],
+      [
+        810,
+        256
+      ],
+      [
+        812,
+        256
+      ],
+      [
+        813,
+        258
+      ],
+      [
+        809,
+        262
+      ],
+      [
+        813,
+        262
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        820,
+        256
+      ],
+      [
+        816,
+        256
+      ],
+      [
+        816,
+        259
+      ],
+      [
+        819,
+        259
+      ],
+      [
+        820,
+        260
+      ],
+      [
+        819,
+        262
+      ],
+      [
+        816,
+        262
+      ],
+      [
+        816,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        826,
+        256
+      ],
+      [
+        824,
+        256
+      ],
+      [
+        822,
+        259
+      ],
+      [
+        822,
+        260
+      ],
+      [
+        824,
+        262
+      ],
+      [
+        826,
+        262
+      ],
+      [
+        827,
+        260
+      ],
+      [
+        826,
+        259
+      ],
+      [
+        822,
+        259
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        829,
+        257
+      ],
+      [
+        830,
+        256
+      ],
+      [
+        833,
+        256
+      ],
+      [
+        833,
+        258
+      ],
+      [
+        832,
+        259
+      ],
+      [
+        833,
+        260
+      ],
+      [
+        833,
+        262
+      ],
+      [
+        830,
+        262
+      ],
+      [
+        829,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        840,
+        256
+      ],
+      [
+        836,
+        256
+      ],
+      [
+        836,
+        262
+      ],
+      [
+        840,
+        262
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        836,
+        259
+      ],
+      [
+        839,
+        259
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        843,
+        262
+      ],
+      [
+        843,
+        256
+      ],
+      [
+        846,
+        256
+      ],
+      [
+        847,
+        257
+      ],
+      [
+        846,
+        259
+      ],
+      [
+        843,
+        259
+      ],
+      [
+        846,
+        259
+      ],
+      [
+        847,
+        260
+      ],
+      [
+        846,
+        262
+      ],
+      [
+        843,
+        262
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        898,
+        256
+      ],
+      [
+        898,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        902,
+        261
+      ],
+      [
+        902,
+        256
+      ],
+      [
+        906,
+        261
+      ],
+      [
+        906,
+        256
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        908,
+        256
+      ],
+      [
+        908,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        912,
+        256
+      ],
+      [
+        908,
+        259
+      ],
+      [
+        912,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        920,
+        261
+      ],
+      [
+        920,
+        256
+      ],
+      [
+        923,
+        256
+      ],
+      [
+        924,
+        257
+      ],
+      [
+        923,
+        259
+      ],
+      [
+        920,
+        259
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        928,
+        256
+      ],
+      [
+        928,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        936,
+        257
+      ],
+      [
+        934,
+        256
+      ],
+      [
+        934,
+        256
+      ],
+      [
+        932,
+        258
+      ],
+      [
+        932,
+        260
+      ],
+      [
+        934,
+        261
+      ],
+      [
+        935,
+        261
+      ],
+      [
+        936,
+        260
+      ],
+      [
+        936,
+        259
+      ],
+      [
+        934,
+        259
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        938,
+        261
+      ],
+      [
+        938,
+        256
+      ],
+      [
+        940,
+        259
+      ],
+      [
+        942,
+        256
+      ],
+      [
+        942,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        948,
+        256
+      ],
+      [
+        944,
+        256
+      ],
+      [
+        944,
+        261
+      ],
+      [
+        948,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        259
+      ],
+      [
+        947,
+        259
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        261
+      ],
+      [
+        950,
+        256
+      ],
+      [
+        954,
+        261
+      ],
+      [
+        954,
+        256
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        956,
+        256
+      ],
+      [
+        960,
+        256
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        958,
+        256
+      ],
+      [
+        958,
+        261
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        756,
+        302
+      ],
+      [
+        756,
+        309
+      ],
+      [
+        761,
+        309
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        309
+      ],
+      [
+        764,
+        304
+      ],
+      [
+        766,
+        302
+      ],
+      [
+        766,
+        302
+      ],
+      [
+        768,
+        304
+      ],
+      [
+        768,
+        309
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        306
+      ],
+      [
+        768,
+        306
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        771,
+        302
+      ],
+      [
+        774,
+        305
+      ],
+      [
+        776,
+        302
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        774,
+        305
+      ],
+      [
+        774,
+        309
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        784,
+        302
+      ],
+      [
+        779,
+        302
+      ],
+      [
+        779,
+        309
+      ],
+      [
+        784,
+        309
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        779,
+        305
+      ],
+      [
+        783,
+        305
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        786,
+        309
+      ],
+      [
+        786,
+        302
+      ],
+      [
+        790,
+        302
+      ],
+      [
+        791,
+        303
+      ],
+      [
+        790,
+        305
+      ],
+      [
+        786,
+        305
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        789,
+        305
+      ],
+      [
+        791,
+        309
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0F172A",
+    "opacity": 1.0,
+    "points": [
+      [
+        799,
+        303
+      ],
+      [
+        797,
+        302
+      ],
+      [
+        795,
+        302
+      ],
+      [
+        794,
+        303
+      ],
+      [
+        795,
+        305
+      ],
+      [
+        798,
+        305
+      ],
+      [
+        799,
+        307
+      ],
+      [
+        798,
+        309
+      ],
+      [
+        796,
+        309
+      ],
+      [
+        794,
+        308
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        940,
+        303
+      ],
+      [
+        940,
+        307
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        938,
+        305
+      ],
+      [
+        942,
+        305
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        951,
+        308
+      ],
+      [
+        951,
+        302
+      ],
+      [
+        955,
+        308
+      ],
+      [
+        955,
+        302
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        961,
+        302
+      ],
+      [
+        957,
+        302
+      ],
+      [
+        957,
+        308
+      ],
+      [
+        961,
+        308
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        957,
+        305
+      ],
+      [
+        960,
+        305
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        964,
+        302
+      ],
+      [
+        965,
+        308
+      ],
+      [
+        966,
+        304
+      ],
+      [
+        966,
+        308
+      ],
+      [
+        968,
+        302
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        332
+      ],
+      [
+        759,
+        332
+      ],
+      [
+        760,
+        334
+      ],
+      [
+        760,
+        336
+      ],
+      [
+        759,
+        338
+      ],
+      [
+        758,
+        338
+      ],
+      [
+        756,
+        336
+      ],
+      [
+        756,
+        334
+      ],
+      [
+        758,
+        332
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        333
+      ],
+      [
+        757,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        767,
+        332
+      ],
+      [
+        763,
+        332
+      ],
+      [
+        763,
+        335
+      ],
+      [
+        766,
+        335
+      ],
+      [
+        767,
+        336
+      ],
+      [
+        766,
+        338
+      ],
+      [
+        764,
+        338
+      ],
+      [
+        763,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        332
+      ],
+      [
+        776,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        781,
+        332
+      ],
+      [
+        781,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        335
+      ],
+      [
+        781,
+        335
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        785,
+        332
+      ],
+      [
+        785,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        794,
+        333
+      ],
+      [
+        793,
+        332
+      ],
+      [
+        792,
+        332
+      ],
+      [
+        790,
+        334
+      ],
+      [
+        790,
+        336
+      ],
+      [
+        792,
+        338
+      ],
+      [
+        793,
+        338
+      ],
+      [
+        794,
+        337
+      ],
+      [
+        794,
+        335
+      ],
+      [
+        793,
+        335
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        332
+      ],
+      [
+        797,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        332
+      ],
+      [
+        801,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        335
+      ],
+      [
+        801,
+        335
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        332
+      ],
+      [
+        804,
+        338
+      ],
+      [
+        808,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        813,
+        332
+      ],
+      [
+        813,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        821,
+        333
+      ],
+      [
+        820,
+        332
+      ],
+      [
+        819,
+        332
+      ],
+      [
+        817,
+        334
+      ],
+      [
+        817,
+        336
+      ],
+      [
+        819,
+        338
+      ],
+      [
+        821,
+        338
+      ],
+      [
+        821,
+        337
+      ],
+      [
+        821,
+        335
+      ],
+      [
+        820,
+        335
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        332
+      ],
+      [
+        824,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        828,
+        332
+      ],
+      [
+        828,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        335
+      ],
+      [
+        828,
+        335
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        831,
+        332
+      ],
+      [
+        835,
+        332
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        833,
+        332
+      ],
+      [
+        833,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        842,
+        333
+      ],
+      [
+        840,
+        332
+      ],
+      [
+        838,
+        332
+      ],
+      [
+        838,
+        333
+      ],
+      [
+        838,
+        335
+      ],
+      [
+        841,
+        335
+      ],
+      [
+        842,
+        337
+      ],
+      [
+        841,
+        338
+      ],
+      [
+        839,
+        338
+      ],
+      [
+        838,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        934,
+        334
+      ],
+      [
+        936,
+        332
+      ],
+      [
+        936,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        935,
+        338
+      ],
+      [
+        937,
+        338
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        332
+      ],
+      [
+        943,
+        332
+      ],
+      [
+        944,
+        334
+      ],
+      [
+        944,
+        336
+      ],
+      [
+        943,
+        338
+      ],
+      [
+        942,
+        338
+      ],
+      [
+        940,
+        336
+      ],
+      [
+        940,
+        334
+      ],
+      [
+        942,
+        332
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        333
+      ],
+      [
+        941,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        948,
+        332
+      ],
+      [
+        949,
+        332
+      ],
+      [
+        951,
+        334
+      ],
+      [
+        951,
+        336
+      ],
+      [
+        949,
+        338
+      ],
+      [
+        948,
+        338
+      ],
+      [
+        947,
+        336
+      ],
+      [
+        947,
+        334
+      ],
+      [
+        948,
+        332
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        333
+      ],
+      [
+        948,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        333
+      ],
+      [
+        954,
+        333
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        956,
+        337
+      ],
+      [
+        957,
+        337
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        338
+      ],
+      [
+        957,
+        332
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        334
+      ],
+      [
+        975,
+        332
+      ],
+      [
+        979,
+        332
+      ],
+      [
+        982,
+        334
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        334
+      ],
+      [
+        975,
+        336
+      ],
+      [
+        979,
+        336
+      ],
+      [
+        982,
+        334
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        334
+      ],
+      [
+        977,
+        334
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        364
+      ],
+      [
+        759,
+        364
+      ],
+      [
+        760,
+        366
+      ],
+      [
+        760,
+        368
+      ],
+      [
+        759,
+        370
+      ],
+      [
+        758,
+        370
+      ],
+      [
+        756,
+        368
+      ],
+      [
+        756,
+        366
+      ],
+      [
+        758,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        365
+      ],
+      [
+        757,
+        369
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        766,
+        370
+      ],
+      [
+        766,
+        364
+      ],
+      [
+        763,
+        368
+      ],
+      [
+        767,
+        368
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        370
+      ],
+      [
+        776,
+        364
+      ],
+      [
+        780,
+        364
+      ],
+      [
+        781,
+        365
+      ],
+      [
+        780,
+        367
+      ],
+      [
+        776,
+        367
+      ],
+      [
+        780,
+        367
+      ],
+      [
+        781,
+        368
+      ],
+      [
+        780,
+        370
+      ],
+      [
+        776,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        370
+      ],
+      [
+        783,
+        364
+      ],
+      [
+        787,
+        364
+      ],
+      [
+        787,
+        365
+      ],
+      [
+        787,
+        367
+      ],
+      [
+        783,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        786,
+        367
+      ],
+      [
+        787,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        364
+      ],
+      [
+        790,
+        368
+      ],
+      [
+        792,
+        370
+      ],
+      [
+        793,
+        370
+      ],
+      [
+        794,
+        368
+      ],
+      [
+        794,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        365
+      ],
+      [
+        799,
+        364
+      ],
+      [
+        798,
+        364
+      ],
+      [
+        797,
+        365
+      ],
+      [
+        798,
+        367
+      ],
+      [
+        800,
+        367
+      ],
+      [
+        801,
+        369
+      ],
+      [
+        800,
+        370
+      ],
+      [
+        798,
+        370
+      ],
+      [
+        797,
+        369
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        364
+      ],
+      [
+        804,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        808,
+        364
+      ],
+      [
+        808,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        367
+      ],
+      [
+        808,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        821,
+        365
+      ],
+      [
+        820,
+        364
+      ],
+      [
+        818,
+        364
+      ],
+      [
+        817,
+        365
+      ],
+      [
+        818,
+        367
+      ],
+      [
+        821,
+        367
+      ],
+      [
+        821,
+        369
+      ],
+      [
+        821,
+        370
+      ],
+      [
+        819,
+        370
+      ],
+      [
+        817,
+        369
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        364
+      ],
+      [
+        824,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        828,
+        364
+      ],
+      [
+        828,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        367
+      ],
+      [
+        828,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        831,
+        370
+      ],
+      [
+        831,
+        366
+      ],
+      [
+        832,
+        364
+      ],
+      [
+        833,
+        364
+      ],
+      [
+        835,
+        366
+      ],
+      [
+        835,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        831,
+        367
+      ],
+      [
+        835,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        370
+      ],
+      [
+        838,
+        364
+      ],
+      [
+        840,
+        364
+      ],
+      [
+        842,
+        366
+      ],
+      [
+        842,
+        368
+      ],
+      [
+        840,
+        370
+      ],
+      [
+        838,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        847,
+        364
+      ],
+      [
+        847,
+        370
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        851,
+        370
+      ],
+      [
+        851,
+        364
+      ],
+      [
+        855,
+        370
+      ],
+      [
+        855,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        862,
+        365
+      ],
+      [
+        861,
+        364
+      ],
+      [
+        860,
+        364
+      ],
+      [
+        858,
+        366
+      ],
+      [
+        858,
+        368
+      ],
+      [
+        860,
+        370
+      ],
+      [
+        861,
+        370
+      ],
+      [
+        862,
+        369
+      ],
+      [
+        862,
+        367
+      ],
+      [
+        861,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        936,
+        364
+      ],
+      [
+        936,
+        364
+      ],
+      [
+        938,
+        365
+      ],
+      [
+        936,
+        367
+      ],
+      [
+        936,
+        367
+      ],
+      [
+        934,
+        365
+      ],
+      [
+        936,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        936,
+        367
+      ],
+      [
+        936,
+        367
+      ],
+      [
+        938,
+        368
+      ],
+      [
+        936,
+        370
+      ],
+      [
+        936,
+        370
+      ],
+      [
+        934,
+        368
+      ],
+      [
+        936,
+        367
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        364
+      ],
+      [
+        943,
+        364
+      ],
+      [
+        944,
+        366
+      ],
+      [
+        944,
+        368
+      ],
+      [
+        943,
+        370
+      ],
+      [
+        942,
+        370
+      ],
+      [
+        940,
+        368
+      ],
+      [
+        940,
+        366
+      ],
+      [
+        942,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        365
+      ],
+      [
+        941,
+        369
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        947,
+        365
+      ],
+      [
+        948,
+        365
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        369
+      ],
+      [
+        951,
+        369
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        947,
+        370
+      ],
+      [
+        951,
+        364
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        366
+      ],
+      [
+        975,
+        364
+      ],
+      [
+        979,
+        364
+      ],
+      [
+        982,
+        366
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        366
+      ],
+      [
+        975,
+        368
+      ],
+      [
+        979,
+        368
+      ],
+      [
+        982,
+        366
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        366
+      ],
+      [
+        977,
+        366
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        396
+      ],
+      [
+        759,
+        396
+      ],
+      [
+        760,
+        398
+      ],
+      [
+        760,
+        400
+      ],
+      [
+        759,
+        402
+      ],
+      [
+        758,
+        402
+      ],
+      [
+        756,
+        400
+      ],
+      [
+        756,
+        398
+      ],
+      [
+        758,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        397
+      ],
+      [
+        757,
+        401
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        397
+      ],
+      [
+        764,
+        396
+      ],
+      [
+        766,
+        396
+      ],
+      [
+        767,
+        398
+      ],
+      [
+        765,
+        399
+      ],
+      [
+        767,
+        400
+      ],
+      [
+        766,
+        402
+      ],
+      [
+        764,
+        402
+      ],
+      [
+        763,
+        401
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        396
+      ],
+      [
+        776,
+        402
+      ],
+      [
+        781,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        785,
+        396
+      ],
+      [
+        785,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        402
+      ],
+      [
+        790,
+        396
+      ],
+      [
+        794,
+        402
+      ],
+      [
+        794,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        396
+      ],
+      [
+        797,
+        396
+      ],
+      [
+        797,
+        402
+      ],
+      [
+        801,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        399
+      ],
+      [
+        800,
+        399
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        402
+      ],
+      [
+        804,
+        398
+      ],
+      [
+        805,
+        396
+      ],
+      [
+        806,
+        396
+      ],
+      [
+        808,
+        398
+      ],
+      [
+        808,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        399
+      ],
+      [
+        808,
+        399
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        810,
+        402
+      ],
+      [
+        810,
+        396
+      ],
+      [
+        814,
+        396
+      ],
+      [
+        815,
+        397
+      ],
+      [
+        814,
+        399
+      ],
+      [
+        810,
+        399
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        813,
+        399
+      ],
+      [
+        815,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        817,
+        396
+      ],
+      [
+        821,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        819,
+        396
+      ],
+      [
+        819,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        934,
+        398
+      ],
+      [
+        936,
+        396
+      ],
+      [
+        936,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        935,
+        402
+      ],
+      [
+        937,
+        402
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        396
+      ],
+      [
+        943,
+        396
+      ],
+      [
+        944,
+        398
+      ],
+      [
+        944,
+        400
+      ],
+      [
+        943,
+        402
+      ],
+      [
+        942,
+        402
+      ],
+      [
+        940,
+        400
+      ],
+      [
+        940,
+        398
+      ],
+      [
+        942,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        397
+      ],
+      [
+        941,
+        401
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        948,
+        396
+      ],
+      [
+        949,
+        396
+      ],
+      [
+        951,
+        398
+      ],
+      [
+        951,
+        400
+      ],
+      [
+        949,
+        402
+      ],
+      [
+        948,
+        402
+      ],
+      [
+        947,
+        400
+      ],
+      [
+        947,
+        398
+      ],
+      [
+        948,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        397
+      ],
+      [
+        948,
+        401
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        397
+      ],
+      [
+        954,
+        397
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        956,
+        401
+      ],
+      [
+        957,
+        401
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        402
+      ],
+      [
+        957,
+        396
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        398
+      ],
+      [
+        975,
+        396
+      ],
+      [
+        979,
+        396
+      ],
+      [
+        982,
+        398
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        398
+      ],
+      [
+        975,
+        400
+      ],
+      [
+        979,
+        400
+      ],
+      [
+        982,
+        398
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#0284C7",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        398
+      ],
+      [
+        977,
+        398
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        428
+      ],
+      [
+        759,
+        428
+      ],
+      [
+        760,
+        430
+      ],
+      [
+        760,
+        432
+      ],
+      [
+        759,
+        434
+      ],
+      [
+        758,
+        434
+      ],
+      [
+        756,
+        432
+      ],
+      [
+        756,
+        430
+      ],
+      [
+        758,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        429
+      ],
+      [
+        757,
+        433
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        430
+      ],
+      [
+        764,
+        428
+      ],
+      [
+        766,
+        428
+      ],
+      [
+        767,
+        430
+      ],
+      [
+        763,
+        434
+      ],
+      [
+        767,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        434
+      ],
+      [
+        776,
+        428
+      ],
+      [
+        780,
+        428
+      ],
+      [
+        781,
+        429
+      ],
+      [
+        780,
+        431
+      ],
+      [
+        776,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        787,
+        428
+      ],
+      [
+        783,
+        428
+      ],
+      [
+        783,
+        434
+      ],
+      [
+        787,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        431
+      ],
+      [
+        787,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        434
+      ],
+      [
+        790,
+        428
+      ],
+      [
+        794,
+        434
+      ],
+      [
+        794,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        429
+      ],
+      [
+        799,
+        428
+      ],
+      [
+        798,
+        428
+      ],
+      [
+        797,
+        430
+      ],
+      [
+        797,
+        432
+      ],
+      [
+        798,
+        434
+      ],
+      [
+        799,
+        434
+      ],
+      [
+        801,
+        433
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        806,
+        428
+      ],
+      [
+        806,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        810,
+        428
+      ],
+      [
+        810,
+        434
+      ],
+      [
+        815,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        434
+      ],
+      [
+        824,
+        428
+      ],
+      [
+        827,
+        428
+      ],
+      [
+        828,
+        429
+      ],
+      [
+        827,
+        431
+      ],
+      [
+        824,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        827,
+        431
+      ],
+      [
+        828,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        832,
+        428
+      ],
+      [
+        833,
+        428
+      ],
+      [
+        835,
+        430
+      ],
+      [
+        835,
+        432
+      ],
+      [
+        833,
+        434
+      ],
+      [
+        832,
+        434
+      ],
+      [
+        831,
+        432
+      ],
+      [
+        831,
+        430
+      ],
+      [
+        832,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        428
+      ],
+      [
+        838,
+        432
+      ],
+      [
+        839,
+        434
+      ],
+      [
+        840,
+        434
+      ],
+      [
+        842,
+        432
+      ],
+      [
+        842,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        849,
+        429
+      ],
+      [
+        847,
+        428
+      ],
+      [
+        846,
+        428
+      ],
+      [
+        844,
+        430
+      ],
+      [
+        844,
+        432
+      ],
+      [
+        846,
+        434
+      ],
+      [
+        848,
+        434
+      ],
+      [
+        849,
+        433
+      ],
+      [
+        849,
+        431
+      ],
+      [
+        847,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        851,
+        428
+      ],
+      [
+        851,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        855,
+        428
+      ],
+      [
+        855,
+        434
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        851,
+        431
+      ],
+      [
+        855,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        862,
+        429
+      ],
+      [
+        861,
+        428
+      ],
+      [
+        859,
+        428
+      ],
+      [
+        858,
+        429
+      ],
+      [
+        859,
+        431
+      ],
+      [
+        861,
+        431
+      ],
+      [
+        862,
+        433
+      ],
+      [
+        861,
+        434
+      ],
+      [
+        860,
+        434
+      ],
+      [
+        858,
+        433
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        937,
+        428
+      ],
+      [
+        936,
+        428
+      ],
+      [
+        934,
+        430
+      ],
+      [
+        934,
+        432
+      ],
+      [
+        936,
+        434
+      ],
+      [
+        937,
+        434
+      ],
+      [
+        938,
+        432
+      ],
+      [
+        937,
+        431
+      ],
+      [
+        934,
+        431
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        428
+      ],
+      [
+        943,
+        428
+      ],
+      [
+        944,
+        430
+      ],
+      [
+        944,
+        432
+      ],
+      [
+        943,
+        434
+      ],
+      [
+        942,
+        434
+      ],
+      [
+        940,
+        432
+      ],
+      [
+        940,
+        430
+      ],
+      [
+        942,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        429
+      ],
+      [
+        941,
+        433
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        947,
+        429
+      ],
+      [
+        948,
+        429
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        433
+      ],
+      [
+        951,
+        433
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        947,
+        434
+      ],
+      [
+        951,
+        428
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        430
+      ],
+      [
+        975,
+        428
+      ],
+      [
+        979,
+        428
+      ],
+      [
+        982,
+        430
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        430
+      ],
+      [
+        975,
+        432
+      ],
+      [
+        979,
+        432
+      ],
+      [
+        982,
+        430
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        430
+      ],
+      [
+        977,
+        430
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        460
+      ],
+      [
+        759,
+        460
+      ],
+      [
+        760,
+        462
+      ],
+      [
+        760,
+        464
+      ],
+      [
+        759,
+        466
+      ],
+      [
+        758,
+        466
+      ],
+      [
+        756,
+        464
+      ],
+      [
+        756,
+        462
+      ],
+      [
+        758,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        461
+      ],
+      [
+        757,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        763,
+        462
+      ],
+      [
+        765,
+        460
+      ],
+      [
+        765,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        466
+      ],
+      [
+        766,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        776,
+        466
+      ],
+      [
+        776,
+        460
+      ],
+      [
+        780,
+        460
+      ],
+      [
+        781,
+        461
+      ],
+      [
+        780,
+        463
+      ],
+      [
+        776,
+        463
+      ],
+      [
+        780,
+        463
+      ],
+      [
+        781,
+        464
+      ],
+      [
+        780,
+        466
+      ],
+      [
+        776,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        466
+      ],
+      [
+        783,
+        462
+      ],
+      [
+        785,
+        460
+      ],
+      [
+        786,
+        460
+      ],
+      [
+        787,
+        462
+      ],
+      [
+        787,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        463
+      ],
+      [
+        787,
+        463
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        794,
+        461
+      ],
+      [
+        793,
+        460
+      ],
+      [
+        792,
+        460
+      ],
+      [
+        790,
+        462
+      ],
+      [
+        790,
+        464
+      ],
+      [
+        792,
+        466
+      ],
+      [
+        793,
+        466
+      ],
+      [
+        794,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        460
+      ],
+      [
+        797,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        460
+      ],
+      [
+        797,
+        463
+      ],
+      [
+        801,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        466
+      ],
+      [
+        804,
+        460
+      ],
+      [
+        806,
+        460
+      ],
+      [
+        808,
+        462
+      ],
+      [
+        808,
+        464
+      ],
+      [
+        806,
+        466
+      ],
+      [
+        804,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        810,
+        466
+      ],
+      [
+        810,
+        460
+      ],
+      [
+        814,
+        460
+      ],
+      [
+        815,
+        461
+      ],
+      [
+        814,
+        463
+      ],
+      [
+        810,
+        463
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        813,
+        463
+      ],
+      [
+        815,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        819,
+        460
+      ],
+      [
+        820,
+        460
+      ],
+      [
+        821,
+        462
+      ],
+      [
+        821,
+        464
+      ],
+      [
+        820,
+        466
+      ],
+      [
+        819,
+        466
+      ],
+      [
+        817,
+        464
+      ],
+      [
+        817,
+        462
+      ],
+      [
+        819,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        466
+      ],
+      [
+        824,
+        460
+      ],
+      [
+        827,
+        460
+      ],
+      [
+        828,
+        461
+      ],
+      [
+        827,
+        463
+      ],
+      [
+        824,
+        463
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        460
+      ],
+      [
+        839,
+        466
+      ],
+      [
+        840,
+        463
+      ],
+      [
+        841,
+        466
+      ],
+      [
+        842,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        844,
+        466
+      ],
+      [
+        844,
+        462
+      ],
+      [
+        846,
+        460
+      ],
+      [
+        847,
+        460
+      ],
+      [
+        849,
+        462
+      ],
+      [
+        849,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        844,
+        463
+      ],
+      [
+        849,
+        463
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        855,
+        461
+      ],
+      [
+        854,
+        460
+      ],
+      [
+        852,
+        460
+      ],
+      [
+        851,
+        461
+      ],
+      [
+        852,
+        463
+      ],
+      [
+        855,
+        463
+      ],
+      [
+        855,
+        465
+      ],
+      [
+        855,
+        466
+      ],
+      [
+        853,
+        466
+      ],
+      [
+        851,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        858,
+        460
+      ],
+      [
+        858,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        862,
+        460
+      ],
+      [
+        862,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        858,
+        463
+      ],
+      [
+        862,
+        463
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        934,
+        462
+      ],
+      [
+        936,
+        460
+      ],
+      [
+        936,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        935,
+        466
+      ],
+      [
+        937,
+        466
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        460
+      ],
+      [
+        943,
+        460
+      ],
+      [
+        944,
+        462
+      ],
+      [
+        944,
+        464
+      ],
+      [
+        943,
+        466
+      ],
+      [
+        942,
+        466
+      ],
+      [
+        940,
+        464
+      ],
+      [
+        940,
+        462
+      ],
+      [
+        942,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        461
+      ],
+      [
+        941,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        948,
+        460
+      ],
+      [
+        949,
+        460
+      ],
+      [
+        951,
+        462
+      ],
+      [
+        951,
+        464
+      ],
+      [
+        949,
+        466
+      ],
+      [
+        948,
+        466
+      ],
+      [
+        947,
+        464
+      ],
+      [
+        947,
+        462
+      ],
+      [
+        948,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        461
+      ],
+      [
+        948,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        461
+      ],
+      [
+        954,
+        461
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        956,
+        465
+      ],
+      [
+        957,
+        465
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        466
+      ],
+      [
+        957,
+        460
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        462
+      ],
+      [
+        975,
+        460
+      ],
+      [
+        979,
+        460
+      ],
+      [
+        982,
+        462
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        462
+      ],
+      [
+        975,
+        464
+      ],
+      [
+        979,
+        464
+      ],
+      [
+        982,
+        462
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        462
+      ],
+      [
+        977,
+        462
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        758,
+        492
+      ],
+      [
+        759,
+        492
+      ],
+      [
+        760,
+        494
+      ],
+      [
+        760,
+        496
+      ],
+      [
+        759,
+        498
+      ],
+      [
+        758,
+        498
+      ],
+      [
+        756,
+        496
+      ],
+      [
+        756,
+        494
+      ],
+      [
+        758,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        759,
+        493
+      ],
+      [
+        757,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        492
+      ],
+      [
+        765,
+        492
+      ],
+      [
+        767,
+        494
+      ],
+      [
+        767,
+        496
+      ],
+      [
+        765,
+        498
+      ],
+      [
+        764,
+        498
+      ],
+      [
+        763,
+        496
+      ],
+      [
+        763,
+        494
+      ],
+      [
+        764,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        766,
+        493
+      ],
+      [
+        764,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        781,
+        493
+      ],
+      [
+        779,
+        492
+      ],
+      [
+        778,
+        492
+      ],
+      [
+        776,
+        494
+      ],
+      [
+        776,
+        496
+      ],
+      [
+        778,
+        498
+      ],
+      [
+        779,
+        498
+      ],
+      [
+        781,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        498
+      ],
+      [
+        783,
+        494
+      ],
+      [
+        785,
+        492
+      ],
+      [
+        786,
+        492
+      ],
+      [
+        787,
+        494
+      ],
+      [
+        787,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        783,
+        495
+      ],
+      [
+        787,
+        495
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        790,
+        498
+      ],
+      [
+        790,
+        492
+      ],
+      [
+        794,
+        498
+      ],
+      [
+        794,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        797,
+        492
+      ],
+      [
+        799,
+        498
+      ],
+      [
+        801,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        498
+      ],
+      [
+        804,
+        494
+      ],
+      [
+        805,
+        492
+      ],
+      [
+        806,
+        492
+      ],
+      [
+        808,
+        494
+      ],
+      [
+        808,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        804,
+        495
+      ],
+      [
+        808,
+        495
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        815,
+        493
+      ],
+      [
+        813,
+        492
+      ],
+      [
+        811,
+        492
+      ],
+      [
+        810,
+        493
+      ],
+      [
+        811,
+        495
+      ],
+      [
+        814,
+        495
+      ],
+      [
+        815,
+        497
+      ],
+      [
+        814,
+        498
+      ],
+      [
+        812,
+        498
+      ],
+      [
+        810,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        498
+      ],
+      [
+        824,
+        492
+      ],
+      [
+        828,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        824,
+        495
+      ],
+      [
+        827,
+        495
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        833,
+        492
+      ],
+      [
+        833,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        838,
+        492
+      ],
+      [
+        838,
+        498
+      ],
+      [
+        842,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [
+      [
+        844,
+        492
+      ],
+      [
+        844,
+        498
+      ],
+      [
+        849,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        934,
+        494
+      ],
+      [
+        936,
+        492
+      ],
+      [
+        936,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        935,
+        498
+      ],
+      [
+        937,
+        498
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        942,
+        492
+      ],
+      [
+        943,
+        492
+      ],
+      [
+        944,
+        494
+      ],
+      [
+        944,
+        496
+      ],
+      [
+        943,
+        498
+      ],
+      [
+        942,
+        498
+      ],
+      [
+        940,
+        496
+      ],
+      [
+        940,
+        494
+      ],
+      [
+        942,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        944,
+        493
+      ],
+      [
+        941,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        948,
+        492
+      ],
+      [
+        949,
+        492
+      ],
+      [
+        951,
+        494
+      ],
+      [
+        951,
+        496
+      ],
+      [
+        949,
+        498
+      ],
+      [
+        948,
+        498
+      ],
+      [
+        947,
+        496
+      ],
+      [
+        947,
+        494
+      ],
+      [
+        948,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        950,
+        493
+      ],
+      [
+        948,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        493
+      ],
+      [
+        954,
+        493
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        956,
+        497
+      ],
+      [
+        957,
+        497
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [
+      [
+        953,
+        498
+      ],
+      [
+        957,
+        492
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        494
+      ],
+      [
+        975,
+        492
+      ],
+      [
+        979,
+        492
+      ],
+      [
+        982,
+        494
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        972,
+        494
+      ],
+      [
+        975,
+        496
+      ],
+      [
+        979,
+        496
+      ],
+      [
+        982,
+        494
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        977,
+        494
+      ],
+      [
+        977,
+        494
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        760,
+        669
+      ],
+      [
+        758,
+        668
+      ],
+      [
+        758,
+        668
+      ],
+      [
+        756,
+        670
+      ],
+      [
+        756,
+        672
+      ],
+      [
+        758,
+        674
+      ],
+      [
+        758,
+        674
+      ],
+      [
+        760,
+        673
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        764,
+        668
+      ],
+      [
+        765,
+        668
+      ],
+      [
+        766,
+        670
+      ],
+      [
+        766,
+        672
+      ],
+      [
+        765,
+        674
+      ],
+      [
+        764,
+        674
+      ],
+      [
+        762,
+        672
+      ],
+      [
+        762,
+        670
+      ],
+      [
+        764,
+        668
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        769,
+        674
+      ],
+      [
+        769,
+        668
+      ],
+      [
+        771,
+        668
+      ],
+      [
+        773,
+        670
+      ],
+      [
+        773,
+        672
+      ],
+      [
+        771,
+        674
+      ],
+      [
+        769,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        779,
+        668
+      ],
+      [
+        775,
+        668
+      ],
+      [
+        775,
+        674
+      ],
+      [
+        779,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        775,
+        671
+      ],
+      [
+        778,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        786,
+        669
+      ],
+      [
+        784,
+        668
+      ],
+      [
+        782,
+        668
+      ],
+      [
+        782,
+        669
+      ],
+      [
+        782,
+        671
+      ],
+      [
+        785,
+        671
+      ],
+      [
+        786,
+        672
+      ],
+      [
+        785,
+        674
+      ],
+      [
+        783,
+        674
+      ],
+      [
+        782,
+        673
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        788,
+        668
+      ],
+      [
+        788,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        792,
+        668
+      ],
+      [
+        788,
+        671
+      ],
+      [
+        792,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        798,
+        668
+      ],
+      [
+        794,
+        668
+      ],
+      [
+        794,
+        674
+      ],
+      [
+        798,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        794,
+        671
+      ],
+      [
+        798,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        801,
+        668
+      ],
+      [
+        805,
+        668
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        803,
+        668
+      ],
+      [
+        803,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        811,
+        669
+      ],
+      [
+        810,
+        668
+      ],
+      [
+        809,
+        668
+      ],
+      [
+        807,
+        670
+      ],
+      [
+        807,
+        672
+      ],
+      [
+        809,
+        674
+      ],
+      [
+        810,
+        674
+      ],
+      [
+        811,
+        673
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        814,
+        668
+      ],
+      [
+        814,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        818,
+        668
+      ],
+      [
+        818,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        814,
+        671
+      ],
+      [
+        818,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        830,
+        668
+      ],
+      [
+        826,
+        668
+      ],
+      [
+        826,
+        674
+      ],
+      [
+        830,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        826,
+        671
+      ],
+      [
+        830,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        833,
+        674
+      ],
+      [
+        833,
+        668
+      ],
+      [
+        837,
+        674
+      ],
+      [
+        837,
+        668
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        843,
+        669
+      ],
+      [
+        842,
+        668
+      ],
+      [
+        841,
+        668
+      ],
+      [
+        839,
+        670
+      ],
+      [
+        839,
+        672
+      ],
+      [
+        841,
+        674
+      ],
+      [
+        842,
+        674
+      ],
+      [
+        843,
+        673
+      ],
+      [
+        843,
+        671
+      ],
+      [
+        842,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        848,
+        668
+      ],
+      [
+        848,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        852,
+        674
+      ],
+      [
+        852,
+        668
+      ],
+      [
+        856,
+        674
+      ],
+      [
+        856,
+        668
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        862,
+        668
+      ],
+      [
+        858,
+        668
+      ],
+      [
+        858,
+        674
+      ],
+      [
+        862,
+        674
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        858,
+        671
+      ],
+      [
+        862,
+        671
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        871,
+        668
+      ],
+      [
+        873,
+        674
+      ],
+      [
+        875,
+        668
+      ]
+    ]
+  },
+  {
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "brush",
+    "size": 1,
+    "color": "#94A3B8",
+    "opacity": 1.0,
+    "points": [
+      [
+        878,
+        670
+      ],
+      [
+        878,
+        668
+      ],
+      [
+        881,
+        668
+      ],
+      [
+        882,
+        670
+      ],
+      [
+        878,
+        674
+      ],
+      [
+        882,
+        674
+      ]
+    ]
+  }
+]

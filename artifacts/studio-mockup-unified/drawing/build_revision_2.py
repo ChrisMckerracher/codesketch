@@ -1,0 +1,192 @@
+import json
+
+revisions = []
+
+def add_rev(cmd):
+    revisions.append(cmd)
+
+# 1. Completely wipe the top area (0 to 52) across entire width with the neutral background #EEF2F6
+add_rev({
+    "type": "rect",
+    "layer": "base_ui",
+    "x": 0,
+    "y": 0,
+    "width": 1000,
+    "height": 52,
+    "color": "#EEF2F6",
+    "opacity": 1.0
+})
+
+# 2. Re-draw top header inside Right Sidebar (x=762, y=56, w=224)
+# Cover old header area of right panel
+add_rev({
+    "type": "rect",
+    "layer": "right_panel",
+    "x": 763,
+    "y": 57,
+    "width": 222,
+    "height": 38,
+    "color": "#F8FAFC",
+    "opacity": 1.0
+})
+add_rev({
+    "type": "rect",
+    "layer": "right_panel",
+    "x": 763,
+    "y": 94,
+    "width": 222,
+    "height": 1,
+    "color": "#E2E8F0",
+    "opacity": 1.0
+})
+
+# "Who's watching" avatars embedded in Right Sidebar
+# Avatar 1
+add_rev({
+    "type": "ellipse",
+    "layer": "right_panel",
+    "x": 772,
+    "y": 66,
+    "width": 20,
+    "height": 20,
+    "color": "#EA580C",
+    "opacity": 1.0
+})
+# Avatar 2
+add_rev({
+    "type": "ellipse",
+    "layer": "right_panel",
+    "x": 788,
+    "y": 66,
+    "width": 20,
+    "height": 20,
+    "color": "#7C3AED",
+    "opacity": 1.0
+})
+# Avatar 3
+add_rev({
+    "type": "ellipse",
+    "layer": "right_panel",
+    "x": 804,
+    "y": 66,
+    "width": 20,
+    "height": 20,
+    "color": "#059669",
+    "opacity": 1.0
+})
+
+# Play/View button
+add_rev({
+    "type": "rect",
+    "layer": "right_panel",
+    "x": 834,
+    "y": 64,
+    "width": 24,
+    "height": 24,
+    "color": "#F1F5F9",
+    "opacity": 1.0
+})
+add_rev({
+    "type": "stroke",
+    "layer": "right_panel",
+    "brush": "brush",
+    "size": 2,
+    "color": "#475569",
+    "opacity": 1.0,
+    "points": [[840, 69], [840, 81], [850, 75], [840, 69]]
+})
+
+# Share CTA Button embedded in Right Sidebar
+add_rev({
+    "type": "rect",
+    "layer": "right_panel",
+    "x": 868,
+    "y": 63,
+    "width": 110,
+    "height": 26,
+    "color": "#0D99FF",
+    "opacity": 1.0
+})
+# "SHARE" lettering
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#FFFFFF",
+    "opacity": 1.0,
+    "points": [[896, 70], [902, 70], [896, 75], [902, 75], [896, 80]] # S
+})
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#FFFFFF",
+    "opacity": 1.0,
+    "points": [[906, 70], [906, 80], [906, 75], [912, 75], [912, 70], [912, 80]] # H
+})
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#FFFFFF",
+    "opacity": 1.0,
+    "points": [[916, 80], [919, 70], [922, 80], [917, 76], [921, 76]] # A
+})
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#FFFFFF",
+    "opacity": 1.0,
+    "points": [[926, 80], [926, 70], [931, 70], [931, 75], [926, 75], [931, 80]] # R
+})
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#FFFFFF",
+    "opacity": 1.0,
+    "points": [[935, 80], [935, 70], [940, 70], [935, 75], [939, 75], [935, 80], [940, 80]] # E
+})
+
+# 3. Clean Artboard top frame
+add_rev({
+    "type": "stroke",
+    "layer": "artboard",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#CBD5E1",
+    "opacity": 1.0,
+    "points": [[252, 56], [748, 56]]
+})
+# Artboard title right on top edge of artboard paper
+add_rev({
+    "type": "rect",
+    "layer": "base_ui",
+    "x": 252,
+    "y": 38,
+    "width": 300,
+    "height": 16,
+    "color": "#EEF2F6",
+    "opacity": 1.0
+})
+add_rev({
+    "type": "stroke",
+    "layer": "typography",
+    "brush": "pencil",
+    "size": 1,
+    "color": "#64748B",
+    "opacity": 1.0,
+    "points": [[254, 46], [260, 46]]
+})
+
+rev_path = "/private/tmp/codesketch-designer-20260910-fresh/artifacts/drawing/revisions_2.json"
+with open(rev_path, "w") as f:
+    json.dump(revisions, f, indent=2)
+
+print(f"Generated {len(revisions)} revision commands in {rev_path}")

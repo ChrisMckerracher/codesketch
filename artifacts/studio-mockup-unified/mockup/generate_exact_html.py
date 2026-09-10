@@ -442,35 +442,37 @@ html_content = '''<!DOCTYPE html>
         draw_text("+ NEW", 938, 302, 0.8, "#0284C7", 1);
 
         const layers = [
-          { num: "05", name: "HIGHLIGHTS", op: "100%" },
-          { num: "04", name: "BRUSH SHADING", op: "80%" },
-          { num: "03", name: "LINEART", op: "100%" },
-          { num: "02", name: "PENCIL ROUGHS", op: "60%" },
-          { num: "01", name: "BACKDROP WASH", op: "100%" },
-          { num: "00", name: "CANVAS FILL", op: "100%" }
+          { num: "05", name: "HIGHLIGHTS", op: "100%", vis: true },
+          { num: "04", name: "BRUSH SHADING", op: "80%", vis: true },
+          { num: "03", name: "LINEART", op: "100%", vis: true },
+          { num: "02", name: "PENCIL ROUGHS", op: "60%", vis: true },
+          { num: "01", name: "BACKDROP WASH", op: "100%", vis: true },
+          { num: "00", name: "CANVAS FILL", op: "100%", vis: true }
         ];
 
         let ly = 328;
         for (const l of layers) {
           const is_active = state.activeLayer === l.num;
-          if (is_active) {
-            draw_text(`${l.num} ${l.name}`, 776, ly + 4, 0.85, "#0284C7", 1);
-            draw_text(l.op, 950, ly + 4, 0.8, "#0284C7", 1);
+          const rowColor = is_active ? "#0284C7" : (l.vis ? "#475569" : "#94A3B8");
+          const eyeColor = is_active ? "#0284C7" : "#94A3B8";
+
+          draw_text(`${l.num} ${l.name}`, 756, ly + 4, 0.85, rowColor, 1);
+          draw_text(l.op, 934, ly + 4, 0.8, is_active ? "#0284C7" : "#64748B", 1);
+
+          // Inline Eye Icon
+          const ex = 972;
+          const ey = ly + 4;
+          draw_stroke([[ex, ey+2], [ex+3, ey], [ex+7, ey], [ex+10, ey+2]], eyeColor, 1);
+          draw_stroke([[ex, ey+2], [ex+3, ey+4], [ex+7, ey+4], [ex+10, ey+2]], eyeColor, 1);
+          if (l.vis) {
+            draw_stroke([[ex+5, ey+2], [ex+5.1, ey+2.1]], eyeColor, 1.5);
           } else {
-            draw_text(`${l.num} ${l.name}`, 776, ly + 4, 0.85, "#475569", 1);
-            draw_text(l.op, 950, ly + 4, 0.8, "#64748B", 1);
+            draw_stroke([[ex+1, ey-1], [ex+9, ey+5]], "#94A3B8", 1);
           }
+
           ly += 32;
         }
 
-        // Section 4: Layer Settings
-        draw_text("LAYER SETTINGS", 756, ly + 14, 0.85, "#64748B", 1);
-        draw_text("BLEND MODE", 756, ly + 32, 0.85, "#475569", 1);
-        draw_text("NORMAL", 884, ly + 32, 0.8, "#0F172A", 1);
-        draw_stroke([[972, ly + 34], [976, ly + 38], [980, ly + 34]], "#475569", 1);
-
-        draw_text("VISIBILITY", 756, ly + 56, 0.85, "#475569", 1);
-        draw_text("VISIBLE", 926, ly + 56, 0.75, "#047857", 1);
 
         // Footer
         draw_text("CODESKETCH ENGINE V2", 756, 668, 0.8, "#94A3B8", 1);
