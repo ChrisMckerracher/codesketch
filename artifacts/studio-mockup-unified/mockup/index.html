@@ -57,21 +57,13 @@
       left: 130px;
       width: 184px;
       height: 24px;
-      background: #FFFFFF;
-      border: 1px solid #CBD5E1;
-      border-radius: 3px;
-      color: #0F172A;
-      font-family: monospace;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
+      background: transparent;
+      border: none;
       outline: none;
+      color: transparent;
+      caret-color: #0284C7;
+      padding: 2px 8px;
       pointer-events: auto;
-      text-transform: uppercase;
-    }
-    #replyInput:focus {
-      border-color: #0284C7;
-      box-shadow: 0 0 0 1px #0284C7;
     }
   </style>
 </head>
@@ -125,7 +117,7 @@
       <!-- Feedback Card -->
       <div id="cardInteractiveGroup">
         <button class="interactive-btn" id="btnCloseCard" style="top: 42px; left: 436px; width: 22px; height: 20px;" title="Close Feedback Card"></button>
-        <input type="text" id="replyInput" placeholder="WRITE A REPLY..." autocomplete="off" spellcheck="false" />
+        <input type="text" id="replyInput" value="" autocomplete="off" spellcheck="false" />
         <button class="interactive-btn" id="btnSubmitResume" style="top: 202px; left: 322px; width: 128px; height: 24px;" title="Submit & Resume"></button>
       </div>
 
@@ -410,6 +402,10 @@
 
         // Action Box
         draw_rect(120, 194, 340, 1, "#E2E8F0");
+        draw_rounded_rect(130, 202, 184, 24, 3, "#F8FAFC");
+        draw_rect(130, 202, 184, 1, "#CBD5E1");
+        draw_text(state.replyText || "WRITE A REPLY...", 138, 209, 0.75, state.replyText ? "#0F172A" : "#94A3B8", 1);
+
         draw_rounded_rect(322, 202, 128, 24, 3, "#0284C7");
         draw_text("SUBMIT & RESUME", 330, 209, 0.75, "#FFFFFF", 1);
 
@@ -424,10 +420,8 @@
         // Header (y: 0..44)
         draw_text("STUDIO", 756, 20, 0.95, "#0F172A", 1);
 
-        // Feedback Badge [FB]
-        draw_rounded_rect(818, 11, 36, 24, 3, state.feedbackOpen ? "#DBEAFE" : "#EFF6FF");
-        draw_rect(818, 11, 36, 1, state.feedbackOpen ? "#93C5FD" : "#BFDBFE");
-        draw_text("FB", 828, 18, 0.85, state.feedbackOpen ? "#1D4ED8" : "#2563EB", 1);
+        // Feedback Toggle [FB] (Pure typography, no box)
+        draw_text("FB", 830, 20, 0.85, state.feedbackOpen ? "#0284C7" : "#64748B", 1);
 
         // Primary SAVE button [SAVE]
         if (state.saved) {
@@ -601,11 +595,16 @@
         lines: [val.slice(0, 36), val.slice(36, 72)]
       });
       state.statusBadge = 'APPLIED';
+      state.replyText = '';
       inp.value = '';
       renderStudio();
     }
 
     document.getElementById('btnSubmitResume').onclick = submitFeedback;
+    document.getElementById('replyInput').addEventListener('input', (e) => {
+      state.replyText = e.target.value.toUpperCase();
+      renderStudio();
+    });
     document.getElementById('replyInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();

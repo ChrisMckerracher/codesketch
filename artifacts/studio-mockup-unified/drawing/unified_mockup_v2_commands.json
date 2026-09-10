@@ -10064,104 +10064,24 @@
     ]
   },
   {
-    "type": "rect",
-    "layer": "right_panel",
-    "x": 821,
-    "y": 11,
-    "width": 30,
-    "height": 24,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "rect",
-    "layer": "right_panel",
-    "x": 818,
-    "y": 14,
-    "width": 3,
-    "height": 18,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "rect",
-    "layer": "right_panel",
-    "x": 851,
-    "y": 14,
-    "width": 3,
-    "height": 18,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "ellipse",
-    "layer": "right_panel",
-    "x": 818,
-    "y": 11,
-    "width": 6,
-    "height": 6,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "ellipse",
-    "layer": "right_panel",
-    "x": 848,
-    "y": 11,
-    "width": 6,
-    "height": 6,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "ellipse",
-    "layer": "right_panel",
-    "x": 818,
-    "y": 29,
-    "width": 6,
-    "height": 6,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "ellipse",
-    "layer": "right_panel",
-    "x": 848,
-    "y": 29,
-    "width": 6,
-    "height": 6,
-    "color": "#EFF6FF",
-    "opacity": 1.0
-  },
-  {
-    "type": "rect",
-    "layer": "right_panel",
-    "x": 818,
-    "y": 11,
-    "width": 36,
-    "height": 1,
-    "color": "#BFDBFE",
-    "opacity": 1.0
-  },
-  {
     "type": "stroke",
     "layer": "typography",
     "brush": "brush",
     "size": 1,
-    "color": "#2563EB",
+    "color": "#3B82F6",
     "opacity": 1.0,
     "points": [
       [
-        828,
-        24
+        830,
+        26
       ],
       [
-        828,
-        18
+        830,
+        20
       ],
       [
-        832,
-        18
+        834,
+        20
       ]
     ]
   },
@@ -10170,16 +10090,16 @@
     "layer": "typography",
     "brush": "brush",
     "size": 1,
-    "color": "#2563EB",
+    "color": "#3B82F6",
     "opacity": 1.0,
     "points": [
       [
-        828,
-        21
+        830,
+        23
       ],
       [
-        831,
-        21
+        833,
+        23
       ]
     ]
   },
@@ -10188,48 +10108,48 @@
     "layer": "typography",
     "brush": "brush",
     "size": 1,
-    "color": "#2563EB",
+    "color": "#3B82F6",
     "opacity": 1.0,
     "points": [
       [
-        835,
-        24
+        837,
+        26
       ],
       [
-        835,
-        18
+        837,
+        20
       ],
       [
-        838,
-        18
+        840,
+        20
       ],
       [
-        839,
-        19
-      ],
-      [
-        838,
+        841,
         21
       ],
       [
-        835,
-        21
+        840,
+        23
       ],
       [
-        838,
-        21
+        837,
+        23
       ],
       [
-        839,
-        22
+        840,
+        23
       ],
       [
-        838,
+        841,
         24
       ],
       [
-        835,
-        24
+        840,
+        26
+      ],
+      [
+        837,
+        26
       ]
     ]
   },

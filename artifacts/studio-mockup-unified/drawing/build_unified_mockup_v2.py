@@ -310,10 +310,8 @@ draw_rect("right_panel", 740, 0, 260, 700, "#FFFFFF")
 # 1. Header
 draw_text("typography", "STUDIO", 756, 20, scale=0.95, color="#0F172A", size=1)
 
-# Feedback Badge [FB]
-draw_rounded_rect("right_panel", 818, 11, 36, 24, 3, "#EFF6FF")
-draw_rect("right_panel", 818, 11, 36, 1, "#BFDBFE")
-draw_text("typography", "FB", 828, 18, scale=0.85, color="#2563EB", size=1)
+# Feedback Toggle [FB]
+draw_text("typography", "FB", 830, 20, scale=0.85, color="#3B82F6", size=1)
 
 # Primary SAVE button [SAVE]
 draw_rounded_rect("right_panel", 872, 11, 62, 24, 3, "#0284C7")
