@@ -130,7 +130,7 @@ export class StudioState {
     }
 
     // Persistent playbackError display
-    const pError = snapshot.playbackError || snapshot.playback?.playbackError || null;
+    const pError = snapshot.playbackError || null;
     if (pError !== this.playbackError) {
       this.playbackError = pError;
       if (pError) {

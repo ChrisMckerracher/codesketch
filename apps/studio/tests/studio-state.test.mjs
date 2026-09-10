@@ -207,3 +207,23 @@ test('setOpacity emits only when the normalized value changes', () => {
   assert.deepEqual(emitted, [0.5, 1], 'repeat value emits once');
   assert.equal(state.opacity, 1);
 });
+
+test('setSnapshot consumes only the top-level playbackError field', () => {
+  const state = new StudioState();
+  const snapshot = (overrides = {}) => ({
+    revision: 1,
+    instanceId: 'inst-1',
+    playback: { status: 'idle', speed: 1, remaining: 0, active: null },
+    ...overrides,
+  });
+
+  state.setSnapshot(snapshot({ playbackError: 'replay stalled' }));
+  assert.equal(state.playbackError, 'replay stalled', 'top-level string sets the error');
+  assert.match(state.notification.message, /replay stalled/);
+
+  state.setSnapshot(snapshot({ playbackError: null }));
+  assert.equal(state.playbackError, null, 'explicit null clears the error');
+
+  state.setSnapshot(snapshot({ playback: { status: 'idle', speed: 1, remaining: 0, active: null, playbackError: 'nested' } }));
+  assert.equal(state.playbackError, null, 'nested-only value is not interpreted');
+});
