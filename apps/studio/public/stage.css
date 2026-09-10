@@ -1,0 +1,21 @@
+#canvas-wrapper {
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.cs-stage {
+  touch-action: none;
+}
+
+.cs-stage-hand {
+  cursor: grab;
+}
+
+.cs-stage-hand.cs-stage-panning {
+  cursor: grabbing;
+}
+
+.cs-stage-panning,
+.cs-stage-panning #canvas-wrapper {
+  user-select: none;
+}
