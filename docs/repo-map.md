@@ -1,65 +1,80 @@
 # Repository map
 
-Codesketch is a dependency-free local painting studio with a JavaScript browser runtime and a native Go CLI.
+Codesketch is a dependency-free local painting studio. The browser studio is
+the canonical application runtime; the native Go `paint` CLI packages and
+manages that runtime.
 
-## Root contracts and build
+## Root and applications
 
-- [`go.mod`](../go.mod) declares the native module and standard-library-only build boundary.
-- [`package.json`](../package.json) declares native Node scripts: `start`, `test`, `test:browser`, and `verify`.
-- [`Makefile`](../Makefile) builds, installs, vets, tests, and verifies the native `paint` executable with offline Go settings.
-- [`AGENTS.md`](../AGENTS.md) records production protection and repository operating rules.
+- [`go.mod`](../go.mod) declares the native module and standard-library-only
+  build boundary.
+- [`package.json`](../package.json) declares the Node start, test, browser,
+  and verification scripts.
+- [`Makefile`](../Makefile) builds, installs, vets, tests, and verifies the
+  native `paint` executable with offline Go settings.
+- [`AGENTS.md`](../AGENTS.md) defines production protection, ownership, and
+  verification rules.
+- [`apps/studio/`](../apps/studio/README.md) contains the browser application.
+  Its source, public assets, and checks each have local README coverage.
+- [`apps/paint/`](../apps/paint/README.md) contains the native CLI. `cmd/paint`
+  is the executable; `internal/cli` owns parsing, transport, lifecycle,
+  capture, input, and output seams.
+- [`docs/`](README.md) contains standards, plans, guides, and release evidence.
+- [`docs/agent-guide.md`](agent-guide.md) is embedded for offline CLI guidance.
+- [`docs/plans/architect/managed-lifecycle.md`](plans/architect/managed-lifecycle.md)
+  is the durable managed-studio lifecycle contract.
+- [`tools/`](../tools/README.md) contains verification and browser runners.
+- [`tests/`](../tests/README.md) contains repository-wide policy and shared
+  cross-language fixtures.
+- [`docs/verification.md`](verification.md) is the current source for release
+  verification evidence.
 
-## Applications
+## Studio bounded contexts
 
-- [`apps/studio/`](../apps/studio/README.md) is the canonical browser studio.
-  Its JavaScript runtime lives in [`apps/studio/src/`](../apps/studio/src/README.md),
-  its shell/assets in [`apps/studio/public/`](../apps/studio/public/README.md),
-  and its browser/Node checks in [`apps/studio/tests/`](../apps/studio/tests/README.md).
-  [`apps/studio/assets.go`](../apps/studio/assets.go) embeds the reviewed runtime `src/` and `public/` tree for native distribution.
-- [`apps/paint/`](../apps/paint) is the native Go CLI: `cmd/paint` is the executable,
-  while `internal/cli` owns command parsing, studio transport, managed lifecycle, comments, capture, and tests.
-  Folder seams are documented by the READMEs in [`apps/paint/`](../apps/paint/README.md).
+The JavaScript dependency direction is studio → transport API and painting;
+transport → direction → painting. Cross-context imports use public
+`index.mjs` entrypoints.
 
-## Studio source contexts
+- [`painting/`](../apps/studio/src/painting/README.md) validates and reduces
+  artwork commands, then renders document values and playback marks.
+- [`direction/`](../apps/studio/src/direction/README.md) owns session state,
+  playback, queue, history, comments, projects, and recovery.
+- [`transport/`](../apps/studio/src/transport/README.md) owns local HTTP,
+  persistence, trust checks, lifecycle, and the runtime manifest.
+- [`studio/`](../apps/studio/src/studio/README.md) owns browser interaction,
+  immutable UI model state, application fanout, presentation, gestures,
+  viewport transforms, review, and the HTTP client.
+- [`compositions/`](../apps/studio/src/compositions/README.md) supplies the
+  deterministic example command batch.
 
-- [`apps/studio/src/painting/`](../apps/studio/src/painting/README.md) owns artwork values and rendering.
-- [`apps/studio/src/direction/`](../apps/studio/src/direction/README.md) owns session playback, history, projects, recovery, and feedback.
-- [`apps/studio/src/transport/`](../apps/studio/src/transport/README.md) owns local HTTP, persistence, trust, and lifecycle seams.
-- [`apps/studio/src/studio/`](../apps/studio/src/studio/README.md) owns browser interaction and presentation.
-- [`apps/studio/src/compositions/`](../apps/studio/src/compositions/README.md) supplies the deterministic landscape command batch.
+## Current studio hierarchy
 
-The current JavaScript dependency direction is studio → transport API and painting; transport → direction → painting. The native lifecycle manager starts the embedded managed entrypoint and communicates through the authenticated lifecycle seam; it does not import browser UI or studio domain internals.
-Cross-context imports target public `index.mjs` entrypoints. Document code remains browser/network/filesystem independent.
+`public/index.html` provides one application shell: `global-header`,
+`left-sidebar`, `stage-viewport`, `inspector-dock`, and `studio-notice`.
+The stage contains `director-hud`, `canvas-wrapper` with `painting-canvas` and
+`stage-overlay`, `feedback-composer`, and `tool-dock`. The left side mounts
+Layers and Feedback; the right side mounts the contextual inspector. At compact
+widths, the sidebars become rail-triggered drawers.
 
-## Documentation
+`studio/index.mjs` mounts the header, playback HUD, layers, inspector, tools,
+viewport, review, and gesture services. The application model stores immutable
+values; every accepted update renders artwork when its signature or draft
+changes and fans the same value to every mounted component.
 
-- [`docs/`](.) contains embedded guides, standards, plans, and release verification evidence.
-- [`docs/agent-guide.md`](agent-guide.md) is embedded by [`docs/assets.go`](assets.go) for offline CLI guidance.
-- [`docs/standards/`](standards) defines architecture, interface, security, and testing expectations.
-- [`docs/plans/architect/`](plans/architect) contains approved architecture scope, contracts, and risks.
-- [`docs/plans/architect/managed-lifecycle.md`](plans/architect/managed-lifecycle.md) is the durable managed-studio lifecycle implementation contract.
+## Native runtime and release boundary
 
-## Tools and policy
+[`apps/studio/assets.go`](../apps/studio/assets.go) explicitly embeds the
+complete `src/` and `public/` runtime, including `public/icon.svg`, all seven
+stylesheets, the HTML entrypoint, and every transitive module. The renderer
+exports remain direct views of the canonical painting renderer.
 
-- [`tools/verify.mjs`](../tools/verify.mjs) checks JavaScript syntax, source boundaries, file size, and zero-dependency policy.
-- [`tools/verify-go.mjs`](../tools/verify-go.mjs) checks Go formatting, dependencies, embeds, and source policy.
-- [`tools/browser-check.mjs`](../tools/browser-check.mjs) runs isolated Playwright CLI scenarios and validates project/PNG artifacts.
-- [`tools/go-policy/`](../tools/go-policy) contains Go inventory, environment, source, and runtime policy helpers.
-- [`tools/README.md`](../tools/README.md) documents root verification tools.
-- [`tools/go-policy/README.md`](../tools/go-policy/README.md) documents the Go policy seams.
+The lifecycle manager derives a strict SHA-256 digest from the exact embedded
+manifest and uses a verified digest-keyed cache. It cannot discover or restart
+an old incompatible digest. A lead-managed cross-digest release stops the old
+binary's studio successfully, then starts the new binary's studio; same-version
+restart is a separate lifecycle operation. Port 4317 is production.
+Development and tests use ephemeral loopback ports and temporary persistence.
 
-## Shared tests and fixtures
-
-- [`tests/`](../tests) contains repository-wide policy and runtime-embedding tests.
-- [`tests/fixtures/capture-contract.json`](../tests/fixtures/capture-contract.json) is the shared cross-language capture contract fixture.
-- [`tests/go-policy-fixture.mjs`](../tests/go-policy-fixture.mjs) builds policy fixtures for Go inventory checks.
-- [`tests/README.md`](../tests/README.md) documents repository-wide test ownership.
-- [`tests/fixtures/README.md`](../tests/fixtures/README.md) documents shared cross-language fixtures.
-- [`docs/verification.md`](verification.md) records release verification evidence and the required isolated checks.
-
-## Runtime and safety notes
-
-Bare `paint` and `paint studio start` use durable application data and port 4317 by default; `paint studio status`, `stop`, and `restart` manage the same owned runtime. Port 4317 is production and is never a development or test default.
-Development, unit tests, and browser checks use ephemeral loopback ports and temporary persistence.
-The studio supports current contracts only; obsolete formats are rejected without compatibility adapters.
-Project saves use v2, strict recovery uses v1, and partial playback progress belongs to recovery snapshots rather than project files. Human pause remains authoritative across managed operations.
+Project files use current v2; strict recovery uses current v1. Obsolete formats
+are rejected without compatibility adapters. Consult
+[`verification.md`](verification.md) for current release evidence.
