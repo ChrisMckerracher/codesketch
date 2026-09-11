@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codesketch Studio — Numerical Overflow Architecture</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0B0F19;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      padding: 0;
+    }
+    .studio-container {
+      position: relative;
+      width: 1000px;
+      height: 700px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px #1E293B;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #0F172A;
+    }
+    #studioCanvas {
+      display: block;
+      width: 1000px;
+      height: 700px;
+      cursor: crosshair;
+    }
+    .interactive-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1000px;
+      height: 700px;
+      pointer-events: none;
+    }
+    .interactive-btn {
+      position: absolute;
+      pointer-events: auto;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+    #critiqueInput {
+      position: absolute;
+      top: 216px;
+      left: 486px;
+      width: 228px;
+      height: 76px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: transparent;
+      caret-color: #0284C7;
+      padding: 4px 6px;
+      pointer-events: auto;
+    }
+    #pickerHexInput {
+      position: absolute;
+      top: 288px;
+      left: 564px;
+      width: 92px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: transparent;
+      caret-color: #0284C7;
+      padding: 2px 8px;
+      pointer-events: auto;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div style="position: absolute; top: 10px; display: flex; gap: 8px; z-index: 1000; align-items: center; background: rgba(15, 23, 42, 0.95); padding: 6px 14px; border-radius: 8px; border: 1px solid #334155; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+    <span style="font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;">Perspective:</span>
+    <button id="btnPaint" onclick="switchPerspective('paint_stroke')" style="background: #0284C7; color: #FFF; border: none; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;">🖌️ Rounded Paint Stroke (Live)</button>
+    <button id="btnSoft" onclick="switchPerspective('paint_stroke_soft')" style="background: #1E293B; color: #94A3B8; border: 1px solid #334155; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;">Stroke + Soft Guide</button>
+    <button id="btnCobalt" onclick="switchPerspective('paint_stroke_cobalt')" style="background: #1E293B; color: #94A3B8; border: 1px solid #334155; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;">Cobalt Ink</button>
+    <button id="btnP1" onclick="switchPerspective('dedicated_feedback')" style="background: #1E293B; color: #94A3B8; border: 1px solid #334155; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;">Review Panel</button>
+
+    <div style="width: 1px; height: 20px; background: #334155; margin: 0 4px;"></div>
+
+    <!-- Live CLS Meter -->
+    <div id="clsBadge" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10B981; border-radius: 4px; font-size: 11px; color: #34D399; font-weight: 700;">
+      <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
+      <span>CLS: 0.0000 (ZERO SHIFT)</span>
+    </div>
+
+    <!-- CLS Mode Toggle -->
+    <button id="btnToggleClsMode" onclick="toggleClsMode()" style="background: rgba(16, 185, 129, 0.1); color: #34D399; border: 1px solid #10B981; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;" title="Toggle between CLS-Free Reserved Gutter and Traditional Auto-Scrollbar to demonstrate layout shift difference">⚡ CLS Shield: Active (Reserved 24px Gutter)</button>
+  </div>
+
+  <div class="studio-container" id="studioContainer" style="margin-top: 50px;">
+    <canvas id="studioCanvas" width="1000" height="700"></canvas>
+
+    <div class="interactive-layer" id="interactiveLayer">
+      <!-- Header Actions -->
+      <button class="interactive-btn" id="btnHeaderFb" style="top: 11px; left: 818px; width: 48px; height: 24px;" title="Toggle Area Feedback Flow"></button>
+      <button class="interactive-btn primary-cta" id="btnHeaderSave" style="top: 11px; left: 872px; width: 62px; height: 24px;" title="Save Project"></button>
+      <button class="interactive-btn" id="btnHeaderCollapse" style="top: 11px; left: 958px; width: 30px; height: 24px;" title="Collapse Panel"></button>
+      <button class="interactive-btn" id="btnCollapsedStudio" style="display: none; top: 12px; left: 896px; width: 94px; height: 28px;" title="Expand Studio"></button>
+
+      <!-- Tool Buttons (x: 760..985) -->
+      <button class="interactive-btn" id="btnToolInk" style="top: 98px; left: 760px; width: 50px; height: 28px;" title="Tool: Ink"></button>
+      <button class="interactive-btn" id="btnToolPencil" style="top: 98px; left: 815px; width: 55px; height: 28px;" title="Tool: Pencil"></button>
+      <button class="interactive-btn" id="btnToolMark" style="top: 98px; left: 875px; width: 50px; height: 28px;" title="Tool: Marker"></button>
+      <button class="interactive-btn" id="btnToolErase" style="top: 98px; left: 930px; width: 55px; height: 28px;" title="Tool: Eraser"></button>
+
+      <!-- Stroke Sliders Direct Touch Zones -->
+      <button class="interactive-btn" id="sliderTrackSize" style="top: 148px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Brush Size (1-100px)"></button>
+      <button class="interactive-btn" id="sliderTrackOpacity" style="top: 174px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Stroke Opacity (1-100%)"></button>
+      <button class="interactive-btn" id="sliderTrackSmoothing" style="top: 200px; left: 750px; width: 240px; height: 26px; cursor: ew-resize;" title="Drag Smoothing (0-100%)"></button>
+
+      <!-- Pigment Hex Trigger -->
+      <button class="interactive-btn" id="btnTriggerColorPicker" style="top: 226px; left: 914px; width: 72px; height: 24px;" title="Open Color Picker / Customize Pigment"></button>
+
+      <!-- Pigment Chips Touch Zone -->
+      <div id="pigmentChipsGroup">
+        <button class="interactive-btn" id="chip0" style="top: 248px; left: 754px; width: 22px; height: 22px; border-radius: 50%;" title="Lamp Black"></button>
+        <button class="interactive-btn" id="chip1" style="top: 248px; left: 784px; width: 22px; height: 22px; border-radius: 50%;" title="Graphite Slate"></button>
+        <button class="interactive-btn" id="chip2" style="top: 246px; left: 812px; width: 24px; height: 24px; border-radius: 50%;" title="Cobalt Blue"></button>
+        <button class="interactive-btn" id="chip3" style="top: 248px; left: 844px; width: 22px; height: 22px; border-radius: 50%;" title="Cerulean Cyan"></button>
+        <button class="interactive-btn" id="chip4" style="top: 248px; left: 874px; width: 22px; height: 22px; border-radius: 50%;" title="Emerald Green"></button>
+        <button class="interactive-btn" id="chip5" style="top: 248px; left: 904px; width: 22px; height: 22px; border-radius: 50%;" title="Yellow Ochre"></button>
+        <button class="interactive-btn" id="chip6" style="top: 248px; left: 934px; width: 22px; height: 22px; border-radius: 50%;" title="Cadmium Red"></button>
+        <button class="interactive-btn" id="chip7" style="top: 248px; left: 964px; width: 22px; height: 22px; border-radius: 50%;" title="Titanium White"></button>
+      </div>
+
+      <!-- Layers Header -->
+      <button class="interactive-btn" id="btnNewLayer" style="top: 252px; left: 932px; width: 56px; height: 24px;" title="Add New Layer"></button>
+
+      <!-- Dynamic Layer Touch Container -->
+      <div id="layersTouchContainer"></div>
+
+      <!-- Sidebar Comments Container (Bottom of Sidebar) -->
+      
+      <!-- Overflow Architecture Interactive Elements -->
+      <div id="overflowInteractiveGroup">
+        <!-- Frame Prev/Next in Card Header -->
+        <button class="interactive-btn" id="btnCardFramePrev" style="top: 161px; left: 500px; width: 18px; height: 18px;" title="Previous Feedback Frame"></button>
+        <button class="interactive-btn" id="btnCardFrameNext" style="top: 161px; left: 590px; width: 18px; height: 18px;" title="Next Feedback Frame"></button>
+
+        <!-- Sidebar Comment Filter Chips (Exact Canvas Position Alignments) -->
+        <button class="interactive-btn" id="btnFilterAll" style="top: 486px; left: 836px; width: 34px; height: 20px;" title="Show All 24 Comments"></button>
+        <button class="interactive-btn" id="btnFilterActive" style="top: 486px; left: 874px; width: 60px; height: 20px;" title="Filter to 4 Active Comments"></button>
+
+        <!-- Dedicated Scrollbar Interactive Touch Zone (980..1000, centered on sx=994) -->
+        <div id="scrollbarDragZone" style="position: absolute; top: 514px; left: 980px; width: 20px; height: 140px; cursor: grab; pointer-events: auto;" title="Drag or click paint stroke scrollbar (Mouse wheel also supported)"></div>
+
+        <!-- Cluster on Canvas -->
+        <!-- Cluster button removed in simplified design -->
+        <!-- Standalone Pin #5 Hotspot -->
+        <button class="interactive-btn" id="btnCommentPin5" style="top: 382px; left: 544px; width: 80px; height: 26px;" title="Frame #5: Forest Silhouette (Active)"></button>
+      </div>
+
+      <!-- Prior Collapsed Comment Pin #1 Hotspot -->
+      <button class="interactive-btn" id="btnCommentPin1" style="top: 250px; left: 44px; width: 80px; height: 28px; border-radius: 4px;" title="Prior Feedback #1: Sunset Gradient (Acknowledged)"></button>
+
+      <!-- Dynamic Sidebar Comments Container (Canvas Mode with Custom Font) -->
+      <div id="commentsTouchContainer"></div>
+
+      <!-- Area Selection Feedback Group -->
+      <div id="cardInteractiveGroup">
+        <!-- Close button [X] on card header -->
+        <button class="interactive-btn" id="btnCloseCard" style="top: 160px; left: 698px; width: 24px; height: 24px;" title="Dismiss Feedback Card"></button>
+        
+        <!-- Textarea input field for Director's Critique -->
+        <textarea id="critiqueInput" placeholder=""></textarea>
+
+        <!-- Action Buttons -->
+        <button class="interactive-btn" id="btnCancelFeedback" style="top: 300px; left: 586px; width: 58px; height: 24px;" title="Cancel Feedback"></button>
+        <button class="interactive-btn primary-cta" id="btnSendFeedback" style="top: 300px; left: 650px; width: 64px; height: 24px;" title="Send Feedback"></button>
+      </div>
+
+      <!-- Color Customization Popover Group (x: 476..724, y: 168..384) -->
+      <div id="colorPickerGroup" style="display: none;">
+        <button class="interactive-btn" id="btnClosePicker" style="top: 170px; left: 704px; width: 20px; height: 20px;" title="Close Color Picker"></button>
+        <button class="interactive-btn" id="pickerField2D" style="top: 202px; left: 486px; width: 228px; height: 62px; cursor: crosshair;" title="Pick Saturation & Value"></button>
+        <button class="interactive-btn" id="pickerHueSlider" style="top: 268px; left: 486px; width: 228px; height: 14px; cursor: ew-resize;" title="Drag Hue Spectrum"></button>
+        <button class="interactive-btn" id="btnPickerEyedropper" style="top: 288px; left: 486px; width: 72px; height: 24px;" title="Sample Color From Canvas"></button>
+        <input type="text" id="pickerHexInput" value="" autocomplete="off" spellcheck="false" />
+        <button class="interactive-btn" id="btnApplyPigment" style="top: 320px; left: 486px; width: 228px; height: 26px;" title="Apply Pigment to Palette"></button>
+        
+        <!-- Recent Swatches -->
+        <button class="interactive-btn" id="recent0" style="top: 350px; left: 536px; width: 20px; height: 20px; border-radius: 50%;"></button>
+        <button class="interactive-btn" id="recent1" style="top: 350px; left: 564px; width: 20px; height: 20px; border-radius: 50%;"></button>
+        <button class="interactive-btn" id="recent2" style="top: 350px; left: 592px; width: 20px; height: 20px; border-radius: 50%;"></button>
+        <button class="interactive-btn" id="recent3" style="top: 350px; left: 620px; width: 20px; height: 20px; border-radius: 50%;"></button>
+        <button class="interactive-btn" id="recent4" style="top: 350px; left: 648px; width: 20px; height: 20px; border-radius: 50%;"></button>
+        <button class="interactive-btn" id="recent5" style="top: 350px; left: 676px; width: 20px; height: 20px; border-radius: 50%;"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GLYPHS = {"A": [[[0, 7], [0, 2], [2, 0], [3, 0], [5, 2], [5, 7]], [[0, 4], [5, 4]]], "B": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5], [4, 3.5], [5, 5], [4, 7], [0, 7]]], "C": [[[5, 1], [3, 0], [2, 0], [0, 2], [0, 5], [2, 7], [3, 7], [5, 6]]], "D": [[[0, 7], [0, 0], [3, 0], [5, 2], [5, 5], [3, 7], [0, 7]]], "E": [[[5, 0], [0, 0], [0, 7], [5, 7]], [[0, 3.5], [4, 3.5]]], "F": [[[0, 7], [0, 0], [5, 0]], [[0, 3.5], [3.5, 3.5]]], "G": [[[5, 1], [3, 0], [2, 0], [0, 2], [0, 5], [2, 7], [4, 7], [5, 6], [5, 3.5], [3, 3.5]]], "H": [[[0, 0], [0, 7]], [[5, 0], [5, 7]], [[0, 3.5], [5, 3.5]]], "I": [[[2.5, 0], [2.5, 7]]], "J": [[[4, 0], [4, 5], [3, 7], [1, 7], [0, 5]]], "K": [[[0, 0], [0, 7]], [[5, 0], [0, 4], [5, 7]]], "L": [[[0, 0], [0, 7], [5, 7]]], "M": [[[0, 7], [0, 0], [2.5, 4], [5, 0], [5, 7]]], "N": [[[0, 7], [0, 0], [5, 7], [5, 0]]], "O": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]]], "P": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5]]], "Q": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]], [[3, 5], [5, 7]]], "R": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5]], [[3, 3.5], [5, 7]]], "S": [[[5, 1], [3, 0], [1, 0], [0, 1.5], [1, 3.5], [4, 3.5], [5, 5.5], [4, 7], [2, 7], [0, 6]]], "T": [[[0, 0], [5, 0]], [[2.5, 0], [2.5, 7]]], "U": [[[0, 0], [0, 5], [2, 7], [3, 7], [5, 5], [5, 0]]], "V": [[[0, 0], [2.5, 7], [5, 0]]], "W": [[[0, 0], [1.5, 7], [2.5, 3], [3.5, 7], [5, 0]]], "X": [[[0, 0], [5, 7]], [[5, 0], [0, 7]]], "Y": [[[0, 0], [2.5, 3.5], [5, 0]], [[2.5, 3.5], [2.5, 7]]], "Z": [[[0, 0], [5, 0], [0, 7], [5, 7]]], "0": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]], [[4, 1], [1, 6]]], "1": [[[0.5, 2.5], [2.5, 0], [2.5, 7]], [[1, 7], [4, 7]]], "2": [[[0, 2], [1, 0], [4, 0], [5, 2], [0, 7], [5, 7]]], "3": [[[0, 1], [1, 0], [4, 0], [5, 2], [3, 3.5], [5, 5], [4, 7], [1, 7], [0, 6]]], "4": [[[4, 7], [4, 0], [0, 5], [5, 5]]], "5": [[[5, 0], [0, 0], [0, 3.5], [4, 3.5], [5, 5], [4, 7], [1, 7], [0, 6]]], "6": [[[4, 0], [2, 0], [0, 3], [0, 5], [2, 7], [4, 7], [5, 5], [4, 3.5], [0, 3.5]]], "7": [[[0, 0], [5, 0], [2, 7]]], "8": [[[2, 0], [3, 0], [5, 1.5], [3, 3.5], [2, 3.5], [0, 1.5], [2, 0]], [[2, 3.5], [3, 3.5], [5, 5.5], [3, 7], [2, 7], [0, 5.5], [2, 3.5]]], "9": [[[5, 3.5], [1, 3.5], [0, 2], [1, 0], [4, 0], [5, 3], [5, 5], [3, 7], [1, 7]]], ":": [[[2.5, 2], [2.5, 2.5]], [[2.5, 5], [2.5, 5.5]]], "-": [[[0, 3.5], [5, 3.5]]], "/": [[[0, 7], [5, 0]]], "+": [[[2.5, 1], [2.5, 6]], [[0, 3.5], [5, 3.5]]], "#": [[[1.5, 0], [1.5, 7]], [[3.5, 0], [3.5, 7]], [[0, 2.5], [5, 2.5]], [[0, 4.5], [5, 4.5]]], "[": [[[3, 0], [1, 0], [1, 7], [3, 7]]], "]": [[[1, 0], [3, 0], [3, 7], [1, 7]]], "(": [[[3, 0], [1, 2], [1, 5], [3, 7]]], ")": [[[1, 0], [3, 2], [3, 5], [1, 7]]], "%": [[[0, 1], [1, 1]], [[4, 6], [5, 6]], [[0, 7], [5, 0]]], ".": [[[2, 6.5], [3, 6.5]]], ",": [[[2, 6], [3, 6], [1, 8]]], "=": [[[0, 2.5], [5, 2.5]], [[0, 4.5], [5, 4.5]]], ">": [[[0, 1], [4, 3.5], [0, 6]]], "<": [[[4, 1], [0, 3.5], [4, 6]]], "|": [[[2.5, 0], [2.5, 7]]], "&": [[[4, 0], [2, 0], [0, 2], [0, 3.5], [4, 5], [4, 7], [2, 7], [0, 5]], [[2, 3.5], [5, 7]]], "!": [[[2.5, 0], [2.5, 4.5]], [[2.5, 6.5], [2.5, 7]]], " ": []};
+
+    const canvas = document.getElementById('studioCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw_rect(x, y, w, h, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+      ctx.restore();
+    }
+
+    function draw_stroke(pts, color, size = 1, opacity = 1.0) {
+      if (!pts || pts.length === 0) return;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i][0], pts[i][1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function draw_ellipse(cx, cy, rx, ry, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx / 2, ry / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function draw_rounded_rect(x, y, w, h, r, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function draw_text(text, x, y, scale = 1.0, color = "#1E293B", size = 1, opacity = 1.0) {
+      let cur_x = x;
+      const char_w = 6 * scale;
+      const spacing = 2 * scale;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      for (let char of String(text).toUpperCase()) {
+        if (GLYPHS[char]) {
+          const paths = GLYPHS[char];
+          for (let path of paths) {
+            ctx.beginPath();
+            const p0x = cur_x + path[0][0] * scale;
+            const p0y = y + path[0][1] * scale;
+            ctx.moveTo(p0x, p0y);
+            if (path.length === 1) {
+              ctx.lineTo(p0x + 1, p0y + 1);
+            } else {
+              for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(cur_x + path[i][0] * scale, y + path[i][1] * scale);
+              }
+            }
+            ctx.stroke();
+          }
+        }
+        cur_x += char_w + spacing;
+      }
+      ctx.restore();
+    }
+
+    // Default palette
+    const PALETTE = ["#000000", "#475569", "#2563EB", "#0284C7", "#059669", "#D97706", "#DC2626", "#FFFFFF"];
+    const PALETTE_NAMES = ["Lamp Black", "Graphite Slate", "Cobalt Blue", "Cerulean Cyan", "Emerald Green", "Yellow Ochre", "Cadmium Red", "Titanium White"];
+
+    // State
+    // 12 Numerical Feedback Frames across canvas
+    const ALL_FRAMES = [
+      { id: 1, bounds: [40, 60, 220, 140], title: "SUNSET GRADIENT", author: "DIRECTOR", status: "ACK", lines: ["ADJUST WARMTH ALONG TOP SKY", "AND BLEND MAGENTA BAND"] },
+      { id: 2, bounds: [80, 220, 260, 150], title: "RIDGE CONTOURS", author: "LEAD", status: "ACK", lines: ["SMOOTH RIDGES WITH 14PX", "FINE PENCIL TEXTURE"] },
+      { id: 3, bounds: [120, 160, 320, 190], title: "CRAG LINEART", author: "DIRECTOR", status: "ACTIVE", lines: ["CRAG LINEART CONTOUR IS TOO", "HEAVY. SOFTEN THE RIDGE EDGES", "AND LIGHTEN MIDGROUND WASH"] },
+      { id: 4, bounds: [280, 180, 200, 160], title: "MIDGROUND WASH", author: "DIRECTOR", status: "ACK", lines: ["LIGHTEN CYAN WASH OVER PEAKS"] },
+      { id: 5, bounds: [480, 280, 180, 140], title: "FOREST SILHOUETTE", author: "ARTIST", status: "ACTIVE", lines: ["ADD PINE VARIETY AND DEEPER", "SHADOW ON FOREGROUND"] },
+      { id: 6, bounds: [200, 520, 340, 120], title: "LAKE REFLECTIONS", author: "DIRECTOR", status: "ACK", lines: ["ADD WATER RIPPLE ACCENTS"] },
+      { id: 7, bounds: [300, 230, 90, 80], title: "PEAK HIGHLIGHT", author: "DIRECTOR", status: "ACK", lines: ["SHARPEN SNOW HIGHLIGHT"] },
+      { id: 8, bounds: [320, 240, 90, 80], title: "PEAK SHADOW", author: "DIRECTOR", status: "ACTIVE", lines: ["COOL BLUE CAST ON CLIFF"] },
+      { id: 9, bounds: [310, 250, 90, 80], title: "SNOW CREVICE", author: "LEAD", status: "ACK", lines: ["SUBTLE INK LINE CONTOUR"] },
+      { id: 10, bounds: [60, 480, 240, 160], title: "SHORELINE CONTRAST", author: "DIRECTOR", status: "ACK", lines: ["DARKEN WATER EDGE CONTOUR"] },
+      { id: 11, bounds: [420, 480, 260, 150], title: "DEEP WATER SHADOW", author: "DIRECTOR", status: "ACK", lines: ["RICH NAVY FILL GRADIENT"] },
+      { id: 12, bounds: [240, 80, 320, 120], title: "ATMOSPHERIC HAZE", author: "DIRECTOR", status: "ACTIVE", lines: ["SOFTEN SKY HORIZON BAND"] }
+    ];
+
+    // 24 Total Comments in Project
+    const ALL_COMMENTS = [
+      { num: 24, label: "ATMOSPHERIC HAZE", author: "DIRECTOR", status: "ACTIVE", bounds: "240,80 -> 560,200", frameIdx: 11 },
+      { num: 23, label: "FOREST SILHOUETTE", author: "ARTIST", status: "ACTIVE", bounds: "480,280 -> 660,420", frameIdx: 4 },
+      { num: 22, label: "PEAK SHADOW CAST", author: "DIRECTOR", status: "ACTIVE", bounds: "320,240 -> 410,320", frameIdx: 7 },
+      { num: 21, label: "CRAG LINEART CONTOUR", author: "DIRECTOR", status: "ACTIVE", bounds: "120,160 -> 440,350", frameIdx: 2 },
+      { num: 20, label: "SNOW CREVICE LINE", author: "LEAD", status: "ACK", bounds: "310,250 -> 400,330", frameIdx: 8 },
+      { num: 19, label: "PEAK HIGHLIGHT SHARP", author: "DIRECTOR", status: "ACK", bounds: "300,230 -> 390,310", frameIdx: 6 },
+      { num: 18, label: "LAKE REFLECTION", author: "DIRECTOR", status: "ACK", bounds: "200,520 -> 540,640", frameIdx: 5 },
+      { num: 17, label: "SHORELINE CONTRAST", author: "DIRECTOR", status: "ACK", bounds: "60,480 -> 300,640", frameIdx: 9 },
+      { num: 16, label: "DEEP WATER SHADOW", author: "DIRECTOR", status: "ACK", bounds: "420,480 -> 680,630", frameIdx: 10 },
+      { num: 15, label: "MIDGROUND WASH TINT", author: "DIRECTOR", status: "ACK", bounds: "280,180 -> 480,340", frameIdx: 3 },
+      { num: 14, label: "RIDGE CONTOURS", author: "LEAD", status: "ACK", bounds: "80,220 -> 340,370", frameIdx: 1 },
+      { num: 13, label: "SUNSET GRADIENT BLEND", author: "DIRECTOR", status: "ACK", bounds: "40,60 -> 260,200", frameIdx: 0 },
+      { num: 12, label: "COLOR SCHEME HARMONY", author: "LEAD", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 11, label: "LINE WEIGHT BALANCE", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 10, label: "CANVAS GRAIN TEST", author: "ARTIST", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 9, label: "PALETTE SATURATION", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 8, label: "SMOOTHING CURVE", author: "LEAD", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 7, label: "BACKGROUND OPACITY", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 6, label: "TREE STEM DETAIL", author: "ARTIST", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 5, label: "HORIZON ALIGNMENT", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 4, label: "HIGHLIGHT OPACITY", author: "LEAD", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 3, label: "INK BRUSH SENSITIVITY", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 2, label: "LAYER STACK REORDER", author: "ARTIST", status: "ACK", bounds: "GLOBAL", frameIdx: -1 },
+      { num: 1, label: "INITIAL ROUGH SKETCH", author: "DIRECTOR", status: "ACK", bounds: "GLOBAL", frameIdx: -1 }
+    ];
+
+    // State
+    const state = {
+      perspective: 'paint_stroke',
+      activeTool: 'INK',
+      size: 14,
+      opacity: 100,
+      smoothing: 75,
+      color: '#2563EB',
+      activeSlider: null,
+      hoveredSlider: null,
+      colorPickerOpen: false,
+      activeFrameIdx: 2, // Frame 03 of 12
+      commentFilter: 'ACTIVE', // 'ACTIVE' or 'ALL'
+      commentScrollY: 0, // Continuous vertical scroll offset in px
+      clsMode: 'cls_free', // 'cls_free' (reserved 24px gutter, CLS=0.0000) or 'traditional' (auto scrollbar shift)
+      clsScore: 0.0000,
+      isDraggingScrollbar: false,
+      dragStartY: 0,
+      dragStartScrollY: 0,
+      eyedropperActive: false,
+      pickerColor: '#2563EB',
+      pickerHue: 220,
+      pickerSat: 84,
+      pickerVal: 92,
+      recentMixes: ["#1E40AF", "#3B82F6", "#0284C7", "#0EA5E9", "#38BDF8", "#7DD3FC"],
+      loupePos: null,
+      loupeColor: '#2563EB',
+      activeLayer: '03',
+      layerScrollY: 0,
+      hoveredNewLayer: false,
+      saved: false,
+      feedbackOpen: true,
+      statusBadge: 'ACKNOWLEDGED',
+      userCritiqueText: '',
+      collapsed: false,
+      marqueeX: 120,
+      marqueeY: 160,
+      marqueeW: 320,
+      marqueeH: 190,
+      composerX: 476,
+      composerY: 156,
+      layers: [
+        { num: "05", name: "HIGHLIGHTS", op: "100%", opacityNum: 100, vis: true },
+        { num: "04", name: "BRUSH SHADING", op: "80%", opacityNum: 80, vis: true },
+        { num: "03", name: "LINEART", op: "100%", opacityNum: 100, vis: true },
+        { num: "02", name: "PENCIL ROUGHS", op: "60%", opacityNum: 60, vis: true },
+        { num: "01", name: "BACKDROP WASH", op: "100%", opacityNum: 100, vis: true },
+        { num: "00", name: "CANVAS FILL", op: "100%", opacityNum: 100, vis: true }
+      ],
+      userStrokes: []
+    };
+
+    window.state = state;
+
+    // Support URL parameters for automated verification and deep-linking
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('perspective')) state.perspective = urlParams.get('perspective');
+    if (urlParams.get('filter')) state.commentFilter = urlParams.get('filter');
+    if (urlParams.get('scroll')) state.commentScrollY = parseInt(urlParams.get('scroll'), 10);
+    if (urlParams.get('clsMode')) state.clsMode = urlParams.get('clsMode');
+
+    function renderStudio() {
+      const cw = state.collapsed ? 1000 : 740;
+
+      // Base Fill
+      draw_rect(0, 0, 1000, 700, "#0F172A");
+
+      // 1. WIDESCREEN EXPANSIVE CANVAS
+      // Sky Gradient Bands
+      draw_rect(0, 0, cw, 120, "#DDD6FE");
+      draw_rect(0, 120, cw, 80, "#FED7AA");
+      draw_rect(0, 200, cw, 60, "#FECDD3");
+      draw_rect(0, 260, cw, 55, "#FEF08A");
+
+      // Distant Mountain Range
+      const mtn_distant = [
+        [0, 260], [60, 220], [130, 250], [210, 180], [300, 255],
+        [390, 190], [480, 240], [560, 175], [640, 230], [710, 195], [cw, 210]
+      ];
+      draw_stroke(mtn_distant, "#93C5FD", 6);
+      for (let y = 250; y < 315; y += 12) {
+        draw_rect(0, y, cw, 14, "#BFDBFE", 0.7);
+      }
+
+      // Midground Ridge
+      const mtn_mid = [
+        [0, 320], [50, 285], [110, 310], [180, 240], [260, 310],
+        [340, 230], [420, 290], [500, 220], [580, 280], [660, 240], [cw, 270]
+      ];
+      draw_stroke(mtn_mid, "#3B82F6", 8);
+      for (let y = 300; y < 385; y += 12) {
+        draw_rect(0, y, cw, 14, "#60A5FA", 0.7);
+      }
+
+      // Rocky Mountain Crags & Passes
+      const crag_pass = [
+        [0, 370], [80, 320], [170, 360], [270, 290], [380, 350],
+        [480, 300], [580, 360], [670, 310], [cw, 340]
+      ];
+      draw_stroke(crag_pass, "#1D4ED8", 10);
+      for (let y = 350; y < 425; y += 12) {
+        draw_rect(0, y, cw, 14, "#1E40AF", 0.85);
+      }
+
+      // Forefront Rolling Foothills
+      draw_rect(0, 410, cw, 105, "#065F46");
+      const hill_pts = [
+        [0, 410], [80, 370], [170, 400], [270, 350], [380, 390],
+        [480, 340], [580, 380], [670, 350], [cw, 370]
+      ];
+      draw_stroke(hill_pts, "#047857", 10);
+
+      // Pine Trees
+      const treeX = [30, 70, 120, 170, 220, 270, 320, 370, 420, 470, 520, 570, 620, 670, 710];
+      for (let px of treeX) {
+        if (px >= cw) continue;
+        const py = px < 400 ? 380 : 360;
+        draw_stroke([[px, py + 28], [px, py]], "#022C22", 3);
+        draw_stroke([[px - 7, py + 16], [px, py + 3], [px + 7, py + 16]], "#064E3B", 4);
+        draw_stroke([[px - 11, py + 26], [px, py + 10], [px + 11, py + 26]], "#047857", 4);
+      }
+
+      // Deep Reflective Lake Water
+      draw_rect(0, 510, cw, 190, "#0F172A");
+      const lake_reflections = [
+        [40, 530, 140], [220, 545, 180], [450, 535, 160],
+        [90, 570, 150], [310, 580, 200], [560, 565, 140],
+        [50, 615, 170], [270, 630, 190], [510, 620, 180],
+        [120, 665, 160], [380, 675, 210]
+      ];
+      for (let [rx, ry, rw] of lake_reflections) {
+        if (rx + rw <= cw) {
+          draw_rect(rx, ry, rw, 3, "#38BDF8", 0.45);
+        }
+      }
+
+      // Active Live Stroke on Canvas (03 Lineart layer)
+      const lineartLayer = state.layers.find(l => l.num === '03');
+      if (lineartLayer && lineartLayer.vis) {
+        const brush_pts = [
+          [60, 330], [160, 310], [280, 260], [380, 290], [480, 240], [570, 275]
+        ];
+        draw_stroke(brush_pts, state.color, state.size, (lineartLayer.opacityNum / 100));
+      }
+
+      // User drawn strokes
+      for (let st of state.userStrokes) {
+        const lyr = state.layers.find(l => l.num === st.layer);
+        if (lyr && lyr.vis) {
+          draw_stroke(st.points, st.color, st.size, (st.opacity / 100) * (lyr.opacityNum / 100));
+        }
+      }
+
+      // 2. IN-APP FEEDBACK PIN & SELECTION FLOW
+      if (state.feedbackOpen) {
+        // A. Collapsed Prior Comment Pin #1 at (60, 260)
+        draw_ellipse(62, 262, 20, 20, "#0D99FF");
+        draw_ellipse(62, 262, 16, 16, "#FFFFFF");
+        draw_ellipse(62, 262, 10, 10, "#0D99FF");
+        draw_stroke([[52, 266], [44, 274], [58, 269]], "#0D99FF", 1.5);
+        draw_rounded_rect(74, 254, 46, 16, 2, "#DCFCE7");
+        draw_text("#1 ACK", 78, 258, 0.55, "#16A34A", 1);
+
+        // B. Active Pin #5 (Forest Silhouette) at (560, 390)
+        draw_ellipse(560, 390, 16, 16, "#0284C7");
+        draw_ellipse(560, 390, 12, 12, "#FFFFFF");
+        draw_ellipse(560, 390, 8, 8, "#0284C7");
+        draw_stroke([[552, 394], [544, 402], [558, 397]], "#0284C7", 1.5);
+        draw_rounded_rect(572, 382, 48, 16, 2, "#E0F2FE");
+        draw_text("#5 ACT", 576, 386, 0.55, "#0284C7", 1);
+
+        // C. Spatial Cluster Badge [ 3 NOTES v ] at Lake Shoreline (230, 508)
+        // Groups Frame #6 (Lake Reflection), #10 (Shoreline Contrast), #11 (Deep Water Shadow)
+        draw_rounded_rect(230, 508, 88, 22, 4, "#1E293B");
+        draw_ellipse(242, 519, 8, 8, "#38BDF8");
+        draw_text("3 NOTES v", 252, 514, 0.6, "#FFFFFF", 1);
+
+        // D. Ghost Pins for Inactive / Historical Notes (opacity 0.4)
+        const ghosts = [
+          { x: 90, y: 100, label: "#13" },
+          { x: 380, y: 95, label: "#12" },
+          { x: 140, y: 280, label: "#14" }
+        ];
+        for (let g of ghosts) {
+          draw_ellipse(g.x, g.y, 8, 8, "rgba(148, 163, 184, 0.4)");
+          draw_text(g.label, g.x + 8, g.y - 4, 0.52, "rgba(148, 163, 184, 0.7)", 1);
+        }
+
+        // B. Area Selection Marquee (120, 160 -> 440, 350)
+        const mx = state.marqueeX || 120;
+        const my = state.marqueeY || 160;
+        const mw = state.marqueeW || 320;
+        const mh = state.marqueeH || 190;
+
+        // Selection Wash (14% translucent blue)
+        draw_rect(mx, my, mw, mh, "rgba(2, 132, 199, 0.14)");
+
+        // Alternating dashed border
+        ctx.save();
+        ctx.strokeStyle = "#0284C7";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8, 6]);
+        ctx.strokeRect(mx, my, mw, mh);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineDashOffset = 7;
+        ctx.strokeRect(mx, my, mw, mh);
+        ctx.restore();
+
+        // 4 Corner Handles
+        const handles = [[mx, my], [mx + mw, my], [mx, my + mh], [mx + mw, my + mh]];
+        for (const [hx, hy] of handles) {
+          draw_rounded_rect(hx - 4, hy - 4, 8, 8, 1, "#FFFFFF");
+          ctx.save();
+          ctx.strokeStyle = "#0284C7";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+          ctx.restore();
+        }
+
+        // Dimension Badge [ 320 X 190 PX ]
+        draw_rounded_rect(mx, my - 22, 92, 18, 3, "#1E293B");
+        draw_text(`${mw} X ${mh} PX`, mx + 6, my - 17, 0.6, "#FFFFFF", 1);
+
+        // Dragging cursor icon & badge at corner
+        draw_stroke([[mx + mw, my + mh], [mx + mw + 8, my + mh + 8]], "#38BDF8", 1.5);
+        draw_rounded_rect(mx + mw - 25, my + mh + 12, 58, 16, 2, "#1E293B");
+        draw_text("DRAGGING", mx + mw - 21, my + mh + 15, 0.55, "#FFFFFF", 1);
+
+        // C. Anchored Comment Composer Popover Card
+        const cx = state.composerX || 476;
+        const cy = state.composerY || 156;
+        const cw = 248, ch = 178;
+
+        // Soft Shadow & Body
+        draw_rounded_rect(cx + 3, cy + 3, cw, ch, 6, "rgba(0, 0, 0, 0.25)");
+        draw_rounded_rect(cx, cy, cw, ch, 6, "#FFFFFF");
+        draw_rect(cx, cy, cw, 1, "#CBD5E1");
+        draw_rect(cx, cy, 1, ch, "#CBD5E1");
+        draw_rect(cx + cw - 1, cy, 1, ch, "#CBD5E1");
+        draw_rect(cx, cy + ch - 1, cw, 1, "#CBD5E1");
+
+        // Pointer Arrow from Marquee Handle (mx + mw, 200) to Composer (cx, 200)
+        draw_stroke([[mx + mw, 200], [cx, 200]], "#0284C7", 1.5);
+        draw_stroke([[cx, 194], [cx - 10, 200], [cx, 206]], "#CBD5E1", 1);
+        draw_stroke([[cx, 195], [cx - 8, 200], [cx, 205]], "#FFFFFF", 2);
+
+        // Header Bar (y: cy..cy+28)
+        draw_rounded_rect(cx + 1, cy + 1, cw - 2, 28, 5, "#F8FAFC");
+        draw_rect(cx, cy + 28, cw, 1, "#E2E8F0");
+
+        // Current Frame Data
+        const curFrame = ALL_FRAMES[state.activeFrameIdx] || ALL_FRAMES[2];
+        const curNum = (state.activeFrameIdx + 1).toString().padStart(2, '0');
+        const totNum = ALL_FRAMES.length.toString().padStart(2, '0');
+
+        // 0. Green Circle Dot to the left of Feedback
+        draw_ellipse(cx + 10, cy + 14, 8, 8, "#16A34A");
+
+        // Blue Feedback Badge [ FEEDBACK #3 ]
+        draw_rounded_rect(cx + 24, cy + 5, 96, 18, 3, "#E0F2FE");
+        draw_text("FEEDBACK #3", cx + 30, cy + 9, 0.6, "#0284C7", 1);
+
+        // Status Badge: [ ACKNOWLEDGED ] or [ ACTIVE ]
+        draw_rounded_rect(cx + 126, cy + 5, 64, 18, 3, curFrame.status === 'ACTIVE' ? "#E0F2FE" : "#DCFCE7");
+        draw_text(curFrame.status === 'ACTIVE' ? "ACTIVE" : "ACK", cx + 138, cy + 9, 0.58, curFrame.status === 'ACTIVE' ? "#0284C7" : "#15803D", 1);
+
+        // Close [X]
+        draw_text("X", cx + 226, cy + 8, 0.75, "#94A3B8", 1);
+
+        // Bounds & Layer Info
+        draw_text(`BOUNDS: ${mx},${my} -> ${mx+mw},${my+mh}`, cx + 10, cy + 34, 0.62, "#475569", 1);
+        draw_text("STACK: 03 LINEART, 02 PENCIL", cx + 10, cy + 46, 0.6, "#94A3B8", 1);
+
+        // Textarea field
+        draw_rounded_rect(cx + 10, cy + 60, 228, 76, 3, "#F8FAFC");
+        draw_rect(cx + 10, cy + 60, 228, 1, "#CBD5E1");
+        draw_rect(cx + 10, cy + 60, 1, 76, "#CBD5E1");
+        draw_rect(cx + 237, cy + 60, 1, 76, "#CBD5E1");
+        draw_rect(cx + 10, cy + 135, 228, 1, "#CBD5E1");
+
+        // Textarea draft text
+        if (!state.userCritiqueText) {
+          draw_text("CRAG LINEART CONTOUR IS TOO", cx + 16, cy + 68, 0.68, "#0F172A", 1);
+          draw_text("HEAVY. SOFTEN THE RIDGE EDGES", cx + 16, cy + 82, 0.68, "#0F172A", 1);
+          draw_text("AND LIGHTEN MIDGROUND WASH", cx + 16, cy + 96, 0.68, "#0F172A", 1);
+          draw_stroke([[cx + 196, cy + 94], [cx + 196, cy + 106]], "#0284C7", 1.5);
+        } else {
+          const lines = state.userCritiqueText.split('\n');
+          for (let li = 0; li < Math.min(3, lines.length); li++) {
+            draw_text(lines[li], cx + 16, cy + 68 + li * 14, 0.68, "#0F172A", 1);
+          }
+        }
+
+        // Action Buttons: [ CANCEL ] and primary [ SEND ]
+        const by = cy + 144;
+        // [ CANCEL ]
+        draw_rounded_rect(cx + 110, by, 58, 24, 3, "#F1F5F9");
+        draw_rect(cx + 110, by, 58, 1, "#CBD5E1");
+        draw_text("CANCEL", cx + 118, by + 6, 0.65, "#64748B", 1);
+
+        // [ SEND ] (Primary submission button)
+        draw_rounded_rect(cx + 174, by, 64, 24, 3, "#0284C7");
+        draw_text("SEND", cx + 190, by + 6, 0.7, "#FFFFFF", 1);
+      }
+
+      // 3. UNIFIED STUDIO INSPECTOR (RIGHT PANEL: x: 740..1000)
+      if (!state.collapsed) {
+        draw_rect(740, 0, 260, 700, "#FFFFFF");
+
+        // Header (y: 0..44)
+        draw_text("STUDIO", 756, 20, 0.95, "#0F172A", 1);
+
+        // Feedback Toggle [FB] (Bright Blue Pill when active)
+        if (state.feedbackOpen) {
+          draw_rounded_rect(820, 11, 44, 24, 3, "#0284C7");
+          draw_text("FB", 834, 18, 0.85, "#FFFFFF", 1);
+        } else {
+          draw_rounded_rect(820, 11, 44, 24, 3, "#F1F5F9");
+          draw_rect(820, 11, 44, 1, "#CBD5E1");
+          draw_text("FB", 834, 18, 0.85, "#64748B", 1);
+        }
+
+        // Primary SAVE button [SAVE]
+        if (state.saved) {
+          draw_rounded_rect(872, 11, 62, 24, 3, "#10B981");
+          draw_text("SAVED", 884, 18, 0.85, "#FFFFFF", 1);
+        } else {
+          draw_rounded_rect(872, 11, 62, 24, 3, "#0284C7");
+          draw_text("SAVE", 888, 18, 0.85, "#FFFFFF", 1);
+        }
+
+        // Collapse toggle icon [>|]
+        draw_stroke([[968, 16], [974, 22], [968, 28]], "#64748B", 1.5);
+        draw_stroke([[978, 16], [978, 28]], "#64748B", 1.5);
+
+        const dy = 0;
+
+        if (state.perspective === 'dedicated_feedback') {
+          // =========================================================================
+          // PERSPECTIVE 1: DEDICATED FULL-HEIGHT FEEDBACK PANEL
+          // =========================================================================
+          draw_rect(756, 52, 228, 1, "#E2E8F0");
+          draw_text("FEEDBACK REVIEWS", 756, 64, 0.88, "#0F172A", 1);
+
+          // Filter chips: [ ALL 24 ] [ ACTIVE 4 ] [ RESOLVED 20 ]
+          const isActFilter = (state.commentFilter === 'ACTIVE');
+          const isResFilter = (state.commentFilter === 'RESOLVED');
+          const isAllFilter = (!isActFilter && !isResFilter);
+
+          draw_rounded_rect(756, 84, 62, 22, 3, isAllFilter ? "#0284C7" : "#F1F5F9");
+          if (!isAllFilter) draw_rect(756, 84, 62, 1, "#CBD5E1");
+          draw_text("ALL 24", 766, 89, 0.68, isAllFilter ? "#FFFFFF" : "#64748B", 1);
+
+          draw_rounded_rect(824, 84, 76, 22, 3, isActFilter ? "#0284C7" : "#F1F5F9");
+          if (!isActFilter) draw_rect(824, 84, 76, 1, "#CBD5E1");
+          draw_text("ACTIVE 4", 834, 89, 0.68, isActFilter ? "#FFFFFF" : "#64748B", 1);
+
+          draw_rounded_rect(906, 84, 76, 22, 3, isResFilter ? "#0284C7" : "#F1F5F9");
+          if (!isResFilter) draw_rect(906, 84, 76, 1, "#CBD5E1");
+          draw_text("RESOLVED", 912, 89, 0.6, isResFilter ? "#FFFFFF" : "#64748B", 1);
+
+          draw_rect(756, 116, 228, 1, "#F1F5F9");
+
+          // 6 Rich Comment Cards
+          const sampleCards = [
+            { y: 126, num: "#24", title: "ATMOSPHERIC HAZE", author: "DIRECTOR", time: "JUST NOW", note: "HAZE CONTOUR NEEDS SOFTER FALLOFF", act: true },
+            { y: 216, num: "#23", title: "FOREST SILHOUETTE", author: "ARTIST", time: "12M AGO", note: "PINE TREE CANOPY DENSITY INCREASED", act: false },
+            { y: 306, num: "#22", title: "PEAK SHADOW CAST", author: "DIRECTOR", time: "1H AGO", note: "CONTRAST BETWEEN RIDGES LOOKS SOLID", act: false },
+            { y: 396, num: "#21", title: "SHORELINE MIST", author: "ARTIST", time: "2H AGO", note: "REFLECTIONS BLENDED WITH WATER", act: false },
+            { y: 486, num: "#20", title: "ALPINE RIDGE GLOW", author: "DIRECTOR", time: "3H AGO", note: "MORNING SUNLIGHT HIGHLIGHTS CONFIRMED", act: false },
+            { y: 576, num: "#19", title: "WATER TONALITY", author: "DIRECTOR", time: "5H AGO", note: "MIDGROUND DEPTH ACCENTUATED", act: false }
+          ];
+
+          sampleCards.forEach(c => {
+            const cardW = 216;
+            const cardH = 76;
+            draw_rounded_rect(756, c.y, cardW, cardH, 4, "#FFFFFF");
+            draw_rect(756, c.y, cardW, 1, c.act ? "#0284C7" : "#E2E8F0");
+            draw_rect(756, c.y, 1, cardH, c.act ? "#0284C7" : "#E2E8F0");
+            draw_rect(756 + cardW, c.y, 1, cardH, c.act ? "#0284C7" : "#E2E8F0");
+            draw_rect(756, c.y + cardH, cardW, 1, c.act ? "#0284C7" : "#E2E8F0");
+
+            if (c.act) {
+              draw_rect(756, c.y, 3, cardH, "#0284C7");
+            }
+
+            draw_ellipse(766, c.y + 10, 8, 8, c.act ? "#0284C7" : "#10B981");
+            draw_text(`${c.num} ${c.title}`, 780, c.y + 8, 0.68, "#0F172A", 1);
+            draw_rounded_rect(924, c.y + 6, 42, 14, 2, c.act ? "#E0F2FE" : "#DCFCE7");
+            draw_text(c.act ? "ACTIVE" : "RESOLVED", 928, c.y + 8, 0.5, c.act ? "#0284C7" : "#15803D", 1);
+
+            draw_text(`${c.author} - ${c.time}`, 780, c.y + 24, 0.56, "#64748B", 1);
+            draw_text(c.note, 766, c.y + 44, 0.56, "#334155", 1);
+          });
+
+          // Full-height wireframe scrollbar
+          draw_rounded_rect(982, 126, 6, 526, 3, "#F8FAFC");
+          draw_rect(982, 126, 6, 1, "#E2E8F0");
+          draw_rect(982, 652, 6, 1, "#E2E8F0");
+          draw_rect(982, 126, 1, 526, "#E2E8F0");
+          draw_rect(987, 126, 1, 526, "#E2E8F0");
+          draw_rounded_rect(983, 140, 4, 88, 2, "#94A3B8");
+
+        } else {
+          // =========================================================================
+          // PERSPECTIVES 2 & 3: STANDARD SIDEBAR WITH TOOLS, SLIDERS, LAYERS
+          // =========================================================================
+          draw_text("TOOLS", 756, 56 + dy, 0.8, "#64748B", 1);
+          draw_text("INK", 772, 79 + dy, 0.85, state.activeTool === 'INK' ? "#0284C7" : "#94A3B8", 1);
+          draw_text("PENCIL", 824, 79 + dy, 0.85, state.activeTool === 'PENCIL' ? "#0284C7" : "#94A3B8", 1);
+          draw_text("MARK", 882, 79 + dy, 0.85, state.activeTool === 'MARK' ? "#0284C7" : "#94A3B8", 1);
+          draw_text("ERASE", 936, 79 + dy, 0.85, state.activeTool === 'ERASE' ? "#0284C7" : "#94A3B8", 1);
+
+          draw_text("STROKE PROPERTIES", 756, 112 + dy, 0.8, "#64748B", 1);
+          const isSizeActive = state.activeSlider === 'size' || state.hoveredSlider === 'size';
+          draw_text("SIZE", 756, 130 + dy, 0.75, "#64748B", 1);
+          draw_text(`${state.size} PX`, 942, 130 + dy, 0.75, isSizeActive ? "#0284C7" : "#64748B", 1);
+          draw_rect(756, 142 + dy, 228, 2, "#E2E8F0");
+          const sizeRatio = Math.max(0, Math.min(1, (state.size - 1) / 99));
+          const sizeFillW = Math.round(sizeRatio * 228);
+          draw_rect(756, 142 + dy, sizeFillW, 2, isSizeActive ? "#0284C7" : "#94A3B8");
+          draw_ellipse(756 + sizeFillW, 143 + dy, 8, 8, isSizeActive ? "#0284C7" : "#94A3B8");
+
+          const isOpActive = state.activeSlider === 'opacity' || state.hoveredSlider === 'opacity';
+          draw_text("OPACITY", 756, 156 + dy, 0.75, "#64748B", 1);
+          draw_text(`${state.opacity}%`, 948, 156 + dy, 0.75, isOpActive ? "#0284C7" : "#64748B", 1);
+          draw_rect(756, 168 + dy, 228, 2, "#E2E8F0");
+          const opRatio = Math.max(0, Math.min(1, state.opacity / 100));
+          const opFillW = Math.round(opRatio * 228);
+          draw_rect(756, 168 + dy, opFillW, 2, isOpActive ? "#0284C7" : "#94A3B8");
+          draw_ellipse(756 + opFillW, 169 + dy, 8, 8, isOpActive ? "#0284C7" : "#94A3B8");
+
+          const isSmActive = state.activeSlider === 'smoothing' || state.hoveredSlider === 'smoothing';
+          draw_text("SMOOTHING", 756, 182 + dy, 0.75, "#64748B", 1);
+          draw_text(`${state.smoothing}%`, 948, 182 + dy, 0.75, isSmActive ? "#0284C7" : "#64748B", 1);
+          draw_rect(756, 194 + dy, 228, 2, "#E2E8F0");
+          const smRatio = Math.max(0, Math.min(1, state.smoothing / 100));
+          const smFillW = Math.round(smRatio * 228);
+          draw_rect(756, 194 + dy, smFillW, 2, isSmActive ? "#0284C7" : "#94A3B8");
+          draw_ellipse(756 + smFillW, 195 + dy, 8, 8, isSmActive ? "#0284C7" : "#94A3B8");
+
+          draw_text("INK PIGMENT", 756, 208 + dy, 0.75, "#64748B", 1);
+          draw_rounded_rect(914, 204 + dy, 70, 18, 3, "#E0F2FE");
+          draw_text(state.color.toUpperCase(), 922, 208 + dy, 0.7, "#0284C7", 1);
+
+          for (let i = 0; i < PALETTE.length; i++) {
+            const cx_chip = 765 + i * 30;
+            const cy_chip = 233 + dy;
+            const isSelected = state.color.toUpperCase() === PALETTE[i].toUpperCase();
+            if (isSelected) {
+              draw_ellipse(cx_chip, cy_chip, 24, 24, "#0284C7");
+              draw_ellipse(cx_chip, cy_chip, 20, 20, "#FFFFFF");
+            }
+            draw_ellipse(cx_chip, cy_chip, 16, 16, PALETTE[i]);
+            if (PALETTE[i] === '#FFFFFF') {
+              draw_stroke([[cx_chip - 8, cy_chip], [cx_chip + 8, cy_chip]], "#E2E8F0", 1);
+            }
+          }
+
+          draw_text("LAYERS", 756, 256 + dy, 0.8, "#64748B", 1);
+          if (state.hoveredNewLayer) {
+            draw_rounded_rect(930, 252 + dy, 56, 18, 3, "#E0F2FE");
+            draw_text("+ NEW", 936, 256 + dy, 0.75, "#0369A1", 1);
+          } else {
+            draw_text("+ NEW", 936, 256 + dy, 0.75, "#0284C7", 1);
+          }
+
+          const layerVpY = 272 + dy;
+          const layerVpH = 200; // 272 to 472
+          let totalLayersH = 0;
+          for (let layer of state.layers) {
+            totalLayersH += (state.activeLayer === layer.num ? 50 : 30);
+          }
+          const maxLayerScroll = Math.max(0, totalLayersH - layerVpH);
+          state.layerScrollY = Math.max(0, Math.min(maxLayerScroll, state.layerScrollY || 0));
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(748, layerVpY, 248, layerVpH);
+          ctx.clip();
+
+          let ly = 276 + dy - state.layerScrollY;
+          for (let layer of state.layers) {
+            const isActive = state.activeLayer === layer.num;
+            const rowH = isActive ? 50 : 30;
+
+            if (ly + rowH >= layerVpY && ly <= layerVpY + layerVpH) {
+              if (isActive) {
+                draw_rounded_rect(748, ly - 4, 244, 46, 3, "#F0F9FF");
+                draw_rect(748, ly - 4, 3, 46, "#0284C7");
+              }
+              draw_text(layer.num, 756, ly, 0.85, isActive ? "#0284C7" : "#64748B", 1);
+              draw_text(layer.name, 786, ly, 0.85, isActive ? "#0F172A" : "#64748B", 1);
+              draw_text(layer.op, 932, ly, 0.75, isActive ? "#0284C7" : "#94A3B8", 1);
+
+              if (layer.vis) {
+                draw_ellipse(976, ly + 4, 12, 6, "#64748B");
+                draw_ellipse(976, ly + 4, 4, 4, "#FFFFFF");
+              } else {
+                draw_ellipse(976, ly + 4, 12, 6, "#CBD5E1");
+                draw_stroke([[970, ly], [982, ly + 8]], "#94A3B8", 1.5);
+              }
+
+              if (isActive) {
+                draw_text("OPACITY", 756, ly + 18, 0.65, "#0369A1", 1);
+                draw_rect(810, ly + 22, 128, 2, "#E2E8F0");
+                const fillW = Math.round((layer.opacityNum / 100) * 128);
+                draw_rect(810, ly + 22, fillW, 2, "#0284C7");
+                draw_ellipse(810 + fillW, ly + 23, 6, 6, "#0284C7");
+              }
+            }
+            ly += rowH;
+          }
+          ctx.restore();
+
+          if (totalLayersH > layerVpH) {
+            const lTrackTop = 276 + dy;
+            const lTrackBottom = 468 + dy;
+            const lTrackH = lTrackBottom - lTrackTop;
+            const lThumbH = Math.max(20, Math.min(lTrackH - 10, Math.round((layerVpH / totalLayersH) * lTrackH)));
+            const lScrollRatio = maxLayerScroll > 0 ? (state.layerScrollY / maxLayerScroll) : 0;
+            const lThumbY = lTrackTop + Math.round(lScrollRatio * (lTrackH - lThumbH));
+            draw_stroke([[994, lThumbY], [994, lThumbY + lThumbH]], "#94A3B8", 4);
+          }
+
+          // Bottom Comments List (Zero-CLS Architecture with Custom Font)
+          const isActFilter = (state.commentFilter === 'ACTIVE');
+          const isAllFilter = !isActFilter;
+
+            draw_rect(756, 476, 228, 1, "#F1F5F9");
+            draw_text("COMMENTS", 756, 494, 0.85, "#0F172A", 1);
+
+            // Dynamic Filter Chiclets
+            draw_rounded_rect(836, 488, 32, 16, 3, isAllFilter ? "#0284C7" : "#F1F5F9");
+            if (!isAllFilter) draw_rect(836, 488, 32, 1, "#CBD5E1");
+            draw_text("24", 844, 491, 0.65, isAllFilter ? "#FFFFFF" : "#64748B", 1);
+
+            draw_rounded_rect(874, 488, 56, 16, 3, isActFilter ? "#0284C7" : "#F1F5F9");
+            if (!isActFilter) draw_rect(874, 488, 56, 1, "#CBD5E1");
+            draw_text("4 ACTIVE", 880, 491, 0.6, isActFilter ? "#FFFFFF" : "#64748B", 1);
+
+            // Filter comments list
+            const filteredComments = isActFilter 
+              ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') 
+              : ALL_COMMENTS;
+
+            const vpX = 752, vpY = 514, vpH = 140;
+            const itemH = 38;
+            const totalContentH = filteredComments.length * itemH;
+            const maxScroll = Math.max(0, totalContentH - vpH);
+            state.commentScrollY = Math.max(0, Math.min(maxScroll, state.commentScrollY));
+
+            // CLS-Free Invariant: Card width & badge X are strictly pinned in reserved gutter mode
+            const cardW = (state.clsMode === 'traditional' && maxScroll > 0) ? 200 : 216;
+            const pillX = (state.clsMode === 'traditional' && maxScroll > 0) ? 904 : 920;
+            const sx = (state.clsMode === 'traditional' && maxScroll > 0) ? 960 : 994;
+
+            // Clipped Comments Viewport (No scrollbar layout thrashing)
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(750, vpY, 240, vpH);
+            ctx.clip();
+
+            filteredComments.forEach((c, idx) => {
+              const cy_c = vpY + 2 + (idx * itemH) - state.commentScrollY;
+              if (cy_c + itemH < vpY - 5 || cy_c > vpY + vpH + 5) return; // viewport culling
+
+              const isAct = (c.status === 'ACTIVE');
+              const isSelected = (c.frameIdx === state.activeFrameIdx);
+
+              if (isSelected) {
+                draw_rounded_rect(752, cy_c - 2, cardW, 35, 3, "#F0F9FF");
+                draw_rect(752, cy_c - 2, 3, 35, "#0284C7");
+              } else {
+                draw_rect(756, cy_c + 35, cardW - 8, 1, "#F8FAFC");
+              }
+
+              draw_ellipse(760, cy_c + 4, 8, 8, isAct ? "#0284C7" : "#94A3B8");
+              draw_text(`#${c.num} ${c.label}`, 774, cy_c + 2, 0.65, isSelected ? "#0F172A" : (isAct ? "#1E293B" : "#64748B"), 1);
+              
+              draw_rounded_rect(pillX, cy_c, 44, 15, 2, isAct ? "#E0F2FE" : "#F1F5F9");
+              draw_text(isAct ? "ACTIVE" : "ACK", pillX + (isAct ? 6 : 12), cy_c + 3, 0.52, isAct ? "#0284C7" : "#64748B", 1);
+              draw_text(c.bounds, 774, cy_c + 16, 0.52, "#64748B", 1);
+            });
+            ctx.restore();
+
+            // Scrollbar Track & Paint Stroke Thumb (Floating in Reserved 24px Gutter)
+            const trackTop = 518;
+            const trackBottom = 650;
+            const trackH = trackBottom - trackTop; // 132px
+
+            if (totalContentH > vpH) {
+              const thumbH = Math.max(26, Math.min(trackH - 10, Math.round((vpH / totalContentH) * trackH)));
+              const scrollRatio = maxScroll > 0 ? (state.commentScrollY / maxScroll) : 0;
+              const thumbY = trackTop + Math.round(scrollRatio * (trackH - thumbH));
+
+              if (state.perspective === 'paint_stroke') {
+                // Pure floating rounded paint stroke (single stroke, natural round ends) - matching layers scrollbar
+                draw_stroke([[sx, thumbY], [sx, thumbY + thumbH]], "#94A3B8", 4);
+
+              } else if (state.perspective === 'paint_stroke_soft') {
+                // Rounded paint stroke with faint soft guide line
+                draw_stroke([[sx, trackTop], [sx, trackBottom]], "#F1F5F9", 2);
+                draw_stroke([[sx, thumbY], [sx, thumbY + thumbH]], "#94A3B8", 4);
+
+              } else if (state.perspective === 'paint_stroke_cobalt') {
+                // Cobalt blue paint stroke matching active canvas lineart
+                draw_stroke([[sx, trackTop], [sx, trackBottom]], "#F1F5F9", 2);
+                draw_stroke([[sx, thumbY], [sx, thumbY + thumbH]], "#2563EB", 4);
+
+              } else if (state.perspective === 'wireframe_box') {
+                draw_rounded_rect(sx - 4, trackTop, 8, trackH, 2, "#F8FAFC");
+                draw_rect(sx - 4, trackTop, 8, 1, "#CBD5E1");
+                draw_rect(sx - 4, trackBottom, 8, 1, "#CBD5E1");
+                draw_rect(sx - 4, trackTop, 1, trackH, "#CBD5E1");
+                draw_rect(sx + 3, trackTop, 1, trackH, "#CBD5E1");
+                draw_rounded_rect(sx - 3, thumbY, 6, thumbH, 1, "#94A3B8");
+              } else if (state.perspective === 'slider_knob') {
+                draw_rect(sx - 1, trackTop, 2, trackH, "#E2E8F0");
+                draw_ellipse(sx - 4, thumbY + Math.round(thumbH / 2) - 4, 8, 8, "#0284C7");
+                draw_ellipse(sx - 2, thumbY + Math.round(thumbH / 2) - 2, 4, 4, "#FFFFFF");
+              }
+            } else {
+              // Dormant state: If fits without scroll, maintain stable guide line in soft/cobalt modes
+              if (state.perspective === 'paint_stroke_soft' || state.perspective === 'paint_stroke_cobalt') {
+                draw_stroke([[sx, trackTop], [sx, trackBottom]], "#F8FAFC", 2, 0.4);
+              }
+            }
+
+            // Bottom Footer in Sidebar (Canvas Mode)
+            draw_text("CODESKETCH ENGINE V2", 756, 666, 0.75, "#94A3B8", 1);
+            const clsStatusText = (state.clsMode === 'cls_free') ? "CLS 0.0000 STABLE GUTTER" : "CLS 0.0825 LAYOUT SHIFT";
+            const clsStatusColor = (state.clsMode === 'cls_free') ? "#10B981" : "#EF4444";
+            draw_text(clsStatusText, 756, 678, 0.52, clsStatusColor, 1);
+            buildCommentsUI();
+        }
+
+      // 4. COLOR PICKER POPOVER (When open)
+      if (state.colorPickerOpen && !state.collapsed) {
+        const px = 476, py = 168, pw = 248, ph = 216;
+
+        // Shadow & Body
+        draw_rounded_rect(px + 3, py + 3, pw, ph, 6, "rgba(0,0,0,0.25)");
+        draw_rounded_rect(px, py, pw, ph, 6, "#FFFFFF");
+        draw_rect(px, py, pw, 1, "#CBD5E1");
+        draw_rect(px, py, 1, ph, "#CBD5E1");
+        draw_rect(px + pw - 1, py, 1, ph, "#CBD5E1");
+        draw_rect(px, py + ph - 1, pw, 1, "#CBD5E1");
+
+        // Header
+        draw_rounded_rect(px + 1, py + 1, pw - 2, 28, 5, "#F8FAFC");
+        draw_rect(px, py + 28, pw, 1, "#E2E8F0");
+        draw_rounded_rect(px + 8, py + 5, 94, 18, 3, "#E0F2FE");
+        draw_text("COLOR PICKER", px + 14, py + 9, 0.65, "#0284C7", 1);
+        draw_text("X", px + pw - 18, py + 8, 0.75, "#94A3B8", 1);
+
+        // 2D Saturation/Value Spectrum Field
+        const fx = px + 10, fy = py + 34, fw = 228, fh = 62;
+        const colW = Math.floor(fw / 6);
+        const rowH = Math.floor(fh / 4);
+        const satValMatrix = [
+          ["#DBEAFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8"],
+          ["#BFDBFE", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF"],
+          ["#93C5FD", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#172554"],
+          ["#60A5FA", "#2563EB", "#1D4ED8", "#1E40AF", "#172554", "#020617"]
+        ];
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < 6; c++) {
+            draw_rect(fx + c * colW, fy + r * rowH, colW, rowH, satValMatrix[r][c]);
+          }
+        }
+        for (let c = 0; c <= 6; c++) {
+          draw_rect(fx + c * colW, fy, 1, fh, "#FFFFFF", 0.4);
+        }
+        for (let r = 0; r <= 4; r++) {
+          draw_rect(fx, fy + r * rowH, fw, 1, "#FFFFFF", 0.4);
+        }
+
+        // Crosshair Reticle in Picker Field
+        const retX = fx + Math.round((state.pickerSat / 100) * fw);
+        const retY = fy + Math.round((1 - state.pickerVal / 100) * fh);
+        draw_ellipse(retX, retY, 12, 12, "#FFFFFF");
+        draw_ellipse(retX, retY, 8, 8, "#0F172A");
+        draw_stroke([[retX - 8, retY], [retX + 8, retY]], "#FFFFFF", 1);
+        draw_stroke([[retX, retY - 8], [retX, retY + 8]], "#FFFFFF", 1);
+
+        // 1D Hue Spectrum Slider
+        const hx = px + 10, hy = py + 100, hw = 228, hh = 12;
+        const HUE_COLORS = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF", "#8B00FF", "#FF007F", "#FF0000"];
+        const segW = hw / (HUE_COLORS.length - 1);
+        for (let i = 0; i < HUE_COLORS.length - 1; i++) {
+          const grad = ctx.createLinearGradient(hx + i * segW, 0, hx + (i + 1) * segW, 0);
+          grad.addColorStop(0, HUE_COLORS[i]);
+          grad.addColorStop(1, HUE_COLORS[i + 1]);
+          ctx.save();
+          ctx.fillStyle = grad;
+          ctx.fillRect(hx + i * segW, hy, segW + 1, hh);
+          ctx.restore();
+        }
+        const hueThumbX = hx + Math.round((state.pickerHue / 360) * hw);
+        const isHueActive = state.activeSlider === 'hue' || state.hoveredSlider === 'hue';
+        draw_ellipse(hueThumbX, hy + 6, 12, 12, isHueActive ? "#0284C7" : "#FFFFFF");
+        ctx.save();
+        ctx.strokeStyle = isHueActive ? "#FFFFFF" : "#0F172A";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(hueThumbX, hy + 6, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Tool Row: [ PICK ] Eyedropper, Hex Code Field, [ NEW ] Swatch
+        const ey = py + 118;
+        // [ PICK ] Button (Exact button approved by user)
+        draw_rounded_rect(px + 10, ey, 56, 24, 3, state.eyedropperActive ? "#0284C7" : "#F0F9FF");
+        draw_rect(px + 10, ey, 56, 1, "#BAE6FD");
+        draw_text("PICK", px + 22, ey + 6, 0.7, state.eyedropperActive ? "#FFFFFF" : "#0284C7", 1);
+
+        // Hex Code Display
+        draw_rounded_rect(px + 72, ey, 90, 24, 3, "#F8FAFC");
+        draw_rect(px + 72, ey, 90, 1, "#CBD5E1");
+        draw_text(state.pickerColor.toUpperCase(), px + 80, ey + 6, 0.7, "#0F172A", 1);
+        draw_stroke([[px + 138, ey + 4], [px + 138, ey + 20]], "#0284C7", 1);
+
+        // New Swatch Preview
+        draw_rounded_rect(px + 168, ey, 70, 24, 3, state.pickerColor);
+        draw_text("NEW", px + 190, ey + 6, 0.7, "#FFFFFF", 1);
+
+        // Primary Action: [ APPLY PIGMENT ]
+        draw_rounded_rect(px + 10, py + 150, 228, 26, 3, "#0284C7");
+        draw_text("APPLY PIGMENT", px + 68, py + 156, 0.75, "#FFFFFF", 1);
+
+        // Recent Mixes Swatches
+        draw_text("RECENT", px + 10, py + 186, 0.65, "#94A3B8", 1);
+        for (let i = 0; i < state.recentMixes.length; i++) {
+          const rx_chip = px + 68 + i * 28;
+          draw_ellipse(rx_chip, py + 190, 14, 14, state.recentMixes[i]);
+        }
+      }
+
+      // 5. LOUPE (When sampling canvas)
+      if (state.eyedropperActive && state.loupePos) {
+        const lx = state.loupePos.x, ly = state.loupePos.y;
+        draw_ellipse(lx, ly, 28, 28, "#FFFFFF");
+        draw_ellipse(lx, ly, 24, 24, state.loupeColor);
+        draw_stroke([[lx - 16, ly], [lx + 16, ly]], "#FFFFFF", 1);
+        draw_stroke([[lx, ly - 16], [lx, ly + 16]], "#FFFFFF", 1);
+        draw_rounded_rect(lx - 24, ly + 18, 48, 14, 2, "#1E293B");
+        draw_text(state.loupeColor.toUpperCase(), lx - 20, ly + 20, 0.5, "#FFFFFF", 1);
+      }
+    }
+  }
+
+    // Interactive Button Position Synchronization
+    function syncButtonPositions() {
+      const dy = 0;
+      document.getElementById('btnToolInk').style.top = (70 + dy) + 'px';
+      document.getElementById('btnToolPencil').style.top = (70 + dy) + 'px';
+      document.getElementById('btnToolMark').style.top = (70 + dy) + 'px';
+      document.getElementById('btnToolErase').style.top = (70 + dy) + 'px';
+
+      document.getElementById('sliderTrackSize').style.top = (130 + dy) + 'px';
+      document.getElementById('sliderTrackOpacity').style.top = (156 + dy) + 'px';
+      document.getElementById('sliderTrackSmoothing').style.top = (182 + dy) + 'px';
+
+      document.getElementById('btnTriggerColorPicker').style.top = (204 + dy) + 'px';
+
+      const chips = document.getElementById('pigmentChipsGroup').children;
+      for (let i = 0; i < chips.length; i++) {
+        chips[i].style.top = (222 + dy) + 'px';
+      }
+
+      document.getElementById('btnNewLayer').style.top = (252 + dy) + 'px';
+      buildLayersUI(dy);
+
+      // Card Header & Action Buttons Sync
+      const cx = state.composerX || 476;
+      const cy = state.composerY || 156;
+      document.getElementById('btnCardFramePrev').style.left = (cx + 20) + 'px';
+      document.getElementById('btnCardFramePrev').style.top = (cy + 5) + 'px';
+      document.getElementById('btnCardFrameNext').style.left = (cx + 126) + 'px';
+      document.getElementById('btnCardFrameNext').style.top = (cy + 5) + 'px';
+      document.getElementById('btnCloseCard').style.left = (cx + 224) + 'px';
+      document.getElementById('btnCloseCard').style.top = (cy + 5) + 'px';
+      document.getElementById('critiqueInput').style.left = (cx + 10) + 'px';
+      document.getElementById('critiqueInput').style.top = (cy + 60) + 'px';
+      document.getElementById('btnCancelFeedback').style.left = (cx + 110) + 'px';
+      document.getElementById('btnCancelFeedback').style.top = (cy + 144) + 'px';
+      document.getElementById('btnSendFeedback').style.left = (cx + 174) + 'px';
+      document.getElementById('btnSendFeedback').style.top = (cy + 144) + 'px';
+    }
+
+    // Dynamic Comments UI in Sidebar (Synchronized with CLS-Free Scrolling)
+    function buildCommentsUI() {
+      const cont = document.getElementById('commentsTouchContainer');
+      if (!cont) return;
+      cont.innerHTML = '';
+      const isAct = state.commentFilter === 'ACTIVE';
+      const filteredList = isAct ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+      const vpY = 514, vpH = 140;
+      const actualCardW = (state.clsMode === 'traditional' && filteredList.length * 38 > vpH) ? 200 : 216;
+
+      filteredList.forEach((c, idx) => {
+        const cy = vpY + 2 + (idx * 38) - state.commentScrollY;
+        // Only active hotspots within visible viewport
+        if (cy + 34 < vpY || cy > vpY + vpH) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'interactive-btn';
+        btn.style.top = (cy - 2) + 'px';
+        btn.style.left = '752px';
+        btn.style.width = actualCardW + 'px';
+        btn.style.height = '35px';
+        btn.title = `#${c.num} ${c.label} (${c.status}) — Bounds: ${c.bounds}`;
+        btn.onclick = () => {
+          if (c.frameIdx >= 0 && c.frameIdx < ALL_FRAMES.length) {
+            state.activeFrameIdx = c.frameIdx;
+            const f = ALL_FRAMES[c.frameIdx];
+            state.marqueeX = f.bounds[0];
+            state.marqueeY = f.bounds[1];
+            state.marqueeW = f.bounds[2];
+            state.marqueeH = f.bounds[3];
+            state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+            state.composerY = state.marqueeY - 4;
+            syncButtonPositions();
+          }
+          renderStudio();
+        };
+        cont.appendChild(btn);
+      });
+    }
+
+    window.switchPerspective = function(p) {
+      state.perspective = p;
+      ['btnPaint', 'btnSoft', 'btnCobalt', 'btnP1'].forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        b.style.background = '#1E293B';
+        b.style.color = '#94A3B8';
+        b.style.border = '1px solid #334155';
+      });
+      const activeMap = {
+        'paint_stroke': 'btnPaint',
+        'paint_stroke_soft': 'btnSoft',
+        'paint_stroke_cobalt': 'btnCobalt',
+        'dedicated_feedback': 'btnP1'
+      };
+      if (activeMap[p]) {
+        const ab = document.getElementById(activeMap[p]);
+        if (ab) {
+          ab.style.background = '#0284C7';
+          ab.style.color = '#FFFFFF';
+          ab.style.border = 'none';
+        }
+      }
+      renderStudio();
+    };
+
+    // Dynamic Layers UI
+    function buildLayersUI(dy = 0) {
+      const cont = document.getElementById('layersTouchContainer');
+      cont.innerHTML = '';
+      const layerVpY = 272 + dy;
+      const layerVpH = 200;
+      let ly = 276 + dy - (state.layerScrollY || 0);
+
+      state.layers.forEach((layer, idx) => {
+        const isActive = state.activeLayer === layer.num;
+        const rowH = isActive ? 46 : 28;
+        const fullRowH = isActive ? 50 : 30;
+
+        if (ly + fullRowH >= layerVpY + 4 && ly <= layerVpY + layerVpH) {
+          const btnSelect = document.createElement('button');
+          btnSelect.className = 'interactive-btn';
+          btnSelect.style.top = (ly - 4) + 'px';
+          btnSelect.style.left = '748px';
+          btnSelect.style.width = '200px';
+          btnSelect.style.height = rowH + 'px';
+          btnSelect.title = `Select Layer ${layer.num} (${layer.name})`;
+          btnSelect.onclick = () => {
+            state.activeLayer = layer.num;
+            syncButtonPositions();
+            renderStudio();
+          };
+          cont.appendChild(btnSelect);
+
+          const btnEye = document.createElement('button');
+          btnEye.className = 'interactive-btn';
+          btnEye.style.top = (ly - 2) + 'px';
+          btnEye.style.left = '964px';
+          btnEye.style.width = '24px';
+          btnEye.style.height = '20px';
+          btnEye.title = `Toggle Visibility Layer ${layer.num}`;
+          btnEye.onclick = (e) => {
+            e.stopPropagation();
+            layer.vis = !layer.vis;
+            renderStudio();
+          };
+          cont.appendChild(btnEye);
+
+          if (isActive) {
+            const btnSlider = document.createElement('button');
+            btnSlider.className = 'interactive-btn';
+            btnSlider.style.top = (ly + 16) + 'px';
+            btnSlider.style.left = '806px';
+            btnSlider.style.width = '136px';
+            btnSlider.style.height = '16px';
+            btnSlider.style.cursor = 'ew-resize';
+            btnSlider.title = `Layer ${layer.num} Opacity Slider`;
+
+            btnSlider.addEventListener('pointerenter', () => {
+              if (!state.activeSlider) {
+                state.hoveredSlider = 'layerOp';
+                renderStudio();
+              }
+            });
+            btnSlider.addEventListener('pointerleave', () => {
+              if (state.hoveredSlider === 'layerOp') {
+                state.hoveredSlider = null;
+                renderStudio();
+              }
+            });
+            btnSlider.addEventListener('pointerdown', (e) => {
+              state.activeSlider = 'layerOp';
+              const updateLayerOp = (pe) => {
+                const rect = btnSlider.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width));
+                layer.opacityNum = Math.round(ratio * 100);
+                layer.op = `${layer.opacityNum}%`;
+                renderStudio();
+              };
+              updateLayerOp(e);
+              const onMove = (pe) => updateLayerOp(pe);
+              const onUp = () => {
+                state.activeSlider = null;
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                renderStudio();
+              };
+              window.addEventListener('pointermove', onMove);
+              window.addEventListener('pointerup', onUp);
+            });
+            cont.appendChild(btnSlider);
+          }
+        }
+        ly += fullRowH;
+      });
+    }
+
+    // Toggle Area Feedback Flow
+    function toggleFeedback(open) {
+      state.feedbackOpen = (open !== undefined) ? open : !state.feedbackOpen;
+      document.getElementById('cardInteractiveGroup').style.display = state.feedbackOpen ? 'block' : 'none';
+      syncButtonPositions();
+      renderStudio();
+    }
+
+    document.getElementById('btnHeaderFb').onclick = () => toggleFeedback();
+    document.getElementById('btnCloseCard').onclick = () => toggleFeedback(false);
+    document.getElementById('btnCancelFeedback').onclick = () => toggleFeedback(false);
+
+    document.getElementById('btnSendFeedback').onclick = () => {
+      state.statusBadge = 'ACKNOWLEDGED';
+      renderStudio();
+    };
+
+
+    const critiqueInp = document.getElementById('critiqueInput');
+    critiqueInp.addEventListener('input', (e) => {
+      state.userCritiqueText = e.target.value.toUpperCase();
+      renderStudio();
+    });
+
+    // Tool switching
+    document.getElementById('btnToolInk').onclick = () => { state.activeTool = 'INK'; renderStudio(); };
+    document.getElementById('btnToolPencil').onclick = () => { state.activeTool = 'PENCIL'; renderStudio(); };
+    document.getElementById('btnToolMark').onclick = () => { state.activeTool = 'MARK'; renderStudio(); };
+    document.getElementById('btnToolErase').onclick = () => { state.activeTool = 'ERASE'; renderStudio(); };
+
+    // Slider Dragging Helpers
+    function setupSlider(elemId, sliderName, minVal, maxVal, getVal, setVal) {
+      const el = document.getElementById(elemId);
+      el.addEventListener('pointerenter', () => {
+        if (!state.activeSlider) {
+          state.hoveredSlider = sliderName;
+          renderStudio();
+        }
+      });
+      el.addEventListener('pointerleave', () => {
+        if (state.hoveredSlider === sliderName) {
+          state.hoveredSlider = null;
+          renderStudio();
+        }
+      });
+      el.addEventListener('pointerdown', (e) => {
+        state.activeSlider = sliderName;
+        const update = (pe) => {
+          const rect = el.getBoundingClientRect();
+          const ratio = Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width));
+          setVal(Math.round(minVal + ratio * (maxVal - minVal)));
+          renderStudio();
+        };
+        update(e);
+        const onMove = (pe) => update(pe);
+        const onUp = () => {
+          state.activeSlider = null;
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          renderStudio();
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+      });
+    }
+
+    setupSlider('sliderTrackSize', 'size', 1, 100, () => state.size, (v) => state.size = v);
+    setupSlider('sliderTrackOpacity', 'opacity', 1, 100, () => state.opacity, (v) => state.opacity = v);
+    setupSlider('sliderTrackSmoothing', 'smoothing', 0, 100, () => state.smoothing, (v) => state.smoothing = v);
+
+    // Palette Chips
+    for (let i = 0; i < PALETTE.length; i++) {
+      const chip = document.getElementById(`chip${i}`);
+      chip.onclick = () => {
+        state.color = PALETTE[i];
+        renderStudio();
+      };
+    }
+
+    // Layers Header: + NEW Layer Button
+    const btnNewLayer = document.getElementById('btnNewLayer');
+    btnNewLayer.addEventListener('pointerenter', () => {
+      state.hoveredNewLayer = true;
+      renderStudio();
+    });
+    btnNewLayer.addEventListener('pointerleave', () => {
+      state.hoveredNewLayer = false;
+      renderStudio();
+    });
+    btnNewLayer.onclick = () => {
+      const existingNums = state.layers.map(l => parseInt(l.num, 10)).filter(n => !isNaN(n));
+      const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
+      const nextNum = maxNum + 1;
+      const nextNumStr = String(nextNum).padStart(2, '0');
+      const newLayer = {
+        num: nextNumStr,
+        name: `LAYER ${nextNum}`,
+        op: "100%",
+        opacityNum: 100,
+        vis: true
+      };
+      state.layers.unshift(newLayer);
+      state.activeLayer = nextNumStr;
+      state.layerScrollY = 0;
+      syncButtonPositions();
+      renderStudio();
+    };
+
+    // Save Button
+    document.getElementById('btnHeaderSave').onclick = () => {
+      state.saved = true;
+      renderStudio();
+      setTimeout(() => {
+        state.saved = false;
+        renderStudio();
+      }, 2500);
+    };
+
+    // Color Picker Popover
+    document.getElementById('btnTriggerColorPicker').onclick = () => {
+      state.colorPickerOpen = !state.colorPickerOpen;
+      document.getElementById('colorPickerGroup').style.display = state.colorPickerOpen ? 'block' : 'none';
+      renderStudio();
+    };
+
+    document.getElementById('btnClosePicker').onclick = () => {
+      state.colorPickerOpen = false;
+      state.eyedropperActive = false;
+      document.getElementById('colorPickerGroup').style.display = 'none';
+      renderStudio();
+    };
+
+    // Eyedropper [ PICK ] button
+    document.getElementById('btnPickerEyedropper').onclick = () => {
+      state.eyedropperActive = !state.eyedropperActive;
+      canvas.style.cursor = state.eyedropperActive ? 'none' : 'crosshair';
+      renderStudio();
+    };
+
+    // Apply Pigment
+    document.getElementById('btnApplyPigment').onclick = () => {
+      state.color = state.pickerColor;
+      if (!state.recentMixes.includes(state.pickerColor)) {
+        state.recentMixes.unshift(state.pickerColor);
+        if (state.recentMixes.length > 6) state.recentMixes.pop();
+      }
+      state.colorPickerOpen = false;
+      state.eyedropperActive = false;
+      document.getElementById('colorPickerGroup').style.display = 'none';
+      canvas.style.cursor = 'crosshair';
+      renderStudio();
+    };
+
+    // Recent chips
+    for (let i = 0; i < 6; i++) {
+      document.getElementById(`recent${i}`).onclick = () => {
+        if (state.recentMixes[i]) {
+          state.pickerColor = state.recentMixes[i];
+          renderStudio();
+        }
+      };
+    }
+
+    // 2D Spectrum Picker Field
+    const pField = document.getElementById('pickerField2D');
+    pField.addEventListener('pointerdown', (e) => {
+      const updateSatVal = (pe) => {
+        const rect = pField.getBoundingClientRect();
+        state.pickerSat = Math.round(Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width)) * 100);
+        state.pickerVal = Math.round(Math.max(0, Math.min(1, 1 - (pe.clientY - rect.top) / rect.height)) * 100);
+        state.pickerColor = hsvToHex(state.pickerHue, state.pickerSat, state.pickerVal);
+        renderStudio();
+      };
+      updateSatVal(e);
+      const onMove = (pe) => updateSatVal(pe);
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // 1D Hue Spectrum Slider
+    const pHue = document.getElementById('pickerHueSlider');
+    pHue.addEventListener('pointerenter', () => {
+      if (!state.activeSlider) {
+        state.hoveredSlider = 'hue';
+        renderStudio();
+      }
+    });
+    pHue.addEventListener('pointerleave', () => {
+      if (state.hoveredSlider === 'hue') {
+        state.hoveredSlider = null;
+        renderStudio();
+      }
+    });
+    pHue.addEventListener('pointerdown', (e) => {
+      state.activeSlider = 'hue';
+      const updateHue = (pe) => {
+        const rect = pHue.getBoundingClientRect();
+        state.pickerHue = Math.round(Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width)) * 360);
+        state.pickerColor = hsvToHex(state.pickerHue, state.pickerSat, state.pickerVal);
+        renderStudio();
+      };
+      updateHue(e);
+      const onMove = (pe) => updateHue(pe);
+      const onUp = () => {
+        state.activeSlider = null;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        renderStudio();
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    function hsvToHex(h, s, v) {
+      s /= 100; v /= 100;
+      const c = v * s;
+      const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+      const m = v - c;
+      let r = 0, g = 0, b = 0;
+      if (h < 60) { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      const toHex = (n) => {
+        const hx = Math.round((n + m) * 255).toString(16).toUpperCase();
+        return hx.length === 1 ? '0' + hx : hx;
+      };
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    // Canvas drawing & Eyedropper interaction
+    let isDrawing = false;
+    let currentStroke = null;
+    let isDraggingMarquee = false;
+    let dragOffsetX = 0, dragOffsetY = 0;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.round(e.clientX - rect.left);
+      const y = Math.round(e.clientY - rect.top);
+
+      if (state.eyedropperActive) {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase()}`;
+        state.pickerColor = hex;
+        state.eyedropperActive = false;
+        state.loupePos = null;
+        canvas.style.cursor = 'crosshair';
+        renderStudio();
+        return;
+      }
+
+      // Check if clicking inside selection marquee to drag
+      if (state.feedbackOpen && x >= state.marqueeX && x <= state.marqueeX + state.marqueeW && y >= state.marqueeY && y <= state.marqueeY + state.marqueeH) {
+        // Only if not clicking inside comment card
+        const cx = state.composerX, cy = state.composerY;
+        if (!(x >= cx && x <= cx + 248 && y >= cy && y <= cy + 178)) {
+          isDraggingMarquee = true;
+          dragOffsetX = x - state.marqueeX;
+          dragOffsetY = y - state.marqueeY;
+          return;
+        }
+      }
+
+      // Ignore canvas drawing if inside right sidebar
+      if (!state.collapsed && x >= 740) return;
+      // Ignore if clicking on composer card
+      if (state.feedbackOpen) {
+        const cx = state.composerX, cy = state.composerY;
+        if (x >= cx && x <= cx + 248 && y >= cy && y <= cy + 178) return;
+      }
+
+      isDrawing = true;
+      const strokeColor = state.activeTool === 'ERASE' ? '#0F172A' : state.color;
+      const strokeSize = state.activeTool === 'ERASE' ? state.size * 2 : state.size;
+      const strokeOpacity = state.activeTool === 'ERASE' ? 100 : state.opacity;
+      currentStroke = {
+        tool: state.activeTool,
+        color: strokeColor,
+        size: strokeSize,
+        opacity: strokeOpacity,
+        layer: state.activeLayer,
+        points: [[x, y]]
+      };
+      state.userStrokes.push(currentStroke);
+      renderStudio();
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.round(e.clientX - rect.left);
+      const y = Math.round(e.clientY - rect.top);
+
+      if (state.eyedropperActive) {
+        if (x >= 0 && x <= 1000 && y >= 0 && y <= 700) {
+          const pixel = ctx.getImageData(x, y, 1, 1).data;
+          const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase()}`;
+          state.loupePos = { x, y };
+          state.loupeColor = hex;
+          renderStudio();
+        }
+        return;
+      }
+
+      if (isDraggingMarquee) {
+        state.marqueeX = Math.max(10, Math.min(740 - state.marqueeW - 10, x - dragOffsetX));
+        state.marqueeY = Math.max(30, Math.min(680 - state.marqueeH, y - dragOffsetY));
+        // Keep composer anchored
+        state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+        state.composerY = state.marqueeY - 4;
+        // Update overlay
+        const cx = state.composerX, cy = state.composerY;
+        document.getElementById('btnCloseCard').style.left = (cx + 222) + 'px';
+        document.getElementById('btnCloseCard').style.top = (cy + 6) + 'px';
+        critiqueInp.style.left = (cx + 10) + 'px';
+        critiqueInp.style.top = (cy + 60) + 'px';
+        document.getElementById('btnCancelFeedback').style.left = (cx + 110) + 'px';
+        document.getElementById('btnCancelFeedback').style.top = (cy + 144) + 'px';
+        document.getElementById('btnSendFeedback').style.left = (cx + 174) + 'px';
+        document.getElementById('btnSendFeedback').style.top = (cy + 144) + 'px';
+        renderStudio();
+        return;
+      }
+
+      if (!isDrawing || !currentStroke) return;
+      currentStroke.points.push([x, y]);
+      renderStudio();
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDrawing = false;
+      currentStroke = null;
+      isDraggingMarquee = false;
+    });
+
+    // Initial render
+    
+    // Stepper Handlers for Card Frame Cycling
+    document.getElementById('btnCardFramePrev').onclick = () => {
+      state.activeFrameIdx = (state.activeFrameIdx - 1 + ALL_FRAMES.length) % ALL_FRAMES.length;
+      const f = ALL_FRAMES[state.activeFrameIdx];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+      state.composerY = state.marqueeY - 4;
+      syncButtonPositions();
+      renderStudio();
+    };
+
+    document.getElementById('btnCardFrameNext').onclick = () => {
+      state.activeFrameIdx = (state.activeFrameIdx + 1) % ALL_FRAMES.length;
+      const f = ALL_FRAMES[state.activeFrameIdx];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+      state.composerY = state.marqueeY - 4;
+      syncButtonPositions();
+      renderStudio();
+    };
+
+    // CLS Metric & Mode Control
+    function updateClsMetric() {
+      const badge = document.getElementById('clsBadge');
+      if (!badge) return;
+      const isAct = state.commentFilter === 'ACTIVE';
+      const itemsCount = isAct ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE').length : ALL_COMMENTS.length;
+      const overflows = (itemsCount * 38 > 140);
+
+      if (state.clsMode === 'cls_free') {
+        state.clsScore = 0.0000;
+        badge.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span><span>CLS: 0.0000 (ZERO SHIFT)</span>`;
+        badge.style.borderColor = '#10B981';
+        badge.style.color = '#34D399';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      } else {
+        // Traditional auto-scrollbar reflow calculation
+        if (overflows) {
+          state.clsScore = 0.0825;
+          badge.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #EF4444; box-shadow: 0 0 6px #EF4444;"></span><span>CLS: 0.0825 (16px REFLOW SHIFT)</span>`;
+          badge.style.borderColor = '#EF4444';
+          badge.style.color = '#F87171';
+          badge.style.background = 'rgba(239, 68, 68, 0.15)';
+        } else {
+          state.clsScore = 0.0000;
+          badge.innerHTML = `<span style="width: 7px; height: 7px; border-radius: 50%; background: #F59E0B;"></span><span>CLS: 0.0000 (NO OVERFLOW)</span>`;
+          badge.style.borderColor = '#F59E0B';
+          badge.style.color = '#FBBF24';
+          badge.style.background = 'rgba(245, 158, 11, 0.15)';
+        }
+      }
+    }
+
+    window.toggleClsMode = function() {
+      state.clsMode = (state.clsMode === 'cls_free') ? 'traditional' : 'cls_free';
+      const btn = document.getElementById('btnToggleClsMode');
+      if (state.clsMode === 'cls_free') {
+        btn.innerText = '⚡ CLS Shield: Active (Reserved 24px Gutter)';
+        btn.style.background = 'rgba(16, 185, 129, 0.1)';
+        btn.style.borderColor = '#10B981';
+        btn.style.color = '#34D399';
+      } else {
+        btn.innerText = '⚠️ Test Mode: Traditional (Auto-Scrollbar Reflow)';
+        btn.style.background = 'rgba(239, 68, 68, 0.15)';
+        btn.style.borderColor = '#EF4444';
+        btn.style.color = '#F87171';
+      }
+      updateClsMetric();
+      renderStudio();
+    };
+
+    // Filter Chips Event Handlers
+    document.getElementById('btnFilterActive').onclick = () => {
+      state.commentFilter = 'ACTIVE';
+      state.commentScrollY = 0;
+      updateClsMetric();
+      renderStudio();
+    };
+
+    document.getElementById('btnFilterAll').onclick = () => {
+      state.commentFilter = 'ALL';
+      state.commentScrollY = 0;
+      updateClsMetric();
+      renderStudio();
+    };
+
+    // Mouse Wheel Scrolling for Comments Viewport
+    const container = document.getElementById('studioContainer');
+    container.addEventListener('wheel', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      // When over the layers list in sidebar (745..1000, 252..476)
+      if (mx >= 745 && mx <= 1000 && my >= 252 && my < 476) {
+        let totalLayersH = 0;
+        for (let l of state.layers) {
+          totalLayersH += (state.activeLayer === l.num ? 50 : 30);
+        }
+        const maxLayerScroll = Math.max(0, totalLayersH - 200);
+        if (maxLayerScroll > 0) {
+          e.preventDefault();
+          state.layerScrollY = Math.max(0, Math.min(maxLayerScroll, (state.layerScrollY || 0) + e.deltaY * 0.4));
+          syncButtonPositions();
+          renderStudio();
+        }
+      }
+
+      // When over the comments list in sidebar (745..1000, 480..665)
+      if (mx >= 745 && mx <= 1000 && my >= 480 && my <= 665) {
+        e.preventDefault();
+        const isAct = state.commentFilter === 'ACTIVE';
+        const list = isAct ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+        const maxScroll = Math.max(0, list.length * 38 - 140);
+        state.commentScrollY = Math.max(0, Math.min(maxScroll, state.commentScrollY + e.deltaY * 0.4));
+        renderStudio();
+      }
+    }, { passive: false });
+
+    // Scrollbar Thumb Pointer Dragging & Track Jump
+    const scrollbarZone = document.getElementById('scrollbarDragZone');
+    if (scrollbarZone) {
+      scrollbarZone.addEventListener('pointerdown', (e) => {
+        const isAct = state.commentFilter === 'ACTIVE';
+        const list = isAct ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+        const totalContentH = list.length * 38;
+        const maxScroll = Math.max(0, totalContentH - 140);
+        if (maxScroll <= 0) return;
+
+        const trackTop = 518;
+        const trackBottom = 650;
+        const trackH = trackBottom - trackTop;
+        const thumbH = Math.max(26, Math.min(trackH - 10, Math.round((140 / totalContentH) * trackH)));
+
+        const rect = canvas.getBoundingClientRect();
+        const clickY = e.clientY - rect.top;
+
+        const updateFromPointer = (clientY) => {
+          const cy = clientY - rect.top;
+          const ratio = Math.max(0, Math.min(1, (cy - trackTop - thumbH / 2) / (trackH - thumbH)));
+          state.commentScrollY = Math.round(ratio * maxScroll);
+          renderStudio();
+        };
+
+        updateFromPointer(e.clientY);
+
+        const onPointerMove = (pe) => {
+          updateFromPointer(pe.clientY);
+        };
+
+        const onPointerUp = () => {
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', onPointerUp);
+        };
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      });
+    }
+
+    // Pin #1 click (Sunset Gradient)
+    document.getElementById('btnCommentPin1').onclick = () => {
+      state.activeFrameIdx = 0; // Frame 01
+      const f = ALL_FRAMES[0];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+      state.composerY = state.marqueeY - 4;
+      syncButtonPositions();
+      renderStudio();
+    };
+
+    // Pin #5 click (Forest Silhouette)
+    document.getElementById('btnCommentPin5').onclick = () => {
+      state.activeFrameIdx = 4; // Frame 05
+      const f = ALL_FRAMES[4];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+      state.composerY = state.marqueeY - 4;
+      syncButtonPositions();
+      renderStudio();
+    };
+
+    // Cluster click (Lake Shoreline: Frame 06) if present
+    const btnCluster = document.getElementById('btnCanvasCluster');
+    if (btnCluster) {
+      btnCluster.onclick = () => {
+        state.activeFrameIdx = 5; // Frame 06 (Lake Reflections)
+        const f = ALL_FRAMES[5];
+        state.marqueeX = f.bounds[0];
+        state.marqueeY = f.bounds[1];
+        state.marqueeW = f.bounds[2];
+        state.marqueeH = f.bounds[3];
+        state.composerX = Math.min(740 - 250, state.marqueeX + state.marqueeW + 12);
+        state.composerY = state.marqueeY - 4;
+        syncButtonPositions();
+        renderStudio();
+      };
+    }
+
+    syncButtonPositions();
+    updateClsMetric();
+    renderStudio();
+
+  </script>
+</body>
+</html>
