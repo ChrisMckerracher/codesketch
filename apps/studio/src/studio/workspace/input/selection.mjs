@@ -74,13 +74,16 @@ export function resizeRect(rect, handle, point, bounds = DESIGN_BOUNDS) {
   const opposite = CORNERS[oppositeHandle(handle)];
   const fixed = [source.x + (opposite[0] ? source.width : 0), source.y + (opposite[1] ? source.height : 0)];
   const active = clampPoint(point, bounds);
+  const activeX = Math.round(active[0]);
+  const activeY = Math.round(active[1]);
+  const rawWidth = Math.abs(activeX - fixed[0]);
+  const rawHeight = Math.abs(activeY - fixed[1]);
   const candidate = {
-    x: Math.min(Math.round(active[0]), fixed[0]),
-    y: Math.min(Math.round(active[1]), fixed[1]),
-    width: Math.abs(Math.round(active[0]) - fixed[0]),
-    height: Math.abs(Math.round(active[1]) - fixed[1]),
+    x: rawWidth ? Math.min(activeX, fixed[0]) : (CORNERS[handle][0] ? fixed[0] : fixed[0] - 1),
+    y: rawHeight ? Math.min(activeY, fixed[1]) : (CORNERS[handle][1] ? fixed[1] : fixed[1] - 1),
+    width: Math.max(1, rawWidth),
+    height: Math.max(1, rawHeight),
   };
-  if (candidate.width < 1 || candidate.height < 1) return source;
   return canonicalRect(candidate);
 }
 const CORNERS = Object.freeze({ nw: [0, 0], ne: [1, 0], sw: [0, 1], se: [1, 1] });

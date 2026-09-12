@@ -32,22 +32,32 @@ test("routes app intents and maps tool opacity from percent", async () => {
   actions.destroy();
 });
 
-test("feedback waits for begin, creates the bounded draft, and cancel restores the tool", async () => {
+test("feedback begins empty, then cancel restores the tool", async () => {
   const h = setup();
-  const ui = { feedbackOpen: false };
+  const ui = { feedbackOpen: false, selectedCommentId: "old-comment" };
   const actions = createWorkspaceActions({ application: h.application, ui, changed() {} });
   await actions.dispatch("feedback.toggle");
-  assert.deepEqual(h.calls.slice(0, 2), [
-    { type: "review.begin", scope: "region" },
-    { type: "review.rect", rect: { x: 120, y: 160, width: 320, height: 190 } },
-  ]);
+  assert.deepEqual(h.calls.slice(0, 1), [{ type: "review.begin", scope: "region" }]);
+  assert.equal(h.calls.some((intent) => intent.type === "review.rect"), false);
   assert.equal(ui.feedbackOpen, true);
+  assert.equal(ui.selection, null);
+  assert.equal(ui.selectedCommentId, null);
   await actions.dispatch("review.cancel");
   assert.deepEqual(h.calls.slice(-2), [
     { type: "review.cancel" },
     { type: "tool.select", tool: "marker" },
   ]);
   assert.equal(ui.feedbackOpen, false);
+});
+
+test("opening feedback does not consume a first drag inside the former preset rectangle", async () => {
+  const h = setup();
+  const ui = { feedbackOpen: false, selection: null };
+  const actions = createWorkspaceActions({ application: h.application, ui, changed() {} });
+  await actions.dispatch("feedback.toggle");
+  ui.selection = { x: 140, y: 180, width: 40, height: 30 };
+  await actions.dispatch("review.rect", { rect: ui.selection });
+  assert.deepEqual(h.calls.slice(-1), [{ type: "review.rect", rect: { x: 140, y: 180, width: 40, height: 30 } }]);
 });
 
 test("selects only the real comment returned by review submission", async () => {

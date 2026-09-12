@@ -8,15 +8,15 @@ import {
   statusColors,
   statusLabel,
 } from "./data.mjs";
-import { cardChrome, textWidth, wrapped } from "./paint.mjs";
+import { textWidth } from "./paint.mjs";
 
 export function renderComments({ ctx, v, state, selectedId, descriptors }) {
   v.rect(756, 476, 228, 1, "#F1F5F9");
   v.text("COMMENTS", 756, 494, 0.85, "#0F172A", 1);
   const allRect = { x: 836, y: 488, width: 32, height: 16 };
   const activeRect = { x: 874, y: 488, width: 56, height: 16 };
-  drawFilter(v, allRect, `ALL ${state.allCount}`, state.filter === "all");
-  drawFilter(v, activeRect, ` ${state.activeCount} ACTIVE`, state.filter === "active");
+  drawFilter(v, allRect, `${state.allCount}`, state.filter === "all");
+  drawFilter(v, activeRect, `${state.activeCount} ACTIVE`, state.filter === "active");
   descriptors.push(control("button", "feedback.filter.all", allRect, "All comments", "comments.filter", { filter: "all" }));
   descriptors.push(control("button", "feedback.filter.active", activeRect, "Active comments", "comments.filter", { filter: "active" }));
 
@@ -41,7 +41,7 @@ export function renderComments({ ctx, v, state, selectedId, descriptors }) {
     const card = { x: COMMENT_VIEWPORT.x, y: COMMENT_VIEWPORT.y + 2 + index * COMMENT_CARD_STEP - state.scroll, width: 216, height: COMMENT_CARD_HEIGHT };
     const visible = clipControl(card, COMMENT_VIEWPORT);
     if (!visible) continue;
-    drawComment(ctx, v, comment, card, comment.id === selectedId);
+     drawComment(v, comment, card, comment.id === selectedId);
     descriptors.push(control("button", `feedback.comment.${comment.id}`, visible, `Select comment ${comment.number}`, "comments.select", { id: comment.id }));
   }
   ctx.restore();
@@ -58,37 +58,43 @@ function drawFilter(v, rect, label, selected) {
   v.roundRect(rect.x, rect.y, rect.width, rect.height, 3, selected ? "#0284C7" : "#F1F5F9");
   if (!selected) v.rect(rect.x, rect.y, rect.width, 1, "#CBD5E1");
   const text = label.trim();
-  const base = 0.6;
+  const base = text.endsWith("ACTIVE") ? 0.6 : 0.65;
   const width = textWidth(v, text, base);
   const scale = width > rect.width - 8 ? (base * (rect.width - 8)) / width * 0.98 : base;
-  wrapped(v, text, rect.x + 5, rect.y + 3, rect.width - 8, scale, selected ? "#FFFFFF" : "#64748B", 1);
+  v.text(text, rect.x + (rect.width - textWidth(v, text, scale)) / 2, rect.y + 3, scale,
+    selected ? "#FFFFFF" : "#64748B", 1);
 }
 
-function drawComment(ctx, v, comment, rect, selected) {
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(rect.x, rect.y, rect.width, rect.height);
-  ctx.clip();
-  cardChrome(v, rect.x, rect.y, rect.width, rect.height, selected);
-  const colors = statusColors(comment.status);
-  v.ellipse(rect.x + 8, rect.y + 7, 8, 8, comment.status === "resolved" ? "#94A3B8" : "#0284C7");
-  v.text(`#${comment.number}`, rect.x + 15, rect.y + 3, 0.5, selected ? "#0F172A" : "#64748B", 1);
-  v.roundRect(rect.x + 168, rect.y + 1, 44, 15, 2, colors.fill);
-  wrapped(v, statusLabel(comment.status), rect.x + 172, rect.y + 4, 38, 0.45, colors.text, 1);
-  wrapped(v, comment.text, rect.x + 8, rect.y + 16, 204, 0.4, "#334155", 1);
-  wrapped(v, bounds(comment.rect), rect.x + 8, rect.y + 24, 204, 0.36, "#64748B", 1);
-  const replies = Array.isArray(comment.replies) ? comment.replies : [];
-  if (replies.length > 0) {
-    wrapped(v, replies.map(replyText).join(" | "), rect.x + 8, rect.y + 30, 204, 0.32, "#475569", 1);
+function drawComment(v, comment, rect, selected) {
+  if (selected) {
+    v.roundRect(rect.x, rect.y - 2, rect.width, 35, 3, "#F0F9FF");
+    v.rect(rect.x, rect.y - 2, 3, 35, "#0284C7");
+  } else {
+    v.rect(rect.x + 4, rect.y + 35, rect.width - 8, 1, "#F8FAFC");
   }
-  ctx.restore();
+  const colors = statusColors(comment.status);
+  const status = statusLabel(comment.status);
+  const active = status === "ACTIVE";
+  const title = truncate(v, `#${comment.number} ${String(comment.text ?? "").replace(/\s+/g, " ").trim()}`, 0.65, 138);
+  v.ellipse(rect.x + 8, rect.y + 4, 8, 8, active ? "#0284C7" : "#94A3B8");
+  v.text(title, rect.x + 22, rect.y + 2, 0.65, selected ? "#0F172A" : active ? "#1E293B" : "#64748B", 1);
+  v.roundRect(rect.x + 168, rect.y, 44, 15, 2, colors.fill);
+  v.text(status, rect.x + 168 + (44 - textWidth(v, status, 0.52)) / 2, rect.y + 3, 0.52, colors.text, 1);
+  v.text(bounds(comment.rect), rect.x + 22, rect.y + 16, 0.52, "#64748B", 1);
+}
+
+function truncate(v, value, scale, width) {
+  const text = String(value);
+  if (textWidth(v, text, scale) <= width) return text;
+  let result = "";
+  for (const character of text) {
+    const candidate = `${result}${character}...`;
+    if (textWidth(v, candidate, scale) > width) break;
+    result += character;
+  }
+  return `${result}...`;
 }
 
 function bounds(rect) {
   return rect && Number.isFinite(rect.x) ? `${rect.x},${rect.y} -> ${rect.x + rect.width},${rect.y + rect.height}` : "WHOLE CANVAS";
-}
-
-function replyText(reply) {
-  const at = String(reply.at ?? "").toUpperCase();
-  return `${String(reply.author ?? "").toUpperCase()}: ${String(reply.text ?? "")}${at ? ` [${at}]` : ""}`;
 }

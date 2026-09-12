@@ -86,7 +86,7 @@ function vector() {
 
 test("expanded comments use real counts, unresolved filtering, fixed cards, and the gutter range", () => {
   const comments = [
-    comment("c1", 1, "open", { x: 20, y: 40, width: 60, height: 50 }, "Ridge edges", [
+    comment("c1", 1, "open", { x: 20, y: 40, width: 60, height: 50 }, " Ridge\n edges ", [
       { author: "agent", text: "Will soften", at: "now" },
       { author: "human", text: "Keep texture", at: "later" },
     ]),
@@ -104,9 +104,12 @@ test("expanded comments use real counts, unresolved filtering, fixed cards, and 
 
   assert.deepEqual(allFilter.payload, { filter: "all" });
   assert.deepEqual(activeFilter.payload, { filter: "active" });
-  assert.ok(all.v.texts.some(([text]) => text === "ALL 6"));
+  assert.ok(all.v.texts.some(([text]) => text === "6"));
   assert.ok(all.v.texts.some(([text]) => text === "4 ACTIVE"));
-  assert.ok(all.v.wraps.some(([text]) => text === "AGENT: Will soften [NOW] | HUMAN: Keep texture [LATER]"));
+  assert.equal(all.v.wraps.some(([text]) => text.includes("Will soften")), false);
+  assert.ok(all.v.texts.some(([text, x, y, scale]) => text === "#1 Ridge edges" && x === 774 && scale === 0.65));
+  assert.ok(all.v.texts.some(([text, x, y, scale]) => text === "20,40 -> 80,90" && x === 774 && scale === 0.52));
+  assert.ok(all.v.roundRects.some(([x, y, width, height]) => x === 920 && y === 516 && width === 44 && height === 15));
   assert.equal(scroll.kind, "range");
   assert.equal(scroll.axis, "y");
   assert.deepEqual({ x: scroll.x, y: scroll.y, width: scroll.width, height: scroll.height },
@@ -125,6 +128,17 @@ test("expanded comments use real counts, unresolved filtering, fixed cards, and 
   const activeCards = active.descriptors.filter((item) => item.id.startsWith("feedback.comment."));
   assert.deepEqual(activeCards.map((item) => item.payload.id), ["c1", "c2", "c3", "c5"]);
   assert.deepEqual(active.descriptors.find((item) => item.id === "feedback.filter.active").payload, { filter: "active" });
+});
+
+test("live selection shows a marquee and dimensions without mounting a composer", () => {
+  const { v, descriptors } = render(model([], { phase: "selecting" }), {
+    feedbackOpen: true,
+    selection: { x: 120, y: 160, width: 320, height: 190 },
+  });
+  assert.equal(descriptors.some((item) => item.action === "review.text"), false);
+  assert.ok(v.rects.some(([x, y, width, height, color, opacity]) =>
+    x === 120 && y === 160 && width === 320 && height === 190 && color === "#0284C7" && opacity === 0.14));
+  assert.ok(v.texts.some(([text]) => text === "320 X 190 PX"));
 });
 
 test("a draft renders a canonical selection and only draft submission controls", () => {

@@ -166,7 +166,26 @@ test("ALL keeps its fixed filter box and scales the real total into it", () => {
   const { v, descriptors } = render(comments, {}, { feedbackOpen: false });
   const all = descriptors.find((item) => item.id === "feedback.filter.all");
   assert.deepEqual({ x: all.x, y: all.y, width: all.width, height: all.height }, { x: 836, y: 488, width: 32, height: 16 });
-  const label = v.texts.find(([text]) => text === "ALL 120");
-  assert.ok(label);
-  assert.ok(label[3] < 0.6, "the label scale adapts without changing the filter geometry");
+   const label = v.texts.find(([text]) => text === "120");
+   assert.ok(label);
+   assert.ok(label[3] === 0.65, "the numeric label keeps the reference scale");
+});
+
+test("composer and blocked regions agree during a live drag and stale recovery", () => {
+  const selected = makeComment("old", 1, "open");
+  const draggingModel = { snapshot: { comments: [selected] }, review: { phase: "composing", rect: { x: 120, y: 160, width: 40, height: 30 }, text: "draft" } };
+  const draggingUi = { feedbackOpen: true, collapsed: false, selectedCommentId: selected.id, selection: { x: 140, y: 180, width: 60, height: 40 } };
+  const live = render([selected], draggingModel.review, draggingUi);
+  assert.equal(live.descriptors.some((item) => item.action === "review.text"), false);
+  assert.deepEqual(feedbackRegions({ model: draggingModel, ui: draggingUi }), { composer: null, thread: null });
+
+  const staleModel = { snapshot: { comments: [] }, review: { phase: "stale", rect: null, text: "retain" } };
+  const staleUi = { feedbackOpen: true, collapsed: false, selectedCommentId: null, selection: null };
+  const staleRender = render([], staleModel.review, staleUi);
+  const staleRegions = feedbackRegions({ model: staleModel, ui: staleUi });
+  assert.ok(staleRender.descriptors.some((item) => item.action === "review.reselect"));
+  assert.deepEqual(staleRegions.composer, { x: 492, y: 0, width: 248, height: 178 });
+  assert.ok(staleRender.v.roundRects.some(([x, y, width, height]) =>
+    x === staleRegions.composer.x && y === staleRegions.composer.y
+      && width === staleRegions.composer.width && height === staleRegions.composer.height));
 });

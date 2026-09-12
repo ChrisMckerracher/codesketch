@@ -27,6 +27,25 @@ async (page) => {
   const rect = (selector) => page.locator(selector).boundingBox();
   const waitControl = (label) => page.locator(`#control-host [aria-label="${label}"]`).waitFor({ timeout: 8000 });
   const clickControl = async (label) => { await waitControl(label); await page.locator(`#control-host [aria-label="${label}"]`).click(); };
+  const dragRegion = async (from, to, inspect = false) => {
+    const box = await page.locator('#painting-canvas').boundingBox();
+    assert(box, 'painting canvas is mounted for feedback drag');
+    await page.mouse.move(box.x + box.width * from[0], box.y + box.height * from[1]);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * to[0], box.y + box.height * to[1], { steps: 6 });
+    if (inspect) {
+      const live = await page.evaluate(() => {
+        const canvas = document.getElementById('ui-canvas');
+        const dpr = devicePixelRatio;
+        const pixel = [...canvas.getContext('2d').getImageData(Math.round(250 * dpr), Math.round(220 * dpr), 1, 1).data];
+        return { pixel, draft: document.querySelector('[aria-label="Feedback draft"]') };
+      });
+      assert(live.pixel[2] > live.pixel[0] && live.pixel[3] > 0, `live marquee pixel missing: ${live.pixel}`);
+      assert(!live.draft, 'composer must stay hidden during pointer drag');
+      await page.screenshot({ path: 'artifacts/browser-check/feedback-live-drag.png' });
+    }
+    await page.mouse.up();
+  };
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
@@ -122,6 +141,7 @@ async (page) => {
     }));
   }
   await clickControl('Feedback');
+  await dragRegion([0.15, 0.2], [0.45, 0.45], true);
   try {
     await page.waitForFunction(() => {
       const area = document.querySelector('#control-host textarea[aria-label="Feedback draft"]');
@@ -220,6 +240,7 @@ async (page) => {
   await clickControl('Feedback');
   await waitControl('Feedback');
   await clickControl('Feedback');
+  await dragRegion([0.2, 0.2], [0.4, 0.4]);
   await page.waitForFunction(() => {
     const area = document.querySelector('#control-host textarea[aria-label="Feedback draft"]');
     return area && !area.disabled;
