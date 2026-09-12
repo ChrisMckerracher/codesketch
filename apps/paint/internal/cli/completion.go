@@ -48,7 +48,7 @@ func completion(shell string) (string, error) {
 				fmt.Fprintf(&b, "complete -c paint -n '__fish_seen_subcommand_from %s' -l %s%s\n", command, flag, extra)
 			}
 		}
-		b.WriteString("complete -c paint -n '__fish_seen_subcommand_from layer' -a 'list add update'\ncomplete -c paint -n '__fish_seen_subcommand_from comments' -a 'list wait watch ack address'\ncomplete -c paint -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish'\ncomplete -c paint -n '__fish_seen_subcommand_from studio' -a 'start status stop restart'\n")
+		b.WriteString("complete -c paint -n '__fish_seen_subcommand_from layer' -a 'list add update'\ncomplete -c paint -n '__fish_seen_subcommand_from comments' -a 'list wait watch ack address reply'\ncomplete -c paint -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish'\ncomplete -c paint -n '__fish_seen_subcommand_from studio' -a 'start status stop restart'\n")
 		return b.String(), nil
 	default:
 		return "", usage("completion requires bash, zsh, or fish")
@@ -64,7 +64,7 @@ func completionWords(command string) string {
 	case "layer":
 		words = append(words, "list", "add", "update")
 	case "comments":
-		words = append(words, "list", "wait", "watch", "ack", "address")
+		words = append(words, "list", "wait", "watch", "ack", "address", "reply")
 	case "completion":
 		words = append(words, "bash", "zsh", "fish")
 	case "studio":

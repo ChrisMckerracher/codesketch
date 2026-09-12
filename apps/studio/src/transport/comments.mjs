@@ -28,6 +28,15 @@ function assertGeneration(value) {
   }
 }
 
+function assertReplySource(value) {
+  if (value !== 'human' && value !== 'agent') throw new Error('source must be human or agent');
+}
+
+function assertTransitionSource(action, value) {
+  const expected = action === 'ack' || action === 'address' ? 'agent' : 'human';
+  if (value !== expected) throw new Error(`${action} source must be ${expected}`);
+}
+
 function assertPollSince(since) {
   if (since !== null && since !== undefined && (typeof since !== 'string' || since.length > 256)) {
     throw new Error('since must be null or a cursor string of at most 256 characters');
@@ -47,7 +56,18 @@ export async function transitionComment(response, { session, heartbeat, flush },
     throw new Error('reopen must be boolean');
   }
   assertGeneration(body.expectedDocGeneration);
-  session.updateComment(action === 'resolve' && body.reopen === true ? 'reopen' : action, body);
+  const transition = action === 'resolve' && body.reopen === true ? 'reopen' : action;
+  assertTransitionSource(transition, body.source);
+  session.updateComment(transition, body);
+  await flush();
+  send(response, 200, { ...session.snapshot(), ...heartbeatOf(heartbeat) });
+}
+
+export async function replyComment(response, { session, heartbeat, flush }, body) {
+  assertRequestId(body.requestId);
+  assertGeneration(body.expectedDocGeneration);
+  assertReplySource(body.source);
+  session.replyComment(body);
   await flush();
   send(response, 200, { ...session.snapshot(), ...heartbeatOf(heartbeat) });
 }

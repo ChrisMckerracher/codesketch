@@ -2,7 +2,6 @@ import { createModel } from '../model/index.mjs';
 import { StudioRequests } from '../requests/index.mjs';
 import { createReview } from '../review/index.mjs';
 import { createDocuments } from '../documents/index.mjs';
-import { handleView } from '../viewport/index.mjs';
 import { handleLocal } from './local.mjs';
 import { createMutations } from './mutations.mjs';
 import { createActions } from './actions.mjs';
@@ -150,7 +149,6 @@ export function createApplication({ state, api }) {
     }
     return tracked('Action', type, () => {
       if (handleLocal(intent, { state, model })) return;
-      if (handleView(intent, { model })) return;
       throw validation(`Unhandled intent type: ${type}`);
     });
   }

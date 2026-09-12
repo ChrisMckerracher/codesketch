@@ -3,9 +3,9 @@
 export class StudioState {
   constructor() {
     this.tool = 'brush';
-    this.size = 12;
+    this.size = 14;
     this.opacity = 1.0;
-    this.color = '#253d38';
+    this.color = '#2563eb';
     this.bgColor = '#f7f3e8';
     this.targetLayer = 'paint';
 

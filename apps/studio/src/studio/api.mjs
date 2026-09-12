@@ -20,6 +20,13 @@ function requireGeneration(expectedDocGeneration) {
   return expectedDocGeneration;
 }
 
+function requireInstanceId(expectedInstanceId) {
+  if (typeof expectedInstanceId !== 'string' || !expectedInstanceId) {
+    throw Object.assign(new TypeError('expectedInstanceId must be a nonempty string'), { code: 'INVALID_INPUT' });
+  }
+  return expectedInstanceId;
+}
+
 function errorBodyMessage(data, text, response) {
   if (typeof data === 'object' && data !== null && !Array.isArray(data) && typeof data.error === 'string' && data.error) {
     return data.error;
@@ -156,7 +163,8 @@ export class StudioApi {
     });
   }
 
-  async createComment({ requestId, text, rect, continuePlayback, expectedDocGeneration, expectedArtRevision }) {
+  async createComment({ requestId, text, rect, continuePlayback, expectedDocGeneration,
+    expectedArtRevision, expectedControlEpoch }) {
     return await this.request('/api/comments', {
       expect: snapshotProblem,
       method: 'POST',
@@ -168,7 +176,18 @@ export class StudioApi {
         continuePlayback,
         expectedDocGeneration,
         expectedArtRevision,
+        expectedControlEpoch,
       }),
+    });
+  }
+
+  async replyComment({ id, requestId, text, source, expectedDocGeneration, expectedSeq }) {
+    requireGeneration(expectedDocGeneration);
+    return await this.request('/api/comments/reply', {
+      expect: snapshotProblem,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, requestId, text, source, expectedDocGeneration, expectedSeq }),
     });
   }
 
@@ -177,12 +196,15 @@ export class StudioApi {
       expect: snapshotProblem,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, reopen, expectedDocGeneration, expectedSeq }),
+      body: JSON.stringify({ id, reopen, source: 'human', expectedDocGeneration, expectedSeq }),
     });
   }
 
-  async fetchProject() {
-    return await this.request('/api/project', { expect: projectProblem });
+  async fetchProject({ expectedInstanceId, expectedDocGeneration } = {}) {
+    const instanceId = requireInstanceId(expectedInstanceId);
+    const generation = requireGeneration(expectedDocGeneration);
+    const query = `?expectedInstanceId=${encodeURIComponent(instanceId)}&expectedDocGeneration=${encodeURIComponent(generation)}`;
+    return await this.request(`/api/project${query}`, { expect: projectProblem });
   }
 
   async loadProject(projectData, { expectedDocGeneration } = {}) {

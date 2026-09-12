@@ -5,7 +5,8 @@ import { send, readJSON, trusted, serveStatic } from './http.mjs';
 import { attachPersistence } from './persistence.mjs';
 import { createLifecycle } from './lifecycle.mjs';
 import { checkHumanGeneration } from './human-context.mjs';
-import { createCommentHeartbeat, heartbeatOf, resetHeartbeat, createComment, transitionComment, pollComments } from './comments.mjs';
+import { createCommentHeartbeat, heartbeatOf, resetHeartbeat, createComment, transitionComment,
+  replyComment, pollComments } from './comments.mjs';
 
 export async function createStudio({ root, persistence, lifecycle: options } = {}) {
   const session = new Session();
@@ -31,7 +32,21 @@ export async function createStudio({ root, persistence, lifecycle: options } = {
           return send(response, 200, { ...session.snapshot(), ...heartbeatOf(heartbeat) });
         }
         if (url.pathname === '/api/comments') return pollComments(response, comments, null);
-        if (url.pathname === '/api/project') return send(response, 200, session.project());
+        if (url.pathname === '/api/project') {
+          const expectedInstanceIds = url.searchParams.getAll('expectedInstanceId');
+          const expectedGenerations = url.searchParams.getAll('expectedDocGeneration');
+          const hasInstance = expectedInstanceIds.length > 0;
+          const hasGeneration = expectedGenerations.length > 0;
+          if (hasInstance !== hasGeneration || expectedInstanceIds.length > 1 || expectedGenerations.length > 1
+            || (hasInstance && (!expectedInstanceIds[0] || !expectedGenerations[0]))) {
+            throw Object.assign(new Error('Project context query requires one expectedInstanceId and expectedDocGeneration'), { statusCode: 400 });
+          }
+          if (hasInstance && (expectedInstanceIds[0] !== session.instanceId
+            || expectedGenerations[0] !== session.controlGrant.docGeneration)) {
+            throw Object.assign(new Error('Project context is stale'), { statusCode: 409 });
+          }
+          return send(response, 200, session.project());
+        }
         const target = request.url.split('?')[0].split('#')[0];
         return await serveStatic(response, target, root);
       }
@@ -43,6 +58,7 @@ export async function createStudio({ root, persistence, lifecycle: options } = {
       if (url.pathname === '/api/comments/ack') return await transitionComment(response, comments, 'ack', body);
       if (url.pathname === '/api/comments/address') return await transitionComment(response, comments, 'address', body);
       if (url.pathname === '/api/comments/resolve') return await transitionComment(response, comments, 'resolve', body);
+      if (url.pathname === '/api/comments/reply') return await replyComment(response, comments, body);
       if (url.pathname === '/api/comments/poll') return pollComments(response, comments, body.since, { markSeen: true });
       if (url.pathname === '/api/commands') {
         checkHumanGeneration(body, session);

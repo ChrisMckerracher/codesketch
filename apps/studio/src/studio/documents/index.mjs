@@ -90,8 +90,16 @@ export function createDocuments({ model, requests }, browser = {}) {
 
   async function save() {
     const captured = capture();
-    const project = await requests.api.fetchProject();
+    const project = await requests.api.fetchProject({
+      expectedInstanceId: captured.instanceId,
+      expectedDocGeneration: captured.expectedDocGeneration,
+    });
     if (destroyed) return;
+    const current = model.get()?.snapshot;
+    if (!current || current.instanceId !== captured.instanceId
+      || current.docGeneration !== captured.expectedDocGeneration) {
+      throw stale('The document changed while the project was read');
+    }
     download(seams.blob([JSON.stringify(project)], 'application/json'), `${captured.filename}.json`);
   }
 

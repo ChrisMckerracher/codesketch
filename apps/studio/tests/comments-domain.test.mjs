@@ -14,11 +14,12 @@ const document = () => ({ version: 1, width: 1000, height: 700, background: '#f7
   { id: 'faint', name: 'Faint', visible: true, opacity: 0 },
   { id: 'sketch', name: 'Sketch', visible: true, opacity: 0.5 } ] });
 
-const context = (overrides = {}) => ({ docGeneration: GEN, artRevision: 7, cursor: 12, document: document(), ...overrides });
+const context = (overrides = {}) => ({ docGeneration: GEN, artRevision: 7, controlEpoch: 3, cursor: 12,
+  document: document(), ...overrides });
 
 const input = (overrides = {}) => ({ requestId: 'req-1', text: '  check the sky  ',
   rect: { x: 10, y: 20, width: 30, height: 40 }, continuePlayback: false,
-  expectedDocGeneration: GEN, expectedArtRevision: 7, ...overrides });
+  expectedDocGeneration: GEN, expectedArtRevision: 7, expectedControlEpoch: 3, ...overrides });
 
 test('legacy nullable comment metadata is rejected', () => {
   assert.throws(() => normalizeComments([rich({ artRevision: null })]), /artRevision/);
@@ -81,7 +82,7 @@ test('prepareComment appends a normalized open comment with server-side visible 
   assert.equal(comments.length, 2);
   assert.equal(comments, base.length ? comments : null);
   assert.deepEqual(item, {
-    id: item.id, number: 4, seq: 6, text: 'check the sky',
+    id: item.id, number: 4, seq: 6, text: '  check the sky  ',
     rect: { x: 10, y: 20, width: 30, height: 40 },
     status: 'open', cursor: 12, artRevision: 7, at: item.at,
     acknowledgedAt: null, addressedAt: null, resolvedAt: null,
@@ -97,10 +98,10 @@ test('prepareComment builds a deterministic fingerprint covering the captured co
   assert.equal(first.item.request.fingerprint, second.item.request.fingerprint);
   const omitted = prepareComment(base, input({ continuePlayback: undefined }), context());
   assert.equal(omitted.item.request.fingerprint, first.item.request.fingerprint);
+  assert.equal(JSON.parse(first.item.request.fingerprint).text, input().text);
   const sameArt = prepareComment(base, input({ continuePlayback: undefined, expectedArtRevision: 7 }), context());
   assert.equal(sameArt.item.request.fingerprint, first.item.request.fingerprint);
 });
-
 test('prepareComment never mutates its inputs', () => {
   const base = normalizeComments([rich({ id: 'c0', number: 1, seq: 1 })]);
   const baseSnapshot = structuredClone(base);
@@ -114,17 +115,28 @@ test('prepareComment never mutates its inputs', () => {
   assert.deepEqual(request, requestSnapshot);
 });
 
-test('a repeated request id dedupes after the generation check but before the art check', () => {
+test('same-id same-payload retries survive art and epoch changes after generation checks', () => {
   const base = normalizeComments([rich({ id: 'c0', number: 1, seq: 1 })]);
   const first = prepareComment(base, input(), context());
-  const retry = prepareComment(first.comments, input(), context({ artRevision: 8 }));
+  const retry = prepareComment(first.comments, input(), context({ artRevision: 8, controlEpoch: 4 }));
   assert.equal(retry.duplicate, true);
   assert.deepEqual(retry.comments, first.comments);
-  assert.deepEqual(retry.item, first.item);
   assert.throws(() => prepareComment(first.comments, input(), context({ docGeneration: 'next-generation' })),
     error => error.statusCode === 409);
 });
-
+test('a late pause rejects atomically when the control epoch moved', () => {
+  const base = normalizeComments([rich({ id: 'c0', number: 1, seq: 1 })]);
+  const snapshot = structuredClone(base);
+  assert.throws(() => prepareComment(base, input({ requestId: 'late-pause' }),
+    context({ controlEpoch: 4 })), error => error.statusCode === 409);
+  assert.deepEqual(base, snapshot);
+});
+test('a same-id retry with a conflicting control epoch is a 409 conflict', () => {
+  const base = normalizeComments([rich({ id: 'c0', number: 1, seq: 1 })]);
+  const first = prepareComment(base, input(), context());
+  assert.throws(() => prepareComment(first.comments, input({ expectedControlEpoch: 4 }),
+    context({ controlEpoch: 4 })), error => error.statusCode === 409);
+});
 test('a repeated request id with a changed payload is a 409 conflict', () => {
   const base = normalizeComments([rich({ id: 'c0', number: 1, seq: 1 })]);
   const first = prepareComment(base, input(), context());
@@ -146,6 +158,17 @@ test('new requests must match the current generation and art revision', () => {
     error => error.statusCode === 409);
   assert.throws(() => prepareComment(base, input({ expectedArtRevision: 6 }), context()),
     error => error.statusCode === 409);
+  assert.throws(() => prepareComment(base, input({ expectedControlEpoch: 2 }), context()),
+    error => error.statusCode === 409);
+  for (const expectedControlEpoch of [undefined, -1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    const alias = expectedControlEpoch === undefined ? { epoch: 3 } : {};
+    assert.throws(() => prepareComment(base, input({ expectedControlEpoch, ...alias }), context()),
+      /expectedControlEpoch/);
+  }
+  assert.throws(() => prepareComment(base, input(), context({ controlEpoch: undefined })),
+    /context controlEpoch/);
+  assert.throws(() => prepareComment(base, input(),
+    context({ controlEpoch: undefined, epoch: 3 })), /context controlEpoch/);
 });
 
 test('prepareComment rejects a 101st comment', () => {

@@ -85,16 +85,18 @@ const pauseCall = (calls, index = 0) => calls.filter((call) => call.method === '
 test('submit freezes the exact request context and clears on success', async () => {
   const { model, calls, observe, review, beginRegion } = build();
   await beginRegion();
-  review.handle({ type: 'review.text', text: '  Soften the hill  ' });
+  const critique = '  Soften the hill\nKeep the ridge  ';
+  review.handle({ type: 'review.text', text: critique });
   review.handle({ type: 'review.hold', value: false });
   const submitting = review.handle({ type: 'review.submit' });
   assert.equal(model.get().review.phase, 'submitting');
   const body = commentCall(calls).args[0];
   assert.match(body.requestId, /^[0-9a-f-]{36}$/);
   assert.deepEqual({ text: body.text, rect: body.rect, continuePlayback: body.continuePlayback,
-    expectedDocGeneration: body.expectedDocGeneration, expectedArtRevision: body.expectedArtRevision }, {
-    text: 'Soften the hill', rect: { x: 10, y: 20, width: 300, height: 200 },
-    continuePlayback: true, expectedDocGeneration: 'gen-1', expectedArtRevision: 4 });
+    expectedDocGeneration: body.expectedDocGeneration, expectedArtRevision: body.expectedArtRevision,
+    expectedControlEpoch: body.expectedControlEpoch }, {
+    text: critique, rect: { x: 10, y: 20, width: 300, height: 200 },
+    continuePlayback: true, expectedDocGeneration: 'gen-1', expectedArtRevision: 4, expectedControlEpoch: 1 });
   observe(paused({ revision: 3, controlEpoch: 2, artRevision: 4, comments: [] }));
   commentCall(calls).control.resolve(paused({ revision: 4, controlEpoch: 2, artRevision: 4 }));
   await submitting;
@@ -102,10 +104,37 @@ test('submit freezes the exact request context and clears on success', async () 
   assert.equal(model.get().review.text, '');
 });
 
-test('keep paused default sends continuePlayback false', async () => {
+test('review default sends continuePlayback true', async () => {
   const { calls, review, beginRegion } = build();
   await beginRegion();
   review.handle({ type: 'review.text', text: 'hold work' });
+  const submitting = review.handle({ type: 'review.submit' });
+  assert.equal(commentCall(calls).args[0].continuePlayback, true);
+  commentCall(calls).control.resolve(paused({ revision: 3, controlEpoch: 1 }));
+  await submitting;
+});
+
+test('a rect selected during whole-scope composition changes the displayed and sent scope', async () => {
+  const { model, calls, observe, review } = build();
+  observe(snapshot({ revision: 1 }));
+  const begun = review.handle({ type: 'review.begin', scope: 'whole' });
+  calls[0].control.resolve(paused({ revision: 2, controlEpoch: 1, artRevision: 4 }));
+  await begun;
+  await review.handle({ type: 'review.rect', rect: { x: 10, y: 20, width: 300, height: 200 } });
+  assert.equal(model.get().review.scope, 'region');
+  assert.deepEqual(model.get().review.rect, { x: 10, y: 20, width: 300, height: 200 });
+  review.handle({ type: 'review.text', text: 'bounded note' });
+  const submitting = review.handle({ type: 'review.submit' });
+  assert.deepEqual(commentCall(calls).args[0].rect, model.get().review.rect);
+  commentCall(calls).control.resolve(paused({ revision: 3, controlEpoch: 1 }));
+  await submitting;
+});
+
+test('explicit keep-paused hold sends continuePlayback false', async () => {
+  const { calls, review, beginRegion } = build();
+  await beginRegion();
+  review.handle({ type: 'review.text', text: 'hold work' });
+  review.handle({ type: 'review.hold', value: true });
   const submitting = review.handle({ type: 'review.submit' });
   assert.equal(commentCall(calls).args[0].continuePlayback, false);
   commentCall(calls).control.resolve(paused({ revision: 3, controlEpoch: 1 }));
@@ -115,9 +144,11 @@ test('keep paused default sends continuePlayback false', async () => {
 test('submit validates the text before sending', async () => {
   const { calls, review, beginRegion } = build();
   await beginRegion();
-  review.handle({ type: 'review.text', text: '   ' });
-  await assert.rejects(review.handle({ type: 'review.submit' }),
-    (error) => error.outcome === 'validation');
+  for (const text of ['   ', 'x'.repeat(2001)]) {
+    review.handle({ type: 'review.text', text });
+    await assert.rejects(review.handle({ type: 'review.submit' }),
+      (error) => error.outcome === 'validation');
+  }
   assert.equal(calls.find((call) => call.method === 'createComment'), undefined);
   await assert.rejects(review.handle({ type: 'review.begin', scope: 'diagonal' }),
     (error) => error.outcome === 'validation', 'unknown scopes reject as validation');
@@ -210,19 +241,19 @@ test('an uncertain submission keeps the frozen request for explicit retry', asyn
   const retried = review.handle({ type: 'review.retry' });
   const refresh = calls.find((call) => call.method === 'fetchState');
   assert.ok(refresh, 'the retry refreshes the coordinator first');
-  refresh.control.resolve(paused({ revision: 5, controlEpoch: 1, artRevision: 9 }));
+  refresh.control.resolve(paused({ revision: 5, controlEpoch: 2, artRevision: 9 }));
   await settle();
   const retryBody = calls.filter((call) => call.method === 'createComment')[1].args[0];
   assert.equal(retryBody, first.requestId ? retryBody : null);
   assert.deepEqual(retryBody, first, 'the exact frozen payload is retried once');
-  observe(paused({ revision: 6, controlEpoch: 1, artRevision: 9 }));
+  observe(paused({ revision: 6, controlEpoch: 2, artRevision: 9 }));
   calls.filter((call) => call.method === 'createComment')[1]
-    .control.resolve(paused({ revision: 7, controlEpoch: 1, artRevision: 9 }));
+    .control.resolve(paused({ revision: 7, controlEpoch: 2, artRevision: 9 }));
   await retried;
   assert.equal(model.get().review.phase, 'closed');
 });
 
-test('a duplicate retry survives an accepted continuation that moved the art revision', async () => {
+test('a duplicate retry preserves its original payload after an accepted continuation moves context', async () => {
   const { model, calls, observe, review, beginRegion } = build();
   await beginRegion();
   review.handle({ type: 'review.text', text: 'lost success' });
@@ -238,6 +269,9 @@ test('a duplicate retry survives an accepted continuation that moved the art rev
   const retryCall = calls.filter((call) => call.method === 'createComment')[1];
   assert.equal(retryCall.args[0].expectedArtRevision, 4,
     'the frozen art revision is resent for the duplicate check');
+  assert.equal(retryCall.args[0].expectedControlEpoch, 1,
+    'the frozen control epoch is resent for the duplicate check');
+  assert.deepEqual(retryCall.args[0], frozen, 'the complete original payload is preserved');
   retryCall.control.resolve(paused({ revision: 6, controlEpoch: 1, artRevision: 9 }));
   await retried;
   assert.equal(model.get().review.phase, 'closed',

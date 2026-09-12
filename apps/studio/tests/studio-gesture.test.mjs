@@ -98,26 +98,41 @@ test('brush stroke requests priority pause, acks at incremented epoch, and commi
   assert.equal(commits.length, 1);
   assert.deepEqual(commits[0], {
     type: 'stroke.commit', generation: 'g1',
-    command: { type: 'stroke', layer: 'paint', brush: 'brush', color: '#253d38', size: 12, opacity: 1, points: [[10, 10], [20, 30], [40, 40]] },
+     command: { type: 'stroke', layer: 'paint', brush: 'brush', color: '#2563eb', size: 14, opacity: 1, points: [[10, 10], [22.5, 27.5], [40, 40]] },
   });
   await resolveCommit(h, commits[0].command, 3);
   assert.equal(h.model.get().draft, null, 'draft removed once accepted command is in current art');
   t.after(() => h.gesture.destroy());
 });
 
-test('layer context really returns to brush on the same pointerdown and retains the target layer', async (t) => {
+test('a non-owning pointercancel does not cancel active drawing', async (t) => {
+  const h = createHarness();
+  fire(h, 'pointerdown', 10, 10);
+  fire(h, 'pointermove', 20, 30);
+  h.canvas.dispatch('pointercancel', ev(30, 40, { pointerId: 2 }));
+  assert.ok(h.model.get().draft, 'the active pointer keeps its draft');
+  assert.equal(h.canvas.captured, 1, 'the active pointer keeps capture');
+  await acceptPause(h);
+  fire(h, 'pointerup', 40, 40);
+  assert.equal(intents(h, 'stroke.commit').length, 1, 'the owning pointer can still commit');
+  t.after(() => h.gesture.destroy());
+});
+
+test('layer context preserves marker on the same pointerdown and retains the target layer', async (t) => {
   const h = createHarness({ snapshot: { document: { layers: LAYERS.concat([{ id: 'ink', name: 'Ink', visible: true, opacity: 1 }]), marks: [] } } });
   h.state.setTool('marker');
   h.model.patch({ context: 'layer', targetLayer: 'ink' });
   fire(h, 'pointerdown', 5, 5);
-  assert.equal(h.model.get().tool, 'brush', 'tool.return applied synchronously');
-  assert.equal(h.model.get().context, 'tool');
+  assert.equal(h.model.get().tool, 'marker', 'selected tool is preserved');
+  assert.equal(h.model.get().context, 'layer');
+  assert.equal(h.model.get().targetLayer, 'ink');
+  assert.equal(intents(h, 'tool.return').length, 0, 'layer context does not return to the tool context');
   assert.equal(intents(h, 'playback.control').length, 1, 'pause follows in the same pointerdown');
   await acceptPause(h);
   fire(h, 'pointerup', 30, 30);
   const commit = intents(h, 'stroke.commit')[0];
   assert.equal(commit.command.layer, 'ink', 'target layer retained');
-  assert.equal(commit.command.brush, 'brush');
+  assert.equal(commit.command.brush, 'marker');
   t.after(() => h.gesture.destroy());
 });
 
@@ -154,7 +169,7 @@ test('point budget bounds strokes to 2000 samples while preserving the final end
   t.after(() => h.gesture.destroy());
 });
 
-test('shapes normalize, clamp, refuse zero area; layer-context shape tool still draws brush strokes', async (t) => {
+test('shapes normalize, clamp, refuse zero area; layer context preserves shape tools', async (t) => {
   const h = createHarness({ snapshot: pausedEpoch1 });
   h.state.setTool('rect');
   fire(h, 'pointerdown', 100, 100);
@@ -163,7 +178,7 @@ test('shapes normalize, clamp, refuse zero area; layer-context shape tool still 
   fire(h, 'pointermove', 50, 150);
   fire(h, 'pointerup', 50, 150);
   const first = intents(h, 'stroke.commit')[0].command;
-  assert.deepEqual(first, { type: 'rect', layer: 'paint', color: '#253d38', opacity: 1, x: 50, y: 100, width: 50, height: 50 });
+  assert.deepEqual(first, { type: 'rect', layer: 'paint', color: '#2563eb', opacity: 1, x: 50, y: 100, width: 50, height: 50 });
   await resolveCommit(h, first, 3);
   fire(h, 'pointerdown', 990, 690);
   h.resolveIntent('playback.control', { controlEpoch: 1 }, 2);
@@ -171,7 +186,7 @@ test('shapes normalize, clamp, refuse zero area; layer-context shape tool still 
   fire(h, 'pointermove', 1200, 800);
   fire(h, 'pointerup', 1200, 800);
   const clamped = intents(h, 'stroke.commit')[1].command;
-  assert.deepEqual(clamped, { type: 'rect', layer: 'paint', color: '#253d38', opacity: 1, x: 990, y: 690, width: 10, height: 10 });
+  assert.deepEqual(clamped, { type: 'rect', layer: 'paint', color: '#2563eb', opacity: 1, x: 990, y: 690, width: 10, height: 10 });
   await resolveCommit(h, clamped, 4);
   fire(h, 'pointerdown', 50, 50);
   fire(h, 'pointerup', 50, 50);
@@ -180,6 +195,7 @@ test('shapes normalize, clamp, refuse zero area; layer-context shape tool still 
   h.model.patch({ context: 'layer', targetLayer: 'paint' });
   h.state.setTool('rect');
   fire(h, 'pointerdown', 10, 10);
-  assert.equal(h.model.get().draft.type, 'stroke', 'layer context forces brush strokes');
+  fire(h, 'pointermove', 20, 20);
+  assert.equal(h.model.get().draft.type, 'rect', 'layer context preserves shape tools');
   t.after(() => h.gesture.destroy());
 });

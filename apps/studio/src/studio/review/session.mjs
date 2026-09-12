@@ -5,6 +5,13 @@ const CANVAS_HEIGHT = 700;
 const TEXT_MAX = 2000;
 const REOPEN_FROM = new Set(['acknowledged', 'addressed', 'resolved']);
 
+function validateReviewText(value) {
+  if (typeof value !== 'string' || value.length > TEXT_MAX || !value.trim()) {
+    throw new Error('Invalid review text');
+  }
+  return value;
+}
+
 function stale(message) {
   return Object.assign(new Error(message), { outcome: 'stale' });
 }
@@ -16,7 +23,7 @@ function validation(message) {
 export function createReviewSession({ model, requests, dispatch }) {
   const internal = {
     destroyed: false, operation: 0, captured: null, scope: null, artRevision: null,
-    rect: null, requestId: null, payload: null, pendingBegin: null, origin: null,
+    rect: null, requestId: null, payload: null, pendingBegin: null, pendingContext: null, origin: null,
   };
 
   const review = () => model.get().review;
@@ -28,6 +35,7 @@ export function createReviewSession({ model, requests, dispatch }) {
   const closeReview = (changes = {}) => {
     internal.operation += 1;
     internal.captured = null;
+    internal.pendingContext = null;
     internal.scope = null;
     internal.artRevision = null;
     internal.rect = null;
@@ -36,7 +44,8 @@ export function createReviewSession({ model, requests, dispatch }) {
     internal.origin = null;
     pauseFlow.rejectPending(stale('Review was cancelled'));
     patchReview({
-      phase: 'closed', rect: null, requestId: null, generation: null, artRevision: null, ...changes,
+      phase: 'closed', rect: null, requestId: null, generation: null, artRevision: null,
+      controlEpoch: null, ...changes,
     });
   };
 
@@ -56,7 +65,7 @@ export function createReviewSession({ model, requests, dispatch }) {
       throw validation('review.begin needs scope region or whole');
     }
     return pauseFlow.start({
-      scope: intent.scope, text: review().text ?? '', keepPaused: true, origin: 'begin',
+      scope: intent.scope, text: review().text ?? '', keepPaused: false, origin: 'begin',
     });
   };
 
@@ -72,7 +81,10 @@ export function createReviewSession({ model, requests, dispatch }) {
   };
 
   const setRect = (intent) => {
-    requirePhase('selecting', 'Region selection is not active');
+    const phase = review().phase;
+    if (phase !== 'selecting' && phase !== 'composing') {
+      throw validation('Region selection is not active');
+    }
     const rect = intent.rect;
     const valid = rect && typeof rect === 'object' &&
       Number.isSafeInteger(rect.x) && rect.x >= 0 &&
@@ -82,7 +94,8 @@ export function createReviewSession({ model, requests, dispatch }) {
       rect.x + rect.width <= CANVAS_WIDTH && rect.y + rect.height <= CANVAS_HEIGHT;
     if (!valid) throw validation('Review region must be a bounded area inside the 1000x700 canvas');
     internal.rect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-    patchReview({ phase: 'composing', rect: internal.rect });
+    internal.scope = 'region';
+    patchReview({ phase: 'composing', scope: 'region', rect: internal.rect });
   };
 
   const setText = (intent) => {
@@ -120,8 +133,10 @@ export function createReviewSession({ model, requests, dispatch }) {
 
   const submit = async () => {
     requirePhase('composing', 'Review composition is not active');
-    const text = typeof review().text === 'string' ? review().text.trim() : '';
-    if (!text || text.length > TEXT_MAX) {
+    let text;
+    try {
+      text = validateReviewText(review().text);
+    } catch {
       throw validation('Review text must be 1-2000 characters');
     }
     if (!internal.captured || internal.artRevision === null) {
@@ -136,6 +151,7 @@ export function createReviewSession({ model, requests, dispatch }) {
       continuePlayback: review().keepPaused !== true,
       expectedDocGeneration: internal.captured.generation,
       expectedArtRevision: internal.artRevision,
+      expectedControlEpoch: internal.captured.controlEpoch,
     };
     internal.payload = payload;
     patchReview({ phase: 'submitting', requestId: payload.requestId });
@@ -176,7 +192,7 @@ export function createReviewSession({ model, requests, dispatch }) {
     return requests.mutate({
       expectedDocGeneration: generation,
       run: (api) => api.resolveComment({
-        id: item.id, reopen, expectedDocGeneration: generation, expectedSeq: item.seq,
+        id: item.id, reopen, expectedDocGeneration: generation, expectedSeq: item.seq, source: 'human',
       }),
     });
   };
@@ -216,7 +232,11 @@ export function createReviewSession({ model, requests, dispatch }) {
           goStale();
           return;
         }
-        if (internal.artRevision !== null && snap.artRevision !== internal.artRevision) goStale();
+        if (internal.artRevision !== null && snap.artRevision !== internal.artRevision) {
+          goStale();
+          return;
+        }
+        if (snap.controlEpoch !== internal.captured.controlEpoch) goStale();
       }
     },
     destroy() {

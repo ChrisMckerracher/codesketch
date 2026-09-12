@@ -22,7 +22,7 @@ The package may import `capture`, `input`, `parse`, and `transport`, plus the st
 
 ## Invariants
 
-Parsing and required guard validation happen before network I/O. Mutations carry current generation and epoch; guarded execution may require a grant. Staging preserves a human pause.
+Parsing and required guard validation happen before network I/O. Mutations carry current generation and epoch; guarded execution may require a grant. Staging preserves a human pause. Comment replies via `paint comments reply <id> <text> --generation <generation> --seq <seq> --request-id <id>` validate sequence and generation before transmission. The studio `ACK` badge indicates authentic autonomous agent acknowledgement (`source: "agent"`), distinct from human notes; human resolution transitions status to `resolved` and removes the item from the `ACTIVE` filter (`status !== 'resolved'`). Studio review `SEND` captures current epoch guards and authorizes continuation directly without requiring a separate Resume step.
 
 ## Relevant root commands
 

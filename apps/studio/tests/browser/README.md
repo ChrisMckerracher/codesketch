@@ -1,29 +1,14 @@
 # Browser scenarios
 
-These scenarios exercise the current Codesketch studio shell and its observable
-painting workflows. They run against an isolated ephemeral loopback server
-with temporary persistence; port 4317 and production artwork remain out of
-scope.
+These scenarios exercise the current Codesketch Studio vector reconstruction and its observable painting workflows. They run against an isolated ephemeral loopback server with temporary persistence; port 4317 and production artwork remain out of scope.
 
-- [`studio.mjs`](studio.mjs) covers the canvas, tools, history, documents,
-  playback, viewport, and shell actions.
-- [`layers-keyboard.mjs`](layers-keyboard.mjs) covers native keyboard layer
-  selection and editing.
-- [`layers-opacity.mjs`](layers-opacity.mjs) covers layer opacity and
-  compositing.
-- [`comments.mjs`](comments.mjs) covers paused region and whole-canvas review.
-- [`comments-races.mjs`](comments-races.mjs) covers pause, generation, stale,
-  and uncertain review races.
-- [`finish.mjs`](finish.mjs) covers progressive playback, step, finish, and
-  clear-pending behavior.
-- [`connection.mjs`](connection.mjs) covers offline, uncertainty, and delayed
-  response handling.
-- [`appearance.mjs`](appearance.mjs) covers light/dark appearance, compact
-  widths, focus, and reduced-motion presentation.
+- [`studio.mjs`](studio.mjs) covers core painting workflows: drawing tools (`INK`, `PENCIL`, `ERASE`), stroke sliders (Size, Opacity, Smoothing), 8 preset pigment chips, 2D Saturation/Value matrix with 1D Hue slider, offscreen canonical canvas pixel sampling, bounded erasing uncovering lower layers, and authentic v2 project `SAVE` JSON download.
+- [`layers-keyboard.mjs`](layers-keyboard.mjs) covers native keyboard interaction and layer hierarchy: semantic button and slider controls in `#control-host`, keyboard tool selection (`Enter`, `Space`), slider navigation (`Home`, `End`, arrow keys), layer stack creation with unique IDs, active card expansion (50px height), active layer opacity slider mounting, keyboard visibility toggle (`Space`), and clipped layer viewport wheel scrolling.
+- [`layers-opacity.mjs`](layers-opacity.mjs) covers layer compositing and opacity controls: layer opacity slider adjustments, real-time compositing pixel updates, rapid keyboard opacity changes, pointer capture drag clamping to 100%, and visibility toggling with canvas pixel clearing and repainting.
+- [`comments.mjs`](comments.mjs) covers spatial feedback lifecycle and review: canvas spatial selection marquee drag, anchored composer card critique input, fenced feedback dispatch, direct continuation grant on `SEND` without a separate Resume button, visible-layer capture, bounded human replies, real agent `ACK`/`addressed` status lifecycle, and human comment resolution.
+- [`comments-races.mjs`](comments-races.mjs) covers feedback concurrency and race conditions: concurrent pause gating, generation advances during critique drafting, stale feedback rejection, retry handling, and control epoch synchronization.
+- [`finish.mjs`](finish.mjs) covers playback command execution and completion: feedback continuation grant authorization, queued agent stroke commands, `/api/control` `finish` action execution, flushing pending commands to document marks, and session reset.
+- [`connection.mjs`](connection.mjs) covers transport and connection resilience: HTTP polling recovery, interrupted `/api/state` polling disabling the `SAVE` action, automatic recovery on subsequent successful poll, and document generation reset handling.
+- [`appearance.mjs`](appearance.mjs) covers visual geometry, vector chrome, and layout stability: zero visible HTML DOM text nodes (all visible UI chrome rendered strictly as custom vector paths from the `GLYPHS` engine), uniform 1000×700 viewport scaling with `devicePixelRatio` allocation, invisible semantic DOM overlays (`<button>`, `<input type="range">`, `<textarea>`), sidebar collapse (`>|`) expanding canvas workspace to 1000 design units and `EXPAND` restoration, dark color scheme, reduced motion emulation, and zero Cumulative Layout Shift (`CLS = 0.0000`).
 
-The runner must inspect browser console and network errors, actual canvas
-pixels, light/dark appearance, compact drawers, keyboard focus, and pointer
-holds. Generated browser artifacts stay outside commits. Current release
-evidence is recorded in [`docs/verification.md`](../../../../docs/verification.md).
-The browser runner is linked from
-[`tools/browser-check.mjs`](../../../../tools/browser-check.mjs).
+The runner inspects browser console and network errors, actual canvas pixels, vector typography, sidebar collapse/expansion, keyboard focus, and pointer gestures. Generated browser artifacts stay outside commits. Current release evidence is recorded in [`docs/verification.md`](../../../../docs/verification.md). The browser runner is linked from [`tools/browser-check.mjs`](../../../../tools/browser-check.mjs).

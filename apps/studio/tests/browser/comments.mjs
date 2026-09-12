@@ -1,12 +1,4 @@
-// V2a browser scenario: the human comment flow over the current review UI.
-// Core: native region pause/drag/compose/Send with visible-layer capture and
-// the default pause, then a whole canvas submission with an explicit
-// unchecked continuation grant on a still-paused session. Extended: composer
-// typing stays stable across state polls with the caret at the end, cancel
-// and reselect preserve the draft, stored pins and list focus highlight the
-// exact stored region, and the ack/address/resolve/reopen lifecycle runs
-// through the real UI with the current seq. Fixtures use the exact current
-// HTTP contracts via page.request; every step throws immediately on failure.
+// Browser coverage for the current vector feedback controls.
 async (page) => {
   const checks = [];
   const done = (name) => checks.push(name);
@@ -17,7 +9,7 @@ async (page) => {
   const state = async () => {
     const response = await page.request.get(`${origin}/api/state`);
     assert(response.ok(), `GET /api/state failed with ${response.status()}`);
-    return await response.json();
+    return response.json();
   };
   const human = async (path, body) => {
     const snapshot = await state();
@@ -37,240 +29,184 @@ async (page) => {
       await page.waitForTimeout(100);
     }
   };
-  const composerLine = (text, timeoutMs = 8000) => page.waitForFunction((expected) =>
-    document.querySelector('#feedback-composer .review-status-line')?.textContent === expected,
-  text, { timeout: timeoutMs });
-  const composerClosed = () =>
-    page.locator('#feedback-composer .review-composer[hidden]').waitFor({ state: 'attached', timeout: 8000 });
-  const press = (selector) => page.locator(selector).click({ timeout: 8000 });
+  const control = (label) => page.locator(`#control-host [aria-label="${label}"]`);
+  const click = (label) => control(label).click({ timeout: 8000 });
+  const canvas = page.locator('#painting-canvas');
+  const consoleMessages = [];
+  page.on('console', (message) => consoleMessages.push(`${message.type()}: ${message.text()}`));
+  const observePauseCompletion = () => page.evaluate(() => {
+    window.__toggleOriginalFetch = window.fetch.bind(window);
+    window.__togglePauseDone = 0;
+    window.fetch = async (input, init) => {
+      const body = typeof init?.body === 'string' ? JSON.parse(init.body) : null;
+      const response = await window.__toggleOriginalFetch(input, init);
+      if (init?.method === 'POST' && String(input).endsWith('/api/control') && body?.action === 'pause') {
+        window.__togglePauseDone += 1;
+      }
+      return response;
+    };
+  });
+  const removePauseObserver = () => page.evaluate(() => {
+    if (window.__toggleOriginalFetch) window.fetch = window.__toggleOriginalFetch;
+    window.__toggleOriginalFetch = null;
+    window.__togglePauseDone = null;
+  });
   const dragRegion = async (from, to) => {
-    const box = await page.locator('#painting-canvas').boundingBox();
+    const box = await canvas.boundingBox();
+    assert(box, 'painting canvas must be mounted');
     await page.mouse.move(box.x + box.width * from[0], box.y + box.height * from[1]);
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * to[0], box.y + box.height * to[1], { steps: 6 });
     await page.mouse.up();
-    await page.locator('#feedback-composer .review-textarea:not([hidden])').waitFor({ timeout: 8000 });
-    return await page.locator('#feedback-composer .review-card-title').textContent();
+    try {
+      await control('Feedback draft').waitFor({ timeout: 8000 });
+    } catch (error) {
+      const labels = await page.locator('#control-host [aria-label]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('aria-label')));
+      await page.screenshot({ path: 'artifacts/browser-check/comments-draft-timeout.png' });
+      const diagnostics = await page.evaluate(() => ({
+        active: document.activeElement?.getAttribute?.('aria-label') ?? document.activeElement?.tagName,
+        focused: document.activeElement === document.querySelector('#control-host textarea'),
+      }));
+      const snapshot = await state();
+      throw new Error(`${error.message}; drag ${JSON.stringify({ from, to })}; controls: ${JSON.stringify(labels)}; `
+        + `focus: ${JSON.stringify(diagnostics)}; server: ${JSON.stringify({
+          playback: snapshot.playback?.status, generation: snapshot.docGeneration, comments: snapshot.comments?.length,
+        })}; console: ${JSON.stringify(consoleMessages)}`);
+    }
   };
-  const typeDraft = async (text) => {
-    const area = page.locator('#feedback-composer .review-textarea');
-    await area.click({ timeout: 8000 });
-    await page.keyboard.type(text);
-  };
-  const send = () => press('#feedback-composer .review-actions button:has-text("Send feedback")');
-  const hold = page.locator('#feedback-composer .review-hold-box');
-  const area = page.locator('#feedback-composer .review-textarea');
-  const commentButton = '.cs-dock-btn[aria-label="Comment (C)"]';
-  const selectingLine = 'Drag a region on the canvas, or switch to the whole canvas.';
 
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.waitForSelector('.cs-dock');
-  await page.waitForFunction(() =>
-    document.querySelector('#global-header .cs-status-text')?.textContent !== 'Connecting',
-  null, { timeout: 15000 });
+  await page.waitForSelector('#control-host [aria-label="Feedback"]');
+  {
+    const seeded = await human('/api/commands', { commands: [
+      { type: 'stroke', layer: 'paint', color: '#253d38', size: 10, points: [[80, 80], [220, 160]] },
+      { type: 'layer.add', id: 'notes', name: 'Notes' },
+      { type: 'layer.add', id: 'hidden', name: 'Hidden' },
+      { type: 'layer.update', id: 'notes', opacity: 0.5 },
+      { type: 'layer.update', id: 'hidden', visible: false },
+    ], immediate: true, play: false });
+    assert(seeded.document.layers.some((layer) => layer.id === 'hidden' && layer.visible === false), 'fixture layer missing');
+    done('current-generation feedback fixture seeded');
 
-  // Seed the real session on the current generation: visible paint and notes
-  // layers plus one hidden layer and one zero-opacity layer.
-  const seeded = await human('/api/commands', { commands: [
-    { type: 'stroke', layer: 'paint', color: '#253d38', size: 10, points: [[80, 80], [220, 160]] },
-    { type: 'layer.add', id: 'notes', name: 'Notes' },
-    { type: 'layer.add', id: 'hidden', name: 'Hidden' },
-    { type: 'layer.add', id: 'ghost', name: 'Ghost' },
-    { type: 'layer.update', id: 'notes', opacity: 0.5 },
-    { type: 'layer.update', id: 'hidden', visible: false },
-    { type: 'layer.update', id: 'ghost', opacity: 0 },
-  ], immediate: true, play: false });
-  const layerOf = (id) => seeded.document.layers.find((layer) => layer.id === id);
-  assert(layerOf('hidden')?.visible === false, 'hidden layer fixture missing');
-  assert(layerOf('ghost')?.opacity === 0, 'zero-opacity layer fixture missing');
-  assert(layerOf('notes')?.opacity === 0.5, 'notes layer fixture missing');
-  done('fixtures seeded on the current generation');
+    await human('/api/commands', { commands: [
+      { type: 'stroke', layer: 'paint', color: '#1c2f6b', size: 8, points: [[40, 620], [940, 640]] },
+    ], play: true, immediate: false });
+    await human('/api/control', { action: 'resume' });
+    await waitState((snapshot) => snapshot.playback.status === 'playing', 'playback to start');
+    await click('Feedback');
+    await waitState((snapshot) => snapshot.playback.status === 'paused', 'feedback to pause playback');
+    await page.waitForTimeout(300);
+    await dragRegion([0.15, 0.2], [0.45, 0.45]);
+    await control('Feedback draft').fill('Soften the hill edge');
+    await click('Send feedback');
+    const stored = await waitState((snapshot) => snapshot.comments.length === 1, 'stored region comment');
+    const region = stored.comments[0];
+    assert(region.number === 1 && region.seq === 1 && region.status === 'open', 'stored region metadata is wrong');
+    assert(region.text === 'Soften the hill edge' && region.rect?.width > 0 && region.rect?.height > 0, 'region feedback was not stored');
+    assert(JSON.stringify(region.visibleLayers) === JSON.stringify([
+      { id: 'paint', opacity: 1 }, { id: 'notes', opacity: 0.5 },
+    ]), `visible-layer capture is wrong: ${JSON.stringify(region.visibleLayers)}`);
+    assert(stored.requiresGrant === true && stored.activeGrant !== null && stored.playback.status === 'paused',
+      'default continuation must grant without resuming playback');
+    done('region drag, text, Send, and visible-layer capture use mounted controls');
 
-  // Make the hidden layer the selected painting target: visible-layer capture
-  // must not depend on the selected target.
-  await press('.sidebar-tab[data-tab="layers"]');
-  await press('#layer-panel .cs-layer-row[data-layer-id="hidden"] .cs-layer-name');
-  await page.waitForFunction(() =>
-    document.querySelector('#layer-panel .cs-layer-row[data-layer-id="hidden"]')
-      ?.getAttribute('aria-current') === 'true', null, { timeout: 8000 });
-  done('hidden layer selected as the painting target');
+    await control('Reply to comment 1').fill('Please keep the edge soft.');
+    await click('Send reply');
+    const replied = await waitState((snapshot) => snapshot.comments[0]?.replies?.length === 1, 'stored human reply');
+    assert(replied.comments[0].replies[0].text === 'Please keep the edge soft.', 'reply text was not stored');
+    done('reply textarea and Send reply persist a human reply');
 
-  // Start real playback so the comment tool has work to stop.
-  await human('/api/commands', { commands: [
-    { type: 'stroke', layer: 'paint', color: '#1c2f6b', size: 8, points: [[40, 620], [940, 640]] },
-    { type: 'stroke', layer: 'notes', color: '#7c3f2a', size: 8, points: [[40, 600], [940, 600]] },
-  ], play: true, immediate: false });
-  await human('/api/control', { action: 'resume' });
-  await waitState((snap) => snap.playback.status === 'playing', 'playback to start');
-  await press(commentButton);
-  await composerLine(selectingLine);
-  await waitState((snap) => snap.playback.status === 'paused', 'the comment tool to pause playback');
-  done('comment tool pauses active playback');
+    const move = async (action, id, expectedSeq) => {
+      const generation = (await state()).docGeneration;
+      const response = await page.request.post(`${origin}/api/comments/${action}`, {
+        data: { id, expectedSeq, source: 'agent', expectedDocGeneration: generation },
+      });
+      const result = await response.json();
+      assert(response.ok(), `${action} failed with ${response.status()}: ${JSON.stringify(result.error ?? result)}`);
+      return result.comments.find((item) => item.id === id);
+    };
+    const latestRegion = (await state()).comments.find((item) => item.id === region.id);
+    const ack = await move('ack', latestRegion.id, latestRegion.seq);
+    const addressed = await move('address', latestRegion.id, ack.seq);
+    assert(ack.status === 'acknowledged' && addressed.status === 'addressed', 'agent lifecycle failed');
+    await waitState((snapshot) => snapshot.comments[0]?.status === 'addressed', 'addressed comment');
+    await click('Resolve comment');
+    const resolved = await waitState((snapshot) => snapshot.comments[0]?.status === 'resolved', 'UI resolve');
+    assert(resolved.comments[0].seq > addressed.seq, 'resolve must advance the sequence');
+    done('agent ack/address and mounted Resolve control follow the current sequence');
 
-  // Drag a region and send the feedback with the default keep-paused hold.
-  const title = await dragRegion([0.15, 0.2], [0.45, 0.45]);
-  assert(title.startsWith('Region'), `region scope title missing: ${title}`);
-  assert(await hold.isChecked() === true, 'keep-paused hold must default to checked');
-  await typeDraft('Soften the hill edge');
-  await send();
-  await composerClosed();
-  await waitState((snap) => snap.comments.length === 1, 'the stored region comment');
-  done('region drag composes and Send stores the feedback');
+    // Close comment exits feedback mode; one Feedback activation starts the
+    // next review after the stored control has detached.
+    await click('Close comment');
+    await page.waitForFunction(() => !document.querySelector('#control-host [aria-label="Close comment"]'), null, { timeout: 8000 });
+    await observePauseCompletion();
+    await click('Feedback');
+    await page.waitForFunction(() => window.__togglePauseDone === 1, null, { timeout: 8000 });
+    await page.waitForSelector('#control-host [aria-label="Feedback draft"]', { timeout: 8000 });
+    await removePauseObserver();
+    await waitState((snapshot) => snapshot.playback.status === 'paused', 'second feedback pause');
+    await dragRegion([0.55, 0.6], [0.8, 0.78]);
+    await control('Feedback draft').fill('second region');
+    await click('Send feedback');
+    const second = await waitState((snapshot) => snapshot.comments.length === 2, 'second stored region');
+    assert(second.comments[1].text === 'second region' && second.comments[1].rect?.width > 0,
+      'second region feedback was not stored');
 
-  // The stored comment must match the current contract: number, seq, status,
-  // timestamp, bounded rect, and only visible layers regardless of target.
-  const snap = await state();
-  const region = snap.comments[0];
-  assert(region.number === 1 && region.seq === 1, `region number/seq wrong: ${region.number}/${region.seq}`);
-  assert(region.status === 'open' && region.text === 'Soften the hill edge',
-    `stored region text/status wrong: ${region.status}`);
-  assert(region.rect && region.rect.width >= 1 && region.rect.height >= 1 &&
-    region.rect.x >= 0 && region.rect.y >= 0 &&
-    region.rect.x + region.rect.width <= 1000 && region.rect.y + region.rect.height <= 700,
-  `region rect invalid: ${JSON.stringify(region.rect)}`);
-  assert(typeof region.at === 'string' && Number.isFinite(Date.parse(region.at)), 'region timestamp missing');
-  assert(JSON.stringify(region.visibleLayers) === JSON.stringify([
-    { id: 'paint', opacity: 1 }, { id: 'notes', opacity: 0.5 },
-  ]), `visible layers must exclude hidden and zero-opacity layers: ${JSON.stringify(region.visibleLayers)}`);
-  assert(snap.requiresGrant === true && snap.activeGrant === null && snap.playback.status === 'paused',
-    'default keepPaused must keep the session paused without an agent grant');
-  await page.locator('.review-item .review-status-open').first().waitFor({ timeout: 8000 });
-  done('stored region comment matches the contract and visible-layer capture');
+    await click('Active comments');
+    await page.waitForFunction(() => document.querySelectorAll('#control-host [aria-label="Select comment 1"]').length === 1
+      && document.querySelectorAll('#control-host [aria-label="Select comment 2"]').length === 2, null, { timeout: 8000 });
+    await click('All comments');
+    await page.waitForFunction(() => document.querySelectorAll('#control-host [aria-label="Select comment 1"]').length > 0
+      && document.querySelectorAll('#control-host [aria-label="Select comment 2"]').length > 0, null, { timeout: 8000 });
+    done('ALL and ACTIVE filters expose the correct comment membership');
 
-  // Whole canvas feedback with an explicit unchecked hold authorizes the
-  // agent while the server stays paused.
-  await press('.review-start button:has-text("Whole canvas feedback")');
-  await page.locator('#feedback-composer .review-composer:not([hidden])').waitFor({ timeout: 8000 });
-  assert(await page.locator('#feedback-composer .review-card-title').textContent() === 'Whole canvas',
-    'whole canvas title missing');
-  assert(await hold.isChecked() === true, 'keep-paused hold must default to checked again');
-  await hold.click({ timeout: 8000 });
-  assert(await hold.isChecked() === false, 'keep-paused hold must be uncheckable');
-  await typeDraft('Whole canvas note');
-  await send();
-  await composerClosed();
-  const granted = await waitState((current) => current.comments.length === 2, 'the stored whole canvas comment');
-  const whole = granted.comments[1];
-  assert(whole.number === 2 && whole.rect === null, 'whole canvas comment must store a null rect');
-  assert(granted.requiresGrant === true && granted.activeGrant !== null &&
-    granted.activeGrant.docGeneration === granted.docGeneration &&
-    Number.isInteger(granted.activeGrant.controlEpoch) &&
-    typeof granted.activeGrant.grantToken === 'string' && granted.activeGrant.grantToken.length > 0,
-  `unchecked continuation must authorize the agent: ${JSON.stringify(granted.activeGrant)}`);
-  assert(granted.playback.status === 'paused', 'the server must remain paused after the grant');
-  done('unchecked continuation grants permission while the server stays paused');
+    const firstSelectors = page.locator('#control-host [aria-label="Select comment 1"]');
+    assert(await firstSelectors.count() >= 2, 'comment 1 must expose both card and pin controls');
+    await firstSelectors.nth(0).click();
+    await control('Reply to comment 1').waitFor({ timeout: 8000 });
+    await firstSelectors.nth(1).click();
+    await control('Reply to comment 1').waitFor({ timeout: 8000 });
+    await click('Next comment');
+    await control('Reply to comment 2').waitFor({ timeout: 8000 });
+    await click('Previous comment');
+    await control('Reply to comment 1').waitFor({ timeout: 8000 });
+    done('comment card, pin, and previous/next frame navigation reach the selected thread');
 
-  // The stored region comment renders a pin; selecting it from the overlay or
-  // the list must highlight the exact stored region.
-  const pins = page.locator('#stage-overlay .review-pin');
-  const pinCount = await pins.count();
-  assert(pinCount === 1, `exactly one region pin expected: ${pinCount}`);
-  assert(await pins.first().textContent() === '#1', 'pin must show the comment number');
-  await pins.first().click({ timeout: 8000 });
-  const highlight = page.locator('#stage-overlay .review-highlight');
-  await highlight.waitFor({ timeout: 8000 });
-  const stored = (await state()).comments.find((item) => item.text === 'Soften the hill edge');
-  const drawn = {
-    x: Number(await highlight.getAttribute('x')),
-    y: Number(await highlight.getAttribute('y')),
-    width: Number(await highlight.getAttribute('width')),
-    height: Number(await highlight.getAttribute('height')),
-  };
-  assert(drawn.x === stored.rect.x && drawn.y === stored.rect.y &&
-    drawn.width === stored.rect.width && drawn.height === stored.rect.height,
-  `pin highlight must match the stored region: ${JSON.stringify(drawn)}`);
-  assert((await pins.first().getAttribute('class'))?.includes('is-selected') === true,
-    'clicked pin must take the selection');
-  await press(`.review-item[data-comment-id="${stored.id}"] .review-action:has-text("Highlight")`);
-  await page.waitForFunction((id) =>
-    document.querySelector(`.review-item[data-comment-id="${id}"]`)?.classList.contains('is-selected') === true,
-  stored.id, { timeout: 8000 });
-  done('stored pin and list focus highlight the stored region');
+    let threadSnapshot = await state();
+    for (let index = 0; index < 8; index += 1) {
+      const text = `Thread detail ${index}`;
+      const comment = threadSnapshot.comments.find((item) => item.id === region.id);
+      const response = await page.request.post(`${origin}/api/comments/reply`, {
+        data: {
+          id: region.id, requestId: `qa-thread-${index}-${Date.now()}`, text, source: 'human',
+          expectedDocGeneration: threadSnapshot.docGeneration, expectedSeq: comment.seq,
+        },
+      });
+      assert(response.ok(), `thread fixture reply failed with ${response.status()}`);
+      threadSnapshot = await response.json();
+    }
+    assert(threadSnapshot.comments.find((item) => item.id === region.id)?.replies?.length === 9,
+      'thread fixture replies were not stored');
+    await page.waitForFunction(() => Number(document.querySelector('#control-host [aria-label="Scroll comment 1"]')?.max) > 0,
+      null, { timeout: 8000 });
+    const replyArea = control('Reply to comment 1');
+    const scroll = control('Scroll comment 1');
+    const beforeScroll = Number(await scroll.inputValue());
+    const replyBox = await replyArea.boundingBox();
+    assert(replyBox, 'reply control must remain mounted beside the thread');
+    await page.mouse.move(replyBox.x + 10, replyBox.y - 24);
+    await page.mouse.wheel(0, 160);
+    await page.waitForFunction((before) => Number(document.querySelector('#control-host [aria-label="Scroll comment 1"]')?.value) > before,
+      beforeScroll, { timeout: 8000 });
+    await replyArea.fill('Final reply remains reachable after thread scroll.');
+    await click('Send reply');
+    const finalState = await waitState((snapshot) => snapshot.comments[0]?.replies?.some((reply) => reply.text === 'Final reply remains reachable after thread scroll.'), 'final scrolled reply');
+    assert(finalState.comments[0].replies.at(-1).text === 'Final reply remains reachable after thread scroll.', 'final reply was not persisted');
+    done('wheel-scrolled thread keeps the final reply reachable and writable');
 
-  // Cancel keeps the draft; typing must be stable across state polls with the
-  // caret resting at the end of the focused textarea.
-  await press(commentButton);
-  await composerLine(selectingLine);
-  await dragRegion([0.55, 0.6], [0.8, 0.78]);
-  await area.click({ timeout: 8000 });
-  await page.keyboard.type('draft ', { delay: 20 });
-  await page.waitForTimeout(350);
-  const midTyping = await page.evaluate(() => {
-    const node = document.querySelector('#feedback-composer .review-textarea');
-    return { focused: document.activeElement === node, value: node.value, caret: node.selectionStart };
-  });
-  assert(midTyping.focused === true, 'textarea must keep focus across state polls');
-  assert(midTyping.value === 'draft ', `state polls clobbered the draft: ${JSON.stringify(midTyping.value)}`);
-  assert(midTyping.caret === midTyping.value.length, `caret must rest at the end: ${midTyping.caret}`);
-  await page.keyboard.type('note', { delay: 20 });
-  assert(await area.inputValue() === 'draft note', 'typing must accumulate without loss');
-  await press('#feedback-composer .review-actions button:has-text("Cancel")');
-  await composerClosed();
-  await press(commentButton);
-  await composerLine(selectingLine);
-  await dragRegion([0.55, 0.6], [0.8, 0.78]);
-  assert(await area.inputValue() === 'draft note',
-    `cancel must preserve the draft text: ${await area.inputValue()}`);
-  done('cancel preserves the draft text for the next review');
+  }
 
-  // Artwork changes during review go stale; Reselect keeps the draft.
-  await human('/api/commands', { commands: [
-    { type: 'stroke', layer: 'paint', color: '#112233', size: 6, points: [[500, 500], [520, 520]] },
-  ], immediate: true, play: false });
-  await composerLine('The artwork changed. Reselect the region to continue.');
-  assert(await area.inputValue() === 'draft note', 'stale review must keep the draft');
-  await press('#feedback-composer .review-actions button:has-text("Reselect region")');
-  await composerLine(selectingLine);
-  await dragRegion([0.55, 0.6], [0.8, 0.78]);
-  assert(await area.inputValue() === 'draft note',
-    `reselect must preserve the draft text: ${await area.inputValue()}`);
-  await press('#feedback-composer .review-actions button:has-text("Cancel")');
-  await composerClosed();
-  done('stale artwork review survives reselect with the draft intact');
-
-  // Drive the real lifecycle: ack and address through the exact HTTP
-  // contract, then Resolve and Reopen through the actual UI, always with the
-  // current seq.
-  const move = async (action, id, expectedSeq) => {
-    const generation = (await state()).docGeneration;
-    const response = await page.request.post(`${origin}/api/comments/${action}`, {
-      data: { id, expectedSeq, expectedDocGeneration: generation },
-    });
-    const result = await response.json();
-    assert(response.ok(), `${action} failed with ${response.status()}: ${JSON.stringify(result.error ?? result)}`);
-    const item = (result.comments ?? []).find((candidate) => candidate.id === id);
-    assert(item, `${action} response lost the comment`);
-    return item;
-  };
-  const track = (await state()).comments.find((item) => item.text === 'Soften the hill edge');
-  const row = page.locator(`.review-item[data-comment-id="${track.id}"]`);
-  const afterAck = await move('ack', track.id, track.seq);
-  assert(afterAck.status === 'acknowledged' && afterAck.seq > track.seq,
-    `ack must move open feedback: ${afterAck.status}/${afterAck.seq}`);
-  const afterAddress = await move('address', track.id, afterAck.seq);
-  assert(afterAddress.status === 'addressed' && afterAddress.seq > afterAck.seq,
-    `address must follow ack: ${afterAddress.status}/${afterAddress.seq}`);
-  await row.locator('.review-status-addressed').waitFor({ timeout: 8000 });
-  await row.locator('.review-action:has-text("Resolve")').click({ timeout: 8000 });
-  let latest = await waitState((current) =>
-    (current.comments.find((item) => item.id === track.id) ?? {}).status === 'resolved', 'UI resolve');
-  let current = latest.comments.find((item) => item.id === track.id);
-  assert(current.seq > afterAddress.seq, `resolve must bump the seq: ${current.seq}`);
-  await row.locator('.review-status-resolved').waitFor({ timeout: 8000 });
-  await row.locator('.review-action:has-text("Reopen")').click({ timeout: 8000 });
-  latest = await waitState((current) =>
-    (current.comments.find((item) => item.id === track.id) ?? {}).status === 'open', 'UI reopen');
-  current = latest.comments.find((item) => item.id === track.id);
-  assert(current.seq > afterAddress.seq + 1, `reopen must bump the seq again: ${current.seq}`);
-  assert(latest.requiresGrant === true && latest.activeGrant === null,
-    'reopen must return the session to a paused, unauthorized state');
-  done('resolve and reopen follow the current seq contract through the real UI');
-
-  return {
-    success: true,
-    checks,
-    comments: latest.comments.map((item) => ({
-      number: item.number, status: item.status, scope: item.rect ? 'region' : 'whole',
-    })),
-  };
+  return { success: true, checks, comments: (await state()).comments.map((item) => ({
+    number: item.number, status: item.status, scope: item.rect ? 'region' : 'whole',
+  })) };
 }

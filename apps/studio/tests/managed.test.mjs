@@ -63,8 +63,20 @@ describe('managed bootstrap', () => {
       await wait(50);
     }
     assert.ok(record, 'the ownership record is published despite EPIPE');
-    const status = await request(Number(new URL(record.url).port), 'GET', '/api/lifecycle/status',
-      { host: `127.0.0.1:${Number(new URL(record.url).port)}`, 'x-codesketch-capability': capability });
+    const port = Number(new URL(record.url).port);
+    const headers = { host: `127.0.0.1:${port}`, 'x-codesketch-capability': capability };
+    let status;
+    while (Date.now() - started < 12000 && child.exitCode === null) {
+      try {
+        status = await request(port, 'GET', '/api/lifecycle/status', headers);
+        if (status.status === 200) break;
+        assert.equal(status.status, 503, 'only startup may return temporary not-ready status');
+      } catch (error) {
+        if (child.exitCode !== null) throw error;
+      }
+      await wait(25);
+    }
+    assert.ok(status, 'the service responded before the readiness deadline');
     assert.equal(status.status, 200, 'the service stays healthy after the pipe broke');
     child.kill('SIGTERM');
     assert.equal((await exited).code, 0);

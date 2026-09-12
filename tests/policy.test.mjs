@@ -50,6 +50,23 @@ test('rejects CSS @import with quoted remote URL', () => {
   });
 });
 
+test('only archival reference HTML skips the asset line ceiling', () => {
+  const archival = `<!doctype html>\n${'<!-- archival reference -->\n'.repeat(301)}`;
+  const allowed = runVerifier({ 'docs/reference-mockup/index_old_minimal.html': archival });
+  assert.equal(allowed.status, 0, allowed.stderr);
+
+  rejects(/docs\/other\.html: Exceeds 300 line limit/, { 'docs/other.html': archival });
+  rejects(/apps\/studio\/public\/index\.html: Exceeds 300 line limit/, {
+    'apps/studio/public/index.html': archival,
+  });
+});
+
+test('archival reference HTML keeps remote asset checks', () => {
+  rejects(/Remote external asset reference forbidden/, {
+    'docs/reference-mockup/overflow_demo.html': `${'<!-- archival -->\n'.repeat(301)}<img src="https://evil.example/pixel.png">\n`,
+  });
+});
+
 test('rejects the bundleDependencies alias in package.json', () => {
   const run = runVerifier({
     'package.json': '{"bundleDependencies": {"left-pad": "1.0.0"}}\n',

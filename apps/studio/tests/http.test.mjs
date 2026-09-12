@@ -45,6 +45,17 @@ const currentContext = async () => {
     grantToken: state.activeGrant?.grantToken };
 };
 
+test('project GET accepts paired context, rejects mismatches before reading, and keeps CLI reads unconditional', async () => {
+  const state = (await json({ path: '/api/state' })).data;
+  const query = `?expectedInstanceId=${encodeURIComponent(state.instanceId)}&expectedDocGeneration=${encodeURIComponent(state.docGeneration)}`;
+  assert.equal((await json({ path: `/api/project${query}` })).status, 200);
+  assert.equal((await json({ path: '/api/project' })).status, 200);
+  assert.equal((await json({ path: `/api/project?expectedInstanceId=${state.instanceId}` })).status, 400);
+  assert.equal((await json({ path: `/api/project${query}&expectedInstanceId=duplicate` })).status, 400);
+  assert.equal((await json({ path: `/api/project?expectedInstanceId=wrong&expectedDocGeneration=${state.docGeneration}` })).status, 409);
+  assert.equal((await json({ path: `/api/project?expectedInstanceId=${state.instanceId}&expectedDocGeneration=wrong` })).status, 409);
+});
+
 test('root serves the rebuilt shell and static policy holds', async () => {
   const rootResponse = await request({ path: '/' });
   assert.equal(rootResponse.status, 200, 'the rebuilt UI serves from the root');
@@ -68,8 +79,7 @@ test('root serves the rebuilt shell and static policy holds', async () => {
     assert.equal(removed.headers['content-type'], 'application/json');
     assert.deepEqual(JSON.parse(removed.text), { error: 'Not found' });
   }
-  for (const path of ['/public/tokens.css', '/public/workspace.css', '/public/controls.css',
-    '/public/layers.css', '/public/inspector.css', '/public/stage.css', '/public/feedback.css']) {
+  for (const path of ['/public/workspace.css']) {
     const stylesheet = await request({ path });
     assert.equal(stylesheet.status, 200, `${path} is an allowed UI stylesheet`);
     assert.match(stylesheet.headers['content-type'], /^text\/css/);
@@ -143,7 +153,7 @@ test('valid commands commit immediately, comments pause, and projects roundtrip'
   assert.equal(submitted.data.playback.status, 'paused');
   const comment = await post('/api/comments', { requestId: 'req-http-1', text: 'thicken the trunk here',
     rect: null, expectedDocGeneration: submitted.data.docGeneration,
-    expectedArtRevision: submitted.data.artRevision });
+    expectedArtRevision: submitted.data.artRevision, expectedControlEpoch: submitted.data.controlEpoch });
   assert.equal(comment.status, 200);
   assert.equal(comment.data.playback.status, 'paused', 'a comment keeps the painter paused');
   assert.equal(comment.data.comments.length, 1);

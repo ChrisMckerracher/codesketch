@@ -5,7 +5,7 @@ import { ControlGrant } from './feedback/index.mjs';
 import { planControl } from './playback-control.mjs';
 import { playbackDuration } from './playback-duration.mjs';
 import { validateRecovery } from './recovery.mjs';
-import { addComment, updateComment, pollComments } from './session-comments.mjs';
+import { addComment, updateComment, pollComments, replyComment } from './session-comments.mjs';
 import { finishPending } from './finish.mjs';
 
 export class Session {
@@ -151,11 +151,13 @@ export class Session {
 
   updateComment(action, input) { return updateComment(this, action, input); }
 
+  replyComment(input) { return replyComment(this, input); }
+
   pollComments(since) { return pollComments(this, since); }
 
   project() {
-    return { format: 'codesketch', version: 2, commands: this.history.commands,
-      cursor: this.history.cursor, queue: this.pending(), comments: this.comments };
+    return structuredClone({ format: 'codesketch', version: 2, commands: this.history.commands,
+      cursor: this.history.cursor, queue: this.pending(), comments: this.comments });
   }
 
   load(value, options = {}) {
@@ -164,7 +166,7 @@ export class Session {
     const history = new History();
     history.restore(project.commands, project.cursor);
     this.history = history; this.queue = project.queue; this.active = null;
-    this.comments = project.comments.map(item => ({ ...item, request: null }));
+    this.comments = structuredClone(project.comments).map(item => ({ ...item, request: null }));
     this.status = 'paused';
     this.controlGrant.reset({ paused: true });
     this.changed(true);
@@ -186,7 +188,7 @@ export class Session {
       ? { command: head, progress: recovery.active.progress, duration: playbackDuration(head) }
       : null;
     const queue = head ? recovery.project.queue.slice(1) : recovery.project.queue;
-    const comments = recovery.project.comments.map(item => ({ ...item, request: null }));
+    const comments = structuredClone(recovery.project.comments).map(item => ({ ...item, request: null }));
     this.history = history;
     this.queue = queue;
     this.active = active;

@@ -19,7 +19,8 @@ const pausedWithLayers = () => {
 const commentInput = (session, overrides = {}) => ({
   text: 'fix this stroke', rect: null, requestId: 'req-1',
   expectedDocGeneration: session.controlGrant.docGeneration,
-  expectedArtRevision: session.artRevision, ...overrides,
+  expectedArtRevision: session.artRevision, expectedControlEpoch: session.controlGrant.controlEpoch,
+  ...overrides,
 });
 
 describe('session comments integration', () => {
@@ -51,12 +52,13 @@ describe('session comments integration', () => {
     let emissions = 0;
     session.onChange = () => emissions++;
     const before = session.controlGrant.snapshot();
-    const item = session.addComment(commentInput(session));
+    const input = commentInput(session);
+    const item = session.addComment(input);
     assert.equal(emissions, 1);
     assert.equal(session.controlGrant.requiresGrant, true);
     const revisions = session.revision;
     const epochs = session.controlGrant.controlEpoch;
-    const duplicate = session.addComment(commentInput(session));
+    const duplicate = session.addComment(input);
     assert.deepEqual(duplicate, item);
     assert.equal(session.comments.length, 1);
     assert.equal(session.revision, revisions, 'duplicate adds no revision');

@@ -1,6 +1,6 @@
 import { label, LIMITS } from '../../painting/index.mjs';
 import { normalizeComments, validateRect, integer, conflict, notFound,
-  TEXT_MAX, CURSOR_MAX } from './schema.mjs';
+  validateText, CURSOR_MAX } from './schema.mjs';
 
 const TRANSITIONS = {
   ack: { from: 'open', to: 'acknowledged', stamp: 'acknowledgedAt' },
@@ -10,7 +10,8 @@ const TRANSITIONS = {
 
 function fingerprint(payload) {
   return JSON.stringify({ text: payload.text, rect: payload.rect,
-    continuePlayback: payload.continuePlayback, expectedArtRevision: payload.expectedArtRevision });
+    continuePlayback: payload.continuePlayback, expectedArtRevision: payload.expectedArtRevision,
+    expectedControlEpoch: payload.expectedControlEpoch });
 }
 
 function visibleLayersFrom(document) {
@@ -31,9 +32,11 @@ export function prepareComment(comments, input, context) {
   const items = normalizeComments(comments);
   const docGeneration = label(context.docGeneration, 'context docGeneration', 80);
   const artRevision = integer(context.artRevision, 'context artRevision', 0);
+  const controlEpoch = integer(context.controlEpoch, 'context controlEpoch', 0);
   const cursor = integer(context.cursor, 'context cursor', 0, CURSOR_MAX);
-  const text = label(input.text, 'comment text', TEXT_MAX);
+  const text = validateText(input.text, 'comment text');
   const rect = validateRect(input.rect);
+  const expectedControlEpoch = integer(input.expectedControlEpoch, 'expectedControlEpoch', 0);
   if (input.continuePlayback !== undefined && typeof input.continuePlayback !== 'boolean') {
     throw new Error('continuePlayback must be boolean');
   }
@@ -41,7 +44,7 @@ export function prepareComment(comments, input, context) {
     throw conflict('Document generation moved on; refresh and resubmit');
   }
   const payload = { text, rect, continuePlayback: input.continuePlayback === true,
-    expectedArtRevision: input.expectedArtRevision ?? null };
+    expectedArtRevision: input.expectedArtRevision ?? null, expectedControlEpoch };
   const mark = input.requestId === undefined || input.requestId === null
     ? null
     : label(input.requestId, 'request id', 80);
@@ -56,6 +59,9 @@ export function prepareComment(comments, input, context) {
   }
   if (input.expectedArtRevision !== artRevision) {
     throw conflict('Artwork revision moved on; refresh and resubmit');
+  }
+  if (expectedControlEpoch !== controlEpoch) {
+    throw conflict('Control epoch moved on; refresh and resubmit');
   }
   const item = {
     id: globalThis.crypto.randomUUID(),

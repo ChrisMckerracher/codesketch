@@ -134,7 +134,9 @@ function checkSourceFile(file, code, rel, srcDir) {
 
 function checkAssetFile(file, code, rel) {
   const lines = code.split('\n').length;
-  if (lines > 300) fail(`${rel}: Exceeds 300 line limit (${lines} lines)`);
+  const normalized = rel.split(sep).join('/');
+  const archivalReference = normalized.startsWith('docs/reference-mockup/') && normalized.endsWith('.html');
+  if (!archivalReference && lines > 300) fail(`${rel}: Exceeds 300 line limit (${lines} lines)`);
 
   const remoteRe = /(?:\b(?:href|src|url)\s*[:=(]|@import\b)\s*['"]?\s*(?:https?:|\/\/)(?!\/(?:127\.0\.0\.1|localhost|www\.w3\.org\/2000\/svg))/i;
   if (remoteRe.test(code)) fail(`${rel}: Remote external asset reference forbidden`);

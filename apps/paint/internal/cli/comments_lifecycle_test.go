@@ -95,7 +95,8 @@ func TestCommentsAckAddressBodiesAndNoResume(t *testing.T) {
 	if code != 0 || stderr != "" || method != "POST" || path != "/api/comments/ack" {
 		t.Fatalf("ack: %d %s %s %s %s", code, out, stderr, method, path)
 	}
-	if body["id"] != "c-1" || body["expectedDocGeneration"] != "g1" || body["expectedSeq"] != 3.0 {
+	if len(body) != 4 || body["id"] != "c-1" || body["source"] != "agent" ||
+		body["expectedDocGeneration"] != "g1" || body["expectedSeq"] != 3.0 {
 		t.Fatalf("ack body: %+v", body)
 	}
 
@@ -106,6 +107,10 @@ func TestCommentsAckAddressBodiesAndNoResume(t *testing.T) {
 	}
 	if !strings.Contains(out, "Addressed comment c-2 (generation g1, expected seq 4)") {
 		t.Fatalf("address text: %s", out)
+	}
+	if len(body) != 4 || body["id"] != "c-2" || body["source"] != "agent" ||
+		body["expectedDocGeneration"] != "g1" || body["expectedSeq"] != 4.0 {
+		t.Fatalf("address body: %+v", body)
 	}
 	if controlRequests != 0 {
 		t.Fatalf("lifecycle must never resume playback; saw %d control requests", controlRequests)

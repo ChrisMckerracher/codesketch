@@ -1,5 +1,5 @@
 import { PROJECT_BUDGET_BYTES } from './project.mjs';
-import { prepareComment, transitionComment, commentPoll } from './feedback/index.mjs';
+import { prepareComment, transitionComment, commentPoll, prepareReply } from './feedback/index.mjs';
 
 function conflict(reason) {
   const error = new Error(reason);
@@ -60,6 +60,15 @@ export function updateComment(session, action, input) {
   }
   session.changed(false);
   return transitioned.item;
+}
+
+export function replyComment(session, input) {
+  const prepared = prepareReply(session.comments, input, session.controlGrant.docGeneration);
+  if (prepared.duplicate) return structuredClone(prepared.reply);
+  assertBudget(candidateProject(session, prepared.comments));
+  session.comments = prepared.comments;
+  session.changed(false);
+  return structuredClone(prepared.reply);
 }
 
 export function pollComments(session, since) {

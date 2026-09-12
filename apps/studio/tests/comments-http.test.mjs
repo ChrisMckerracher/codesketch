@@ -57,19 +57,25 @@ test('comment posts validate requestId and generation, then dedupe identical ret
   const omittedGen = await post('/api/comments', { requestId: 'no-gen', text: 'sky', rect: null,
     expectedArtRevision: s0.artRevision });
   assert.equal(omittedGen.status, 400, 'omitted generation is a malformed request');
+  const omittedEpoch = await post('/api/comments', { requestId: 'no-epoch', text: 'sky', rect: null,
+    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision });
+  assert.equal(omittedEpoch.status, 400, 'omitted control epoch is a malformed request');
   const malformedGen = await post('/api/comments', { requestId: 'bad-gen', text: 'sky', rect: null,
     expectedDocGeneration: 'g'.repeat(81), expectedArtRevision: s0.artRevision });
   assert.equal(malformedGen.status, 400, 'oversized generation is a malformed request');
   const stale = await post('/api/comments', { requestId: 'stale-1', text: 'sky', rect: null,
-    expectedDocGeneration: 'previous-generation', expectedArtRevision: s0.artRevision });
+    expectedDocGeneration: 'previous-generation', expectedArtRevision: s0.artRevision,
+    expectedControlEpoch: s0.controlEpoch });
   assert.equal(stale.status, 409, 'a well-formed stale generation is a conflict');
   const created = await post('/api/comments', { requestId: 'http-req-1', text: '  check the sky  ',
     rect: { x: 1, y: 2, width: 3, height: 4 }, continuePlayback: false,
-    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision });
+    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision,
+    expectedControlEpoch: s0.controlEpoch });
   assert.equal(created.status, 200);
   assert.equal(created.data.playback.status, 'paused', 'comments pause the painter');
   const comment = created.data.comments[0];
-  assert.equal(comment.text, 'check the sky');
+  assert.equal(comment.text, '  check the sky  ');
+  assert.equal(JSON.parse(comment.request.fingerprint).text, comment.text);
   assert.equal(comment.status, 'open');
   assert.equal(comment.number, 1);
   assert.equal(comment.seq, 1);
@@ -78,13 +84,15 @@ test('comment posts validate requestId and generation, then dedupe identical ret
   assert.deepEqual(comment.visibleLayers, [{ id: 'paint', opacity: 1 }]);
   assert.equal(comment.request.id, 'http-req-1');
   assert.ok(isISO(comment.at));
-  const retry = await post('/api/comments', { requestId: 'http-req-1', text: 'check the sky',
+  const retry = await post('/api/comments', { requestId: 'http-req-1', text: '  check the sky  ',
     rect: { x: 1, y: 2, width: 3, height: 4 }, continuePlayback: false,
-    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision });
+    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision,
+    expectedControlEpoch: s0.controlEpoch });
   assert.equal(retry.status, 200);
   assert.equal(retry.data.comments.length, 1, 'identical retry dedupes');
   const changed = await post('/api/comments', { requestId: 'http-req-1', text: 'changed', rect: null,
-    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision });
+    expectedDocGeneration: s0.docGeneration, expectedArtRevision: s0.artRevision,
+    expectedControlEpoch: s0.controlEpoch });
   assert.equal(changed.status, 409);
 });
 
@@ -97,7 +105,8 @@ test('visible layers come from the server document, not the caller', async () =>
   assert.equal(prepared.status, 200);
   const s = await state();
   const created = await post('/api/comments', { requestId: 'http-req-2', text: 'layers look flat',
-    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision });
+    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision,
+    expectedControlEpoch: s.controlEpoch });
   assert.equal(created.status, 200);
   const comment = created.data.comments.find(item => item.request?.id === 'http-req-2');
   assert.deepEqual(comment.visibleLayers, [{ id: 'paint', opacity: 1 }],
@@ -113,16 +122,18 @@ test('a comment pauses with queue kept, continuePlayback clears it and grants th
   assert.equal(queued.data.playback.remaining, 2);
   const s = await state();
   const created = await post('/api/comments', { requestId: 'http-req-3', text: 'wrong direction',
-    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision });
+    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision,
+    expectedControlEpoch: s.controlEpoch });
   assert.equal(created.status, 200);
   assert.equal(created.data.playback.status, 'paused');
   assert.equal(created.data.playback.remaining, 2, 'the queue is preserved for review');
   assert.equal(created.data.requiresGrant, true, 'human input revokes the agent grant');
   const agentWrite = await post('/api/commands', { commands: [stroke([[1, 1]])] });
   assert.equal(agentWrite.status, 409, 'agent needs a grant after human input');
+  const current = await state();
   const redirect = await post('/api/comments', { requestId: 'http-req-3b', text: 'try downward instead',
-    rect: null, continuePlayback: true, expectedDocGeneration: s.docGeneration,
-    expectedArtRevision: s.artRevision });
+    rect: null, continuePlayback: true, expectedDocGeneration: current.docGeneration,
+    expectedArtRevision: current.artRevision, expectedControlEpoch: current.controlEpoch });
   assert.equal(redirect.status, 200);
   assert.equal(redirect.data.playback.status, 'paused');
   assert.equal(redirect.data.playback.remaining, 0, 'continuePlayback clears pending work');
@@ -145,34 +156,41 @@ test('lifecycle transitions over HTTP: idempotency, stale 409, reopen, 404 and 4
   const s = await state();
   const gen = s.docGeneration;
   const created = await post('/api/comments', { requestId: 'http-req-4', text: 'lifecycle',
-    rect: null, expectedDocGeneration: gen, expectedArtRevision: s.artRevision });
+    rect: null, expectedDocGeneration: gen, expectedArtRevision: s.artRevision,
+    expectedControlEpoch: s.controlEpoch });
   const { id, seq } = created.data.comments.find(item => item.request?.id === 'http-req-4');
-  const ack = await post('/api/comments/ack', { id, expectedSeq: seq, expectedDocGeneration: gen });
+  const wrongAckActor = await post('/api/comments/ack',
+    { id, expectedSeq: seq, source: 'human', expectedDocGeneration: gen });
+  assert.equal(wrongAckActor.status, 400, 'ack requires an agent actor');
+  const ack = await post('/api/comments/ack', { id, expectedSeq: seq, source: 'agent', expectedDocGeneration: gen });
   assert.equal(ack.status, 200);
   const acked = ack.data.comments.find(item => item.id === id);
   assert.equal(acked.status, 'acknowledged');
-  const repeat = await post('/api/comments/ack', { id, expectedSeq: acked.seq, expectedDocGeneration: gen });
+  const repeat = await post('/api/comments/ack', { id, expectedSeq: acked.seq, source: 'agent', expectedDocGeneration: gen });
   assert.equal(repeat.status, 200);
   assert.equal(repeat.data.comments.find(item => item.id === id).seq, acked.seq, 'repeat is idempotent');
-  const stale = await post('/api/comments/ack', { id, expectedSeq: acked.seq + 9, expectedDocGeneration: gen });
+  const stale = await post('/api/comments/ack', { id, expectedSeq: acked.seq + 9, source: 'agent', expectedDocGeneration: gen });
   assert.equal(stale.status, 409, 'stale expectedSeq is a conflict');
-  const addressed = await post('/api/comments/address', { id, expectedSeq: acked.seq, expectedDocGeneration: gen });
+  const addressed = await post('/api/comments/address', { id, expectedSeq: acked.seq, source: 'agent', expectedDocGeneration: gen });
   assert.equal(addressed.status, 200);
   const addressedItem = addressed.data.comments.find(item => item.id === id);
-  const resolved = await post('/api/comments/resolve', { id, expectedSeq: addressedItem.seq, expectedDocGeneration: gen });
+  const wrongResolveActor = await post('/api/comments/resolve',
+    { id, expectedSeq: addressedItem.seq, source: 'agent', expectedDocGeneration: gen });
+  assert.equal(wrongResolveActor.status, 400, 'resolve requires a human actor');
+  const resolved = await post('/api/comments/resolve', { id, expectedSeq: addressedItem.seq, source: 'human', expectedDocGeneration: gen });
   assert.equal(resolved.data.comments.find(item => item.id === id).status, 'resolved');
   const resolvedSeq = resolved.data.comments.find(item => item.id === id).seq;
-  const reopened = await post('/api/comments/resolve', { id, expectedSeq: resolvedSeq, reopen: true, expectedDocGeneration: gen });
+  const reopened = await post('/api/comments/resolve', { id, expectedSeq: resolvedSeq, reopen: true, source: 'human', expectedDocGeneration: gen });
   assert.equal(reopened.status, 200);
   const reopenedItem = reopened.data.comments.find(item => item.id === id);
   assert.equal(reopenedItem.status, 'open');
   assert.equal(reopenedItem.acknowledgedAt, null);
   assert.equal(reopenedItem.resolvedAt, null);
-  const ghost = await post('/api/comments/resolve', { id: 'ghost', expectedSeq: 1, expectedDocGeneration: gen });
+  const ghost = await post('/api/comments/resolve', { id: 'ghost', expectedSeq: 1, source: 'human', expectedDocGeneration: gen });
   assert.equal(ghost.status, 404);
-  const badReopen = await post('/api/comments/resolve', { id, expectedSeq: reopenedItem.seq, reopen: 'yes', expectedDocGeneration: gen });
+  const badReopen = await post('/api/comments/resolve', { id, expectedSeq: reopenedItem.seq, reopen: 'yes', source: 'human', expectedDocGeneration: gen });
   assert.equal(badReopen.status, 400);
-  const staleGen = await post('/api/comments/ack', { id, expectedSeq: reopenedItem.seq, expectedDocGeneration: 'old-generation' });
+  const staleGen = await post('/api/comments/ack', { id, expectedSeq: reopenedItem.seq, source: 'agent', expectedDocGeneration: 'old-generation' });
   assert.equal(staleGen.status, 409, 'lifecycle under a stale generation is a conflict');
   const omittedGen = await post('/api/comments/ack', { id, expectedSeq: reopenedItem.seq });
   assert.equal(omittedGen.status, 400, 'lifecycle requires a well-formed generation');
@@ -183,12 +201,13 @@ test('only polls mark the heartbeat; reads and lifecycle never do; new clears it
   let s = await state();
   assert.equal(s.heartbeat.lastSeenAt, null, 'new clears any stale heartbeat');
   const created = await post('/api/comments', { requestId: 'http-req-5', text: 'heartbeat probe',
-    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision });
+    rect: null, expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision,
+    expectedControlEpoch: s.controlEpoch });
   assert.equal(created.status, 200);
   assert.equal(created.data.heartbeat.lastSeenAt, null, 'create must not imply listening');
   const createdItem = created.data.comments.find(item => item.request?.id === 'http-req-5');
   const ack = await post('/api/comments/ack', { id: createdItem.id, expectedSeq: createdItem.seq,
-    expectedDocGeneration: s.docGeneration });
+    source: 'agent', expectedDocGeneration: s.docGeneration });
   assert.equal(ack.data.heartbeat.lastSeenAt, null, 'lifecycle must not imply listening');
   const listed = await json({ path: '/api/comments' });
   assert.equal(listed.data.reset, true);
@@ -214,7 +233,8 @@ test('only polls mark the heartbeat; reads and lifecycle never do; new clears it
 test('poll cursors survive until load or new, and projects roundtrip comments', async () => {
   const s = await state();
   await post('/api/comments', { requestId: 'http-req-6', text: 'save me', rect: null,
-    expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision });
+    expectedDocGeneration: s.docGeneration, expectedArtRevision: s.artRevision,
+    expectedControlEpoch: s.controlEpoch });
   const first = await post('/api/comments/poll', { since: null });
   const cursor = first.data.cursor;
   assert.equal(first.data.reset, true);

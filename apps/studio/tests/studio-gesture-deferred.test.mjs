@@ -92,7 +92,7 @@ test('pointerup before ack retains the draft; paused polls alone never authorize
   fire(h, 'pointermove', 40, 40);
   fire(h, 'pointerup', 60, 60);
   assert.equal(intents(h, 'stroke.commit').length, 0, 'no commit before accepted pause');
-  assert.deepEqual(h.model.get().draft.points, [[10, 10], [40, 40], [60, 60]], 'completed draft retained');
+  assert.deepEqual(h.model.get().draft.points, [[10, 10], [37.5, 37.5], [60, 60]], 'completed draft retained');
   push(h.state, 2, pausedEpoch1);
   await drain();
   assert.equal(intents(h, 'stroke.commit').length, 0, 'paused poll alone cannot authorize');

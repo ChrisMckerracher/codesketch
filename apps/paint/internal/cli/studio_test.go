@@ -175,6 +175,7 @@ func TestNativeStudioIntegration(t *testing.T) {
 		"rect":                  nil,
 		"expectedDocGeneration": observed.DocGeneration,
 		"expectedArtRevision":   observed.ArtRevision,
+		"expectedControlEpoch":  observed.ControlEpoch,
 	})
 	if commented.Playback.Status != "paused" || len(commented.Comments) != 1 {
 		t.Fatal("human comment pause contract failed")

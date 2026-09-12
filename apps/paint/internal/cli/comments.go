@@ -10,9 +10,7 @@ import (
 	"github.com/ChrisMckerracher/codesketch/apps/paint/internal/cli/transport"
 )
 
-// paint comments [list|wait|watch|ack|address] follows human comments without
-// ever resuming playback. All timeouts are bounded; interruption keeps the
-// standard 130 exit via the Runner.
+// paint comments [list|wait|watch|ack|address|reply] follows human comments without ever resuming playback.
 
 const commentsPollInterval = 400 * time.Millisecond
 
@@ -20,6 +18,8 @@ const commentsPollInterval = 400 * time.Millisecond
 type commentsOptions struct {
 	action     string
 	id         string
+	text       string
+	requestID  string
 	generation string
 	seq        int64
 	since      string
@@ -27,6 +27,10 @@ type commentsOptions struct {
 	timeout    time.Duration
 }
 
+// Register the comments-only request ID flag without broadening mutation context.
+func init() {
+	commandFlags["comments"] += " request-id"
+}
 func prepareComments(a *parse.Result, j *invocation) error {
 	opts, err := prepareCommentsOptions(a)
 	if err != nil {
@@ -45,6 +49,8 @@ func (r Runner) commentsCommand(ctx context.Context, c *transport.Client, a *par
 		return r.waitComments(ctx, c, a, opts)
 	case "watch":
 		return r.watchComments(ctx, c, a, opts)
+	case "reply":
+		return r.replyToComment(ctx, c, a, opts)
 	default: // ack, address
 		return r.commentLifecycle(ctx, c, a, opts)
 	}
@@ -238,7 +244,7 @@ func (r Runner) emitCommentsEvent(a *parse.Result, event string, data json.RawMe
 	if err != nil {
 		return err
 	}
-	return r.text(fmt.Sprintf("[%s] %s", event, commentsSummary(env)))
+	return r.text(formatCommentsEvent(event, env))
 }
 
 // commentLifecycle posts ack/address with the caller-provided generation and
@@ -249,7 +255,7 @@ func (r Runner) commentLifecycle(ctx context.Context, c *transport.Client, a *pa
 		path, verb = "/api/comments/address", "Addressed comment"
 	}
 	data, err := c.Request(ctx, "POST", path, map[string]any{
-		"id":                    opts.id,
+		"id": opts.id, "source": "agent",
 		"expectedDocGeneration": opts.generation,
 		"expectedSeq":           opts.seq,
 	})
@@ -260,4 +266,25 @@ func (r Runner) commentLifecycle(ctx context.Context, c *transport.Client, a *pa
 		return r.output(data)
 	}
 	return r.text(fmt.Sprintf("%s %s (generation %s, expected seq %d)", verb, opts.id, opts.generation, opts.seq))
+}
+
+func (r Runner) replyToComment(ctx context.Context, c *transport.Client, a *parse.Result, opts commentsOptions) error {
+	data, err := c.Request(ctx, "POST", "/api/comments/reply", map[string]any{
+		"id": opts.id, "text": opts.text, "source": "agent", "expectedDocGeneration": opts.generation,
+		"expectedSeq": opts.seq, "requestId": opts.requestID,
+	})
+	if err != nil {
+		return err
+	}
+	s, err := decodeSnapshot(data)
+	if err != nil {
+		return err
+	}
+	if reply, ok := acknowledgedAgentReply(s.Comments, opts.id, opts.requestID, opts.text); ok {
+		if a.Booleans["json"] {
+			return r.output(data)
+		}
+		return r.text(formatCommentReply(opts.id, reply))
+	}
+	return fmt.Errorf("studio reply response omitted request %s", opts.requestID)
 }

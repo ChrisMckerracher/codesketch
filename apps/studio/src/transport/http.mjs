@@ -35,7 +35,7 @@ export function trusted(request, port) {
   return !request.headers['sec-fetch-site'] || ['same-origin', 'none'].includes(request.headers['sec-fetch-site']);
 }
 
-const STYLESHEETS = new Set(['tokens', 'workspace', 'controls', 'layers', 'inspector', 'stage', 'feedback']);
+const STYLESHEETS = new Set(['workspace']);
 
 async function containedDirectory(root, relative) {
   const canonicalRoot = await realpath(root);

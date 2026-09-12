@@ -23,6 +23,7 @@ function seededSession() {
     continuePlayback: false,
     expectedDocGeneration: session.controlGrant.docGeneration,
     expectedArtRevision: session.artRevision,
+    expectedControlEpoch: session.controlGrant.controlEpoch,
   });
   return session;
 }
@@ -99,6 +100,7 @@ test('each endpoint resolves only its current validated shape', async () => {
       continuePlayback: false,
       expectedDocGeneration: 'generation-1',
       expectedArtRevision: 0,
+      expectedControlEpoch: 0,
     })).instanceId);
     assert.ok((await api.resolveComment({
       id: 'comment-1',
@@ -110,7 +112,7 @@ test('each endpoint resolves only its current validated shape', async () => {
     assert.ok((await api.loadDemo({ expectedDocGeneration: 'generation-1' })).instanceId);
   });
   await serve(project(), async () => {
-    const data = await client().fetchProject();
+    const data = await client().fetchProject({ expectedInstanceId: 'instance-1', expectedDocGeneration: 'generation-1' });
     assert.equal(data.format, 'codesketch');
     assert.equal(data.version, 2);
   });
@@ -226,7 +228,7 @@ test('rejects project reads that are not current codesketch v2', async () => {
   ];
   for (const [label, body] of cases) {
     await serve(body, async () => {
-      await assert.rejects(client().fetchProject(), (error) => {
+      await assert.rejects(client().fetchProject({ expectedInstanceId: 'instance-1', expectedDocGeneration: 'generation-1' }), (error) => {
         assert.equal(error.name, 'ProtocolError', label);
         return true;
       }, label);
