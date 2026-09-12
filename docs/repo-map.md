@@ -42,30 +42,30 @@ transport → direction → painting. Cross-context imports use public
 - [`transport/`](../apps/studio/src/transport/README.md) owns local HTTP,
   persistence, trust checks, lifecycle, and the runtime manifest.
 - [`studio/`](../apps/studio/src/studio/README.md) owns browser interaction,
-  immutable UI model state, application fanout, presentation, gestures,
-  viewport transforms, review, and the HTTP client.
+  immutable UI model state, application fanout, tactile vector workspace,
+  gestures, review, and the HTTP client.
 - [`compositions/`](../apps/studio/src/compositions/README.md) supplies the
   deterministic example command batch.
 
 ## Current studio hierarchy
 
-`public/index.html` provides one application shell: `global-header`,
-`left-sidebar`, `stage-viewport`, `inspector-dock`, and `studio-notice`.
-The stage contains `director-hud`, `canvas-wrapper` with `painting-canvas` and
-`stage-overlay`, `feedback-composer`, and `tool-dock`. The left side mounts
-Layers and Feedback; the right side mounts the contextual inspector. At compact
-widths, the sidebars become rail-triggered drawers.
+`public/index.html` provides a minimal application shell: `#studio-app`
+containing `#workspace-root` with `#painting-canvas` (canonical committed
+artwork), `#ui-canvas` (vector UI chrome and overlays), and `#control-host`
+(persistent invisible semantic DOM backing inputs).
 
-`studio/index.mjs` mounts the header, playback HUD, layers, inspector, tools,
-viewport, review, and gesture services. The application model stores immutable
-values; every accepted update renders artwork when its signature or draft
-changes and fans the same value to every mounted component.
+`studio/index.mjs` bootstraps `StudioState`, `StudioApi`, `createApplication`,
+and `createWorkspace` in [`workspace/`](../apps/studio/src/studio/workspace/README.md).
+The workspace context operates in fixed 1000×700 design units, using the custom
+`GLYPHS` vector engine for all visible interface text, and coordinates nested
+subcontexts for geometry, vector rendering, controls, actions, input gestures,
+palette, sidebar inspector, and spatial feedback.
 
 ## Native runtime and release boundary
 
 [`apps/studio/assets.go`](../apps/studio/assets.go) explicitly embeds the
-complete `src/` and `public/` runtime, including `public/icon.svg`, all seven
-stylesheets, the HTML entrypoint, and every transitive module. The renderer
+complete `src/` and `public/` runtime, including `public/icon.svg`,
+`public/workspace.css`, the HTML entrypoint, and every transitive module. The renderer
 exports remain direct views of the canonical painting renderer.
 
 The lifecycle manager derives a strict SHA-256 digest from the exact embedded

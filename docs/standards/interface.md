@@ -129,7 +129,6 @@ interface ControlDescriptor {
 
 ### 6.3 Zero Cumulative Layout Shift (CLS)
 - **Layout Invariance**: Comment cards are fixed at width 216px (`x: 752..968`).
-- **Reserved Gutter**: Permanent 24px reserved gutter (`x: 968..1000`) houses the floating paint-stroke scrollbar.
 - **Collinear Thin Scrollbars**: Both Layers (`y: 276..468`) and Comments (`y: 518..650`) use identical 4px rounded paint-stroke scrollbar thumbs aligned collinearly at `x = 994`.
 - **True Measurement**: No hardcoded or fake CLS claims in production; layout stability is verified via standard `PerformanceObserver` layout-shift measurements (`CLS = 0.0000`).
 

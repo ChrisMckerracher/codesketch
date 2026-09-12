@@ -12,7 +12,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 const STUDIO_ROOT = resolve(ROOT, 'apps', 'studio');
 const SCENARIOS = ['studio.mjs', 'layers-keyboard.mjs', 'layers-opacity.mjs', 'comments.mjs', 'comments-races.mjs', 'finish.mjs', 'appearance.mjs', 'connection.mjs'];
 const ARTIFACTS = resolve(ROOT, 'artifacts', 'browser-check');
-const STALE_ARTIFACTS = ['project.json', 'artwork.png'];
+const STALE_ARTIFACTS = ['project.json'];
 
 const onlyArgument = process.argv.slice(2).find((value) => value.startsWith('--only='));
 const unknownArguments = process.argv.slice(2).filter((value) => !value.startsWith('--only='));
@@ -65,21 +65,17 @@ function execCli(session, args, timeoutMs = 60000) {
 
 function verifyArtifacts() {
   const jsonPath = resolve(ARTIFACTS, 'project.json');
-  const pngPath = resolve(ARTIFACTS, 'artwork.png');
   if (!existsSync(jsonPath)) throw new Error('Fresh project.json download missing');
-  if (!existsSync(pngPath)) throw new Error('Fresh artwork.png download missing');
   const project = JSON.parse(readFileSync(jsonPath, 'utf8'));
   if (project.format !== 'codesketch' || project.version !== 2 || !Array.isArray(project.commands)
     || !Array.isArray(project.queue) || !Array.isArray(project.comments) || !Number.isInteger(project.cursor)) {
     throw new Error('Downloaded project JSON is not current codesketch v2');
   }
-  const png = readFileSync(pngPath);
-  const magic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-  if (!png.subarray(0, 8).equals(magic)) throw new Error('artwork.png lacks a PNG signature');
-  const width = png.readUInt32BE(16);
-  const height = png.readUInt32BE(20);
-  if (width !== 1000 || height !== 700) throw new Error(`artwork.png is ${width}x${height}, expected 1000x700`);
-  console.log(`verified fresh project.json (codesketch v2) and artwork.png (1000x700, ${png.length} bytes)`);
+  if (!project.commands.some((command) => command.type === 'stroke'
+    && Array.isArray(command.points) && command.points.length >= 2)) {
+    throw new Error('Downloaded project JSON lacks an actual drawn stroke command');
+  }
+  console.log('verified fresh project.json (codesketch v2) with an actual drawn stroke command');
 }
 
 async function runScenario(name) {

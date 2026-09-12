@@ -1,6 +1,6 @@
-# Reconstruction release verification
+# Reconstruction release verification (September 10, 2026 — historical)
 
-Verified September 10, 2026 for the reconstructed UI release. The
+Historical record: verified September 10, 2026 for the earlier reconstructed UI release (superseded by the September 11, 2026 Studio vector reconstruction). The
 strict browser runner in `tools/browser-check.mjs` runs the eight registered
 scenarios (`studio`, `layers-keyboard`, `layers-opacity`, `comments`,
 `comments-races`, `finish`, `appearance`, `connection`); each receives a fresh
@@ -17,7 +17,7 @@ stale downloads then validates a fresh codesketch v2 `project.json` and a
 | Full native suite | `PAINT_STUDIO_TESTS=1 PAINT_BROWSER_TESTS=1 make test-go` passed all packages after isolated readiness-fixture prewarming (`/private/tmp/codesketch-native-final-rerun.log`) |
 | Built binary | `make build` passed its policy gate; the copied binary served the complete embedded UI on ephemeral port 55164 — icon 200, 50 controls, 1000 × 700 canvas, runtime digest `0ab213ef5cc6cb71660a97302912a303af819f0626f16819a5003f3351f9c663` — and the owned browser session and runtime were stopped afterward |
 | Full browser suite | Root combined `npm run test:browser` passed 8/8, including `finish` (active-preview Clear, Finish 101, pixel and Undo/Redo checks) and `connection` (`/private/tmp/codesketch-browser-release-final.log`) |
-| User visual acceptance | Pending user review; technical checks do not constitute design approval. |
+| Historical user visual acceptance | Historical note (superseded): Pending user review on Sep 10 (technical checks did not constitute design approval). User visual approval of the frozen vector baseline was completed on September 11, 2026. |
 
 Production cutover completed on September 10, 2026 through the lead-managed
 sequence: checksum-verified fresh recovery backup, old binary stop, new binary
@@ -172,3 +172,24 @@ Production release evidence recorded September 10, 2026. Current contracts are c
 | Accepted release self-tests | Passed 103 assertions in `verification/codesketch-release-selftest-accepted.log`. The preserved project had 1,636 commands, cursor 1,636, queue 0, and comments 0. |
 
 GitHub publication verified: `gh repo view` reports the repository public at [github.com/ChrisMckerracher/codesketch](https://github.com/ChrisMckerracher/codesketch), and main source commit `469cd59` was pushed. A clean `--no-hardlinks` local clone of that committed tree passed `make build` with the offline policy gate (120 Go files and 229 resolved packages); log: `/tmp/codesketch-publication-clean-build.log`.
+
+## Studio vector reconstruction verification — September 11, 2026
+
+Visual design baseline approved September 11, 2026 matching user-approved frozen reference mockup (SHA-256 `ff8ca047b1a56b252180bccdbe0baee57e6fb13dfe9fdefef640af9e5c2b6d64`). Final source committed at `cfb0cf6`. Studio presentation operates strictly on dual canvases (`#painting-canvas` and `#ui-canvas`) with custom vector typography (`GLYPHS` engine), fixed 1000×700 design geometry, and invisible semantic DOM backing controls (`#control-host`) for native accessibility, IME composition, and keyboard navigation without visible HTML text nodes.
+
+| Check | Result |
+| --- | --- |
+| Final release-gate verify | Passed: 534 JavaScript tests with zero failures plus Go formatting, dependency/context policy, vet, and race checks (`/private/tmp/codesketch-manager-release-verify-20260911.log`). |
+| Extended native suite | Passed: all native packages passed extended verification (`/private/tmp/codesketch-native-acceptance-20260911.log`). |
+| Candidate binary verification | Passed: copied candidate binary outside checkout passed real drawing, feedback `SEND`, and native agent reply with zero browser console or network errors; runtime digest `a596bb38707b98b4bb86c29f6c209be2c0e718dd957b6ba99b9b718069da5c37`; candidate process closed and stopped cleanly. |
+| Browser reconstruction suite | Passed: final manager `npm run test:browser` passed 8/8 registered scenarios (`studio`, `layers-keyboard`, `layers-opacity`, `comments`, `comments-races`, `finish`, `appearance`, `connection`) with zero failures (`/private/tmp/codesketch-final-browser-20260911.log`). |
+| Production cutover & release | **Pending**: production release cutover remains pending lead execution; not claimed done. |
+
+### Independent review corrections and rechecks
+
+- **Independent review & browser strengthening**: Independent Astra medium final source review found no blocking findings in strengthened comments/navigation/retry and appearance/DPR 2/CLS assertions.
+- **Workspace contracts & public signatures**: Synchronized [`apps/studio/src/studio/workspace/README.md`](../apps/studio/src/studio/workspace/README.md) to match actual implementation contracts: `createWorkspace` returns `{ ui, update, destroy }`, `renderWorkspace({ ctx, v, model, ui, controls, artwork })`, `samplePixel(canvas, x, y)`, and `threadViewport(anchor)`. Verified actual exports of `geometry/` (`DESIGN_WIDTH`, `DESIGN_HEIGHT`, `CANVAS_WIDTH`, `workspaceWidth`, `designPoint`, `clampWorkspacePoint`, `clipRect`) and `vector/` (`GLYPHS`, `createVector`), removing unexported names.
+- **Obsolete UI contexts removed**: Verified complete removal of retired DOM-based contexts (`header/`, `inspector/`, `layers/`, `playback/`, `tools/`, `viewport/`, `review/presentation/`) and legacy stylesheets; updated [`apps/studio/src/studio/README.md`](../apps/studio/src/studio/README.md) and [`docs/repo-map.md`](repo-map.md).
+- **Standards geometry correction**: Removed inaccurate 24px gutter claim from [`docs/standards/interface.md`](standards/interface.md) and [`docs/standards/testing.md`](standards/testing.md); sidebar comments boundary spans `x: 752..968` (width 216px) with collinear thin 4px scrollbar at `x = 994`.
+- **Comment lifecycle & ACK semantics clarification**: Clarified that the `ACK` badge in the UI strictly denotes the actual comment lifecycle status `status === "acknowledged"`. Autonomous agent replies via native CLI (`paint comments reply`) append bounded thread reply entries but do not automatically acknowledge comments or transition comment status. Feedback `SEND` directly establishes a continuation grant without a separate Resume button.
+- **Testing limitations & candid notes**: Native OS-level IME candidate window interaction was not manually tested with an operating system input method engine; verification relies on synthetic composition events (`compositionstart`, `compositionupdate`, `compositionend`) and semantic `<textarea>`/`<input>` DOM backing elements.
