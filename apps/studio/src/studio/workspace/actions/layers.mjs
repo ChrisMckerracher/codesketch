@@ -29,6 +29,9 @@ export function createLayerActions({ application, ui, changed } = {}) {
   let active = null;
   let queue = [];
   let known = contextOf(snapshotOf(application));
+  let editToken = 0;
+  const drafts = new Map();
+  const pendingRenames = new Map();
 
   function dispatch(intent) {
     try { return Promise.resolve(application.dispatch(intent)); }
@@ -46,9 +49,32 @@ export function createLayerActions({ application, ui, changed } = {}) {
     if (error) rejectEntry(entry, error);
     else if (!entry.settled) {
       entry.settled = true;
+      const edit = local.layerEdit;
+      if (entry.kind === "rename" && edit?.id === entry.id && edit.token === entry.token
+        && edit.revision === entry.revision && edit.text === entry.rawName) {
+        drafts.delete(entry.id);
+        local.layerEdit = null;
+        try { rerender(); } catch {}
+      }
       entry.deferred.resolve(value);
     }
     pump();
+  }
+
+  function renameKey(id, token, revision, rawName) {
+    return JSON.stringify([id, token ?? null, revision ?? null, String(rawName ?? "")]);
+  }
+
+  function currentEditMatches(payload, rawName = payload.value) {
+    const edit = local.layerEdit;
+    return Boolean(edit && edit.id === payload.id && edit.token === payload.token
+      && edit.revision === payload.revision && edit.text === rawName);
+  }
+
+  function currentEditHasText(payload) {
+    const edit = local.layerEdit;
+    return edit && edit.id === payload.id && edit.token === payload.token && edit.text === payload.value
+      ? edit : null;
   }
 
   function addSelection(entry, acknowledgement) {
@@ -125,10 +151,32 @@ export function createLayerActions({ application, ui, changed } = {}) {
     if (!layersOf(snapshot).some((layer) => layer?.id === id)) {
       return Promise.reject(failure(`Unknown layer ${id}`));
     }
-    const entry = { kind, id, context, deferred: promiseFor(), settled: false };
+    const value = typeof payload.value === "string" ? payload.value.trim() : payload.value;
+    const currentEdit = kind === "rename" ? currentEditHasText(payload) : null;
+    const revision = currentEdit ? currentEdit.revision : payload.revision;
+    if (kind === "rename") {
+      if (typeof value !== "string" || !value || value.length > 80) {
+        return Promise.reject(failure("Layer name must be a nonblank string of at most 80 characters"));
+      }
+      const layer = layersOf(snapshot).find((item) => item?.id === id);
+      if (layer.name === value) {
+        if (currentEdit || currentEditMatches(payload)) {
+          drafts.delete(id);
+          local.layerEdit = null;
+        }
+        try { rerender(); } catch {}
+        return Promise.resolve({ unchanged: true });
+      }
+    }
+    const key = kind === "rename" ? renameKey(id, payload.token, revision, payload.value) : null;
+    if (key && pendingRenames.has(key)) return pendingRenames.get(key);
+    const entry = { kind, id, context, deferred: promiseFor(), settled: false,
+      token: payload.token, revision, rawName: payload.value };
     if (kind === "visibility") {
       if (typeof payload.visible !== "boolean") return Promise.reject(failure("Layer visibility must be boolean"));
       entry.intent = { type: "layer.update", id, visible: payload.visible, generation: context.generation };
+    } else if (kind === "rename") {
+      entry.intent = { type: "layer.update", id, name: value, generation: context.generation };
     } else {
       const percent = Number(payload.value);
       if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
@@ -137,19 +185,79 @@ export function createLayerActions({ application, ui, changed } = {}) {
       entry.opacity = percent / 100;
       entry.intent = { type: "layer.update", id, opacity: entry.opacity, generation: context.generation };
     }
-    return enqueue(entry);
+    const result = enqueue(entry);
+    if (key) {
+      pendingRenames.set(key, result);
+      result.then(() => {
+        if (pendingRenames.get(key) === result) pendingRenames.delete(key);
+      }, () => {
+        if (pendingRenames.get(key) === result) pendingRenames.delete(key);
+      });
+    }
+    return result;
   }
 
   function handle(action, payload = {}) {
-    if (!["layer.select", "layer.visibility", "layer.opacity", "layer.add"].includes(action)) return false;
+    if (!["layer.select", "layer.visibility", "layer.opacity", "layer.rename", "layer.rename.text", "layer.rename.begin",
+      "layer.rename.cancel", "layer.add"].includes(action)) return false;
     if (destroyed) return Promise.reject(failure("Layer actions were destroyed", "stale"));
     if (action === "layer.select") return dispatch({ type: "layer.inspect", id: payload.id });
     if (action === "layer.visibility") return mutation("visibility", payload);
     if (action === "layer.opacity") return mutation("opacity", payload);
+    if (action === "layer.rename.text") {
+      const edit = local.layerEdit;
+      if (!edit || edit.id !== payload.id || edit.token !== payload.token) return Promise.resolve();
+      const text = String(payload.value ?? "").replace(/[\r\n]/g, "");
+      if (edit.text !== text) {
+        edit.text = text;
+        edit.revision += 1;
+      }
+      drafts.set(edit.id, { ...edit });
+      return Promise.resolve();
+    }
+    if (action === "layer.rename") return mutation("rename", payload);
+    if (action === "layer.rename.cancel") {
+      if (!payload.token || local.layerEdit?.token === payload.token) {
+        drafts.delete(payload.id);
+        local.layerEdit = null;
+      }
+      try { rerender(); } catch {}
+      return Promise.resolve();
+    }
+    if (action === "layer.rename.begin") {
+      const previous = local.layerEdit;
+      if (previous) drafts.set(previous.id, { ...previous });
+      const pending = previous && pendingRenames.get(renameKey(
+        previous.id, previous.token, previous.revision, previous.text));
+      if (pending) {
+        return pending.then(() => handle("layer.rename.begin", payload), (error) => {
+          try { rerender(); } catch {}
+          throw error;
+        });
+      }
+      return beginEdit(payload);
+    }
     const snapshot = snapshotOf(application);
     const context = contextOf(snapshot);
     if (!context) return Promise.reject(failure("No current session; refresh required", "stale"));
     return enqueue({ kind: "add", context, before: new Set(), deferred: promiseFor(), settled: false });
+  }
+
+  function beginEdit(payload) {
+    const context = contextOf(snapshotOf(application));
+    const layer = layersOf(snapshotOf(application)).find((item) => item?.id === payload.id);
+    if (!context) return Promise.reject(failure("No current session; refresh required", "stale"));
+    if (!layer) return Promise.reject(failure(`Unknown layer ${payload.id}`));
+    return dispatch({ type: "layer.inspect", id: payload.id }).then((value) => {
+      const snapshot = snapshotOf(application);
+      if (!sameContext(context, contextOf(snapshot))) throw failure("Layer edit was superseded by a document change", "stale");
+      const draft = drafts.get(payload.id);
+      local.layerEdit = { id: payload.id, value: layer.name,
+        text: draft?.text ?? layer.name, token: ++editToken, revision: draft?.revision ?? 0 };
+      drafts.set(payload.id, { ...local.layerEdit });
+      try { rerender(); } catch {}
+      return value;
+    });
   }
 
   const unsubscribe = application?.model?.subscribe?.((value) => {
@@ -157,6 +265,11 @@ export function createLayerActions({ application, ui, changed } = {}) {
     if (known && next && !sameContext(known, next)) {
       const error = failure("Queued layer changes were dropped because the document changed", "stale");
       for (const entry of queue.splice(0)) rejectEntry(entry, error);
+      if (local.layerEdit) {
+        local.layerEdit = null;
+        try { rerender(); } catch {}
+      }
+      drafts.clear();
     }
     known = next;
     pump();

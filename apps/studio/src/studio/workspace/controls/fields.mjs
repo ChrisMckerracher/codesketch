@@ -39,6 +39,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     if (descriptor.kind === "button" || descriptor.kind === "plane") el.type = "button";
     if (descriptor.kind === "range") el.type = "range";
     el.style.cssText = INVISIBLE;
+    if (descriptor.kind === "textarea" && descriptor.singleLine) el.style.font = "12px/16px monospace";
     const record = {
       descriptor,
       el,
@@ -192,6 +193,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     if (d.cancelAction) el.setAttribute?.("data-cancel-action", d.cancelAction);
     else el.removeAttribute?.("data-cancel-action");
     el.disabled = Boolean(d.disabled);
+    if (d.kind === "textarea" && d.singleLine) el.style.font = "12px/16px monospace";
 
     if (d.kind === "plane") {
       if (!busy(record)) record.value = planeValue(d.value);
