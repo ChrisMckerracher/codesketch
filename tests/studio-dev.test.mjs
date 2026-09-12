@@ -101,7 +101,7 @@ test('launcher serves an in-memory studio on an ephemeral port and exits cleanly
     assert.equal(page.status, 200, 'the launcher serves the reconstructed studio shell');
     assert.match(page.type, /^text\/html/);
     assert.ok(page.body.includes('id="studio-app"'), 'root serves the canonical studio shell');
-    const stylesheet = await get(port, '/public/tokens.css');
+    const stylesheet = await get(port, '/public/workspace.css');
     assert.equal(stylesheet.status, 200);
     assert.match(stylesheet.type, /^text\/css/);
     const state = await get(port, '/api/state');

@@ -33,7 +33,7 @@ test('model seeds defaults, retained values, and safe review default from state'
   assert.deepEqual(value.drawers, { left: false, right: false });
   assert.deepEqual(value.viewport, { mode: 'fit', scale: 1, x: 0, y: 0 });
   assert.equal(value.review.phase, 'closed');
-  assert.equal(value.review.keepPaused, true);
+  assert.equal(value.review.keepPaused, false);
   model.destroy();
 });
 

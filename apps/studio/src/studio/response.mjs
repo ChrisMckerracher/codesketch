@@ -2,10 +2,14 @@ import { activeProblem, commandsProblem, documentProblem } from './response-artw
 
 const PLAYBACK_STATUSES = new Set(['idle', 'playing', 'paused']);
 const COMMENT_STATUSES = new Set(['open', 'acknowledged', 'addressed', 'resolved']);
+const REPLY_AUTHORS = new Set(['human', 'agent']);
+const REPLY_FIELDS = new Set(['id', 'requestId', 'author', 'text', 'at']);
+const MAX_REPLIES = 32;
 const STAMPS = ['acknowledgedAt', 'addressedAt', 'resolvedAt'];
 
 const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
 const isNonemptyString = (value) => typeof value === 'string' && value.length > 0;
+const isBoundedLabel = (value, max) => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 const isNullableString = (value) => value === null || typeof value === 'string';
 const isCount = (value) => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 const isUnitFraction = (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
@@ -99,9 +103,47 @@ function commentProblem(comment, label) {
   );
 }
 
+function replyProblem(reply, label, replyIds, requestIds) {
+  if (!isObject(reply)) return `${label} must be an object`;
+  const fields = Object.keys(reply);
+  if (fields.length !== REPLY_FIELDS.size || fields.some((field) => !REPLY_FIELDS.has(field))) {
+    return `${label} must contain exactly id, requestId, author, text, and at`;
+  }
+  const problem = firstProblem(
+    expect(isBoundedLabel(reply.id, 80), `${label}.id must be a nonblank string of at most 80 characters`),
+    expect(isBoundedLabel(reply.requestId, 80), `${label}.requestId must be a nonblank string of at most 80 characters`),
+    expect(REPLY_AUTHORS.has(reply.author), `${label}.author must be human or agent`),
+    expect(isBoundedLabel(reply.text, 2000), `${label}.text must be a nonblank string of at most 2000 characters`),
+    expect(isBoundedLabel(reply.at, 40), `${label}.at must be a nonblank string of at most 40 characters`),
+  );
+  if (problem) return problem;
+  if (replyIds.has(reply.id)) return `${label}.id must be globally unique`;
+  if (requestIds.has(reply.requestId)) return `${label}.requestId must be globally unique`;
+  replyIds.add(reply.id);
+  requestIds.add(reply.requestId);
+  return null;
+}
+
+function repliesProblem(replies, label, replyIds, requestIds) {
+  if (replies === undefined) return null;
+  if (!Array.isArray(replies)) return `${label} must be an array`;
+  if (replies.length > MAX_REPLIES) return `${label} must contain at most ${MAX_REPLIES} replies`;
+  return firstProblem(...replies.map((reply, index) => replyProblem(reply, `${label}[${index}]`, replyIds, requestIds)));
+}
+
 function commentsProblem(comments) {
   if (!Array.isArray(comments)) return 'comments must be an array';
-  return firstProblem(...comments.map((comment, index) => commentProblem(comment, `comments[${index}]`)));
+  const replyIds = new Set();
+  const requestIds = new Set();
+  for (const [index, comment] of comments.entries()) {
+    const label = `comments[${index}]`;
+    const problem = firstProblem(
+      commentProblem(comment, label),
+      isObject(comment) ? repliesProblem(comment.replies, `${label}.replies`, replyIds, requestIds) : null,
+    );
+    if (problem) return problem;
+  }
+  return null;
 }
 
 function heartbeatProblem(heartbeat) {

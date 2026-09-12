@@ -25,6 +25,10 @@ Go code uses the standard library and this module's packages. The CLI may use it
 
 Inputs and responses are bounded. API destinations are loopback-only. Invalid invocations fail before network I/O, and current contracts reject obsolete input.
 
+- Comment replies use `paint comments reply <id> <text> --generation <generation> --seq <seq> --request-id <id>`. Replies are bounded (up to 32 entries per comment, max 2000 characters each) and require explicit generation and sequence guards.
+- The `ACK` status badge displays strictly upon authentic autonomous agent acknowledgement (`source: "agent"`), distinct from human actions. The `ACTIVE` filter strictly selects unresolved comments (`status !== 'resolved'`).
+- Human review submission in the studio captures `generation`, `artRevision`, and `controlEpoch`; feedback `SEND` authorizes continuation directly at the confirmed control epoch without a separate Resume step.
+
 ## Relevant root commands
 
 - `make build` writes `bin/paint`.

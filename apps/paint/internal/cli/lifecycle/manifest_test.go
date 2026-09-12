@@ -38,7 +38,7 @@ func TestRuntimeManifestEncodingIsCanonical(t *testing.T) {
 	if strings.HasPrefix(text, "\xEF\xBB\xBF") {
 		t.Error("manifest must not start with a BOM")
 	}
-	if !strings.HasPrefix(text, `{"files":[{"path":"public/controls.css","size":`) {
+	if !strings.HasPrefix(text, `{"files":[{"path":"public/icon.svg","size":`) {
 		t.Errorf("manifest must open with canonical key order and the first sorted entry: %.60s", text)
 	}
 	if strings.Contains(text, ", ") || strings.Contains(text, `": `) {

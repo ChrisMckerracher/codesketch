@@ -28,7 +28,8 @@ function activeSession() {
   session.control('pause', 1, { source: 'human' });
   session.control('speed', 2, { source: 'human' });
   session.addComment({ requestId: 'req-note-1', text: 'keep this hill', rect: null,
-    expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+    expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+    expectedControlEpoch: session.controlGrant.controlEpoch });
   return session;
 }
 

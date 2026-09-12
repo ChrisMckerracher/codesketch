@@ -59,8 +59,8 @@ function build() {
       control.resolve(snapshot({ revision: 2 }));
       return control.promise;
     },
-    fetchProject() {
-      calls.push({ method: 'fetchProject' });
+    fetchProject(context) {
+      calls.push({ method: 'fetchProject', context });
       return Promise.resolve(project());
     },
   };
@@ -172,7 +172,9 @@ test('project.save downloads the exact server project JSON under the local filen
   const { calls, downloads, observe, documents } = build();
   observe(snapshot({ revision: 1 }));
   await documents.handle({ type: 'project.save' });
-  assert.deepEqual(calls.at(-1), { method: 'fetchProject' }, 'save is a read-only project fetch');
+  assert.deepEqual(calls.at(-1), {
+    method: 'fetchProject', context: { expectedInstanceId: 'inst-1', expectedDocGeneration: 'gen-1' },
+  }, 'save binds its read to the captured context');
   assert.equal(downloads.length, 1);
   assert.equal(downloads[0].filename, 'meadow.json', 'the editable local filename drives the download');
   assert.equal(await downloads[0].blob.text(), JSON.stringify(project()), 'the exact v2 JSON is saved');
@@ -197,4 +199,24 @@ test('project.save freezes the intent-time filename before the fetch resolves', 
   await pending;
   assert.equal(downloads[0].filename, 'meadow.json',
     'the intent-time filename is captured before the await');
+});
+
+test('project.save rejects a rotated context after the async fetch and never downloads', async () => {
+  const { modelView, downloads, observe, documents } = build();
+  const fetch = deferred();
+  const requests = new StudioRequests({
+    api: { fetchProject: () => fetch.promise },
+    acceptSnapshot: (candidate) => true,
+  });
+  const currentModel = { get: () => ({ snapshot: modelView.snapshot, filename: modelView.filename }) };
+  const guarded = createDocuments({ model: currentModel, requests }, {
+    download: (blob, filename) => downloads.push({ blob, filename }),
+    blob: (parts, type) => ({ parts, type }),
+  });
+  observe(snapshot({ revision: 1 }));
+  const pending = guarded.handle({ type: 'project.save' });
+  modelView.snapshot = snapshot({ revision: 2, instanceId: 'inst-2', docGeneration: 'gen-2' });
+  fetch.resolve(project());
+  await assert.rejects(pending, (error) => error.outcome === 'stale');
+  assert.equal(downloads.length, 0);
 });

@@ -42,11 +42,12 @@ test('comments land only while paused and record the painter cursor', () => {
   session.submit({ commands: [stroke()], play: true, ...grant(session) });
   conflict(() => session.addComment({ requestId: 'req-early-1', text: 'slow down here', rect: null,
     expectedDocGeneration: session.controlGrant.docGeneration,
-    expectedArtRevision: session.artRevision }), 'a comment cannot be added while playing');
+    expectedArtRevision: session.artRevision, expectedControlEpoch: session.controlGrant.controlEpoch }),
+    'a comment cannot be added while playing');
   session.control('pause', 1, { source: 'human' });
   session.addComment({ requestId: 'req-slow-1', text: 'slow down here', rect: null,
     expectedDocGeneration: session.controlGrant.docGeneration,
-    expectedArtRevision: session.artRevision });
+    expectedArtRevision: session.artRevision, expectedControlEpoch: session.controlGrant.controlEpoch });
   assert.equal(session.status, 'paused', 'a comment keeps the painter paused');
   assert.equal(session.comments.length, 1);
   assert.equal(session.comments[0].text, 'slow down here');
@@ -110,7 +111,7 @@ test('undo/redo moves the cursor and a v2 project roundtrips into a new session'
   assert.equal(source.document.marks.length, 2, 'redo restores the mark');
   source.addComment({ requestId: 'req-ship-1', text: 'ship it', rect: null,
     expectedDocGeneration: source.controlGrant.docGeneration,
-    expectedArtRevision: source.artRevision });
+    expectedArtRevision: source.artRevision, expectedControlEpoch: source.controlGrant.controlEpoch });
   const exported = source.project();
   assert.equal(exported.version, 2, 'projects export as v2 with comments');
   const restored = new Session();

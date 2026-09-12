@@ -100,6 +100,7 @@ func TestCommentsStudioIntegration(t *testing.T) {
 		"continuePlayback":      false,
 		"expectedDocGeneration": full.DocGeneration,
 		"expectedArtRevision":   full.ArtRevision,
+		"expectedControlEpoch":  full.ControlEpoch,
 	})
 
 	listing := envelope("comments", "list")
@@ -159,6 +160,7 @@ func TestCommentsStudioIntegration(t *testing.T) {
 		"continuePlayback":      false,
 		"expectedDocGeneration": second.DocGeneration,
 		"expectedArtRevision":   second.ArtRevision,
+		"expectedControlEpoch":  second.ControlEpoch,
 	})
 	change := readEvent()
 	if change["event"] == "initial" {

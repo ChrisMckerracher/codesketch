@@ -1,7 +1,5 @@
 import { createReviewSession } from './session.mjs';
 
-export { mount } from './presentation/index.mjs';
-
 export function createReview({ model, requests, dispatch } = {}) {
   let destroyed = false;
   const session = createReviewSession({ model, requests, dispatch });

@@ -60,10 +60,14 @@ export function handleLocal(intent, { state, model }) {
 
 function readProperties(intent) {
   const fields = {};
-  const { size, opacity, color } = intent;
+  const { size, smoothing, opacity, color } = intent;
   if (size !== undefined) {
     if (!Number.isInteger(size) || size < 1 || size > 100) return null;
     fields.size = size;
+  }
+  if (smoothing !== undefined) {
+    if (!Number.isInteger(smoothing) || smoothing < 0 || smoothing > 100) return null;
+    fields.smoothing = smoothing;
   }
   if (opacity !== undefined) {
     if (typeof opacity !== 'number' || !Number.isFinite(opacity) || opacity < 0 || opacity > 1) {

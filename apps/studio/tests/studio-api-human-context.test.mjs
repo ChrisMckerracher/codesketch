@@ -127,7 +127,7 @@ test('a supplied generation string is sent unchanged', async () => {
   assert.equal(calls[0].expectedDocGeneration, 'stale-generation');
 });
 
-test('comment methods keep their existing signatures', async () => {
+test('comment methods forward the current epoch and human transition actor', async () => {
   const calls = await captureCalls(async () => {
     const api = new StudioApi({ timeoutMs: 1000 });
     await api.createComment({
@@ -137,15 +137,18 @@ test('comment methods keep their existing signatures', async () => {
       continuePlayback: false,
       expectedDocGeneration: 'gen-1',
       expectedArtRevision: 0,
+      expectedControlEpoch: 1,
     });
     await api.resolveComment({ id: 'comment-1', reopen: false, expectedDocGeneration: 'gen-1', expectedSeq: 1 });
   });
   assert.deepEqual(calls.map((call) => call.path), ['/api/comments', '/api/comments/resolve']);
   assert.equal(calls[0].body.requestId, 'request-1');
   assert.equal(calls[0].body.expectedDocGeneration, 'gen-1');
+  assert.equal(calls[0].body.expectedControlEpoch, 1);
   assert.deepEqual(calls[1].body, {
     id: 'comment-1',
     reopen: false,
+    source: 'human',
     expectedDocGeneration: 'gen-1',
     expectedSeq: 1,
   });

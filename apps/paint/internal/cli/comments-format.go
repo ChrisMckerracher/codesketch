@@ -27,6 +27,14 @@ type commentsLayer struct {
 	Opacity float64 `json:"opacity"`
 }
 
+type commentReply struct {
+	ID        string `json:"id"`
+	RequestID string `json:"requestId"`
+	Author    string `json:"author"`
+	Text      string `json:"text"`
+	At        string `json:"at"`
+}
+
 // commentsGrant mirrors the active control grant object or null.
 type commentsGrant struct {
 	DocGeneration string `json:"docGeneration"`
@@ -49,6 +57,7 @@ type commentRecord struct {
 	ResolvedAt     *string         `json:"resolvedAt"`
 	VisibleLayers  []commentsLayer `json:"visibleLayers"`
 	Request        json.RawMessage `json:"request"`
+	Replies        []commentReply  `json:"replies"`
 }
 
 // commentsEnvelope is the shared envelope for /api/comments and
@@ -98,7 +107,7 @@ func validateCommentRecords(comments []commentRecord) error {
 			return fmt.Errorf("comment %d requires rect (use null for the whole canvas)", c.Number)
 		}
 	}
-	return nil
+	return validateCommentReplies(comments)
 }
 
 func sameActiveGrant(a, b *commentsGrant) bool {
@@ -137,8 +146,16 @@ func commentLines(comments []commentRecord) []string {
 	for _, c := range comments {
 		lines = append(lines, fmt.Sprintf("  #%d [%s] (id %s, seq %d) %s (%s, %s)",
 			c.Number, c.Status, c.ID, c.Seq, c.Text, commentsRectText(c.Rect), commentsLayersText(c.VisibleLayers)))
+		for _, reply := range c.Replies {
+			lines = append(lines, "    "+formatCommentReply(c.ID, reply))
+		}
 	}
 	return lines
+}
+
+func formatCommentReply(commentID string, reply commentReply) string {
+	return fmt.Sprintf("Reply to comment %s: [%s] %s (id %s, requestId %s, at %s)",
+		commentID, reply.Author, reply.Text, reply.ID, reply.RequestID, reply.At)
 }
 
 // formatCommentsRecords renders snapshot comment records without an envelope
@@ -165,6 +182,16 @@ func commentsSummary(env commentsEnvelope) string {
 		summary += ", reset"
 	}
 	return summary
+}
+
+func formatCommentsEvent(event string, env commentsEnvelope) string {
+	lines := []string{fmt.Sprintf("[%s] %s", event, commentsSummary(env))}
+	for _, comment := range env.Comments {
+		for _, reply := range comment.Replies {
+			lines = append(lines, "    "+formatCommentReply(comment.ID, reply))
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 // formatCommentsText renders the concise human listing with the identifiers

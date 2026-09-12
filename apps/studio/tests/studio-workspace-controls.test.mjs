@@ -63,6 +63,22 @@ test("controls require the current vector layout contract without an older fallb
   assert.throws(() => layoutText({ layout() { return { cells: [], lines: [], width: 0, height: 0, lineHeight: 0 }; } }, "A", 20), /invalid layout/);
 });
 
+test("DOM events consume rejected async dispatches after routing reports them", () => {
+  const document = new FakeDocument();
+  const root = document.createElement("div");
+  let caught = false;
+  const rejection = { catch(handler) { caught = true; handler(); return this; } };
+  const controls = createControls({
+    root,
+    vector: vector(),
+    dispatch: () => rejection,
+    changed() {},
+  });
+  controls.update([descriptor("button")]);
+  root.children[0].emit("click");
+  assert.equal(caught, true);
+});
+
 test("caret boundaries follow vector CRLF, CR, Unicode separators, expansion, and scale", () => {
   const v = createVector(null);
   const breaks = "A\r\n\u2028\u2029B";
@@ -172,7 +188,7 @@ test("Shift-click extends from the active end of a backward selection", () => {
 test("range and plane pointer activation focuses the control and rejects competing or nonprimary pointers", () => {
   const { document, root, controls, calls } = mount([
     descriptor("textarea", { value: "old" }),
-    descriptor("range", { id: "range", x: 20, y: 30, width: 100, height: 20, value: 25, min: 0, max: 100, track: { x: 20, width: 100 } }),
+    descriptor("range", { id: "range", x: 20, y: 30, width: 100, height: 20, value: 25, min: 0, max: 100, track: { x: 20, y: 30, width: 100, height: 20 } }),
     descriptor("plane", { id: "plane", x: 20, y: 60, width: 100, height: 50, value: { x: 0.2, y: 0.3 } }),
   ]);
   const area = root.children[0];
@@ -209,6 +225,30 @@ test("range and plane pointer activation focuses the control and rejects competi
   assert.deepEqual(plane.captures, [3]);
 });
 
+test("removing a focused control is safe when DOM blur synchronously re-syncs", () => {
+  const document = new FakeDocument();
+  const root = document.createElement("div");
+  let controls;
+  let changes = 0;
+  controls = createControls({
+    root,
+    vector: vector(),
+    changed() {
+      changes += 1;
+      controls.update([]);
+    },
+  });
+  controls.update([descriptor("button")]);
+  const button = root.children[0];
+  document.activeElement = button;
+  controls.update([]);
+
+  assert.equal(button.blurEvents, 1);
+  assert.equal(changes, 0, "removed focus listener does not re-enter sync");
+  assert.equal(root.children.length, 0);
+  assert.equal(controls.inputState("button"), null);
+});
+
 class FakeDocument {
   constructor() { this.activeElement = null; this.listeners = new Map(); }
   createElement(tag) { return new FakeElement(this, tag); }
@@ -230,15 +270,25 @@ class FakeElement {
     this.disabled = false;
     this.captures = [];
     this.releases = [];
+    this.blurEvents = 0;
   }
   addEventListener(type, listener) { this.listeners.set(type, listener); }
+  removeEventListener(type, listener) { if (this.listeners.get(type) === listener) this.listeners.delete(type); }
   emit(type, init = {}) {
     const event = { target: this, preventDefault() { this.defaultPrevented = true; }, ...init };
     this.listeners.get(type)?.(event);
     return event;
   }
   appendChild(child) { this.children.push(child); child.parentNode = this; }
-  remove() { const index = this.parentNode?.children.indexOf(this); if (index >= 0) this.parentNode.children.splice(index, 1); }
+  remove() {
+    if (this.ownerDocument.activeElement === this) {
+      this.blurEvents += 1;
+      this.ownerDocument.activeElement = null;
+      this.emit("blur");
+    }
+    const index = this.parentNode?.children.indexOf(this);
+    if (index >= 0) this.parentNode.children.splice(index, 1);
+  }
   focus(options) { this.focusOptions = options; this.ownerDocument.activeElement = this; this.emit("focus"); }
   setSelectionRange(start, end, direction = "none") { this.selectionStart = start; this.selectionEnd = end; this.selectionDirection = direction; }
   setPointerCapture(pointerId) { this.captures.push(pointerId); }

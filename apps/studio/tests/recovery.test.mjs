@@ -121,7 +121,8 @@ describe('recovery and bounded direction regressions', () => {
 
     assert.throws(() => session.addComment({ requestId: 'req-over-1', text: 'One too many', rect: null,
       expectedDocGeneration: session.controlGrant.docGeneration,
-      expectedArtRevision: session.artRevision }), /At most 100/);
+      expectedArtRevision: session.artRevision, expectedControlEpoch: session.controlGrant.controlEpoch }),
+      /At most 100/);
     assert.equal(session.status, 'paused');
     assert.equal(changedNotified, false, 'a failed comment never notifies');
     assert.deepEqual(session.snapshot(), before, 'a failed capacity add preserves the entire state');
@@ -152,7 +153,8 @@ describe('recovery and bounded direction regressions', () => {
 
     assert.throws(() => nearBudget.addComment({ requestId: 'req-big-1', text: 'y'.repeat(2000), rect: null,
       expectedDocGeneration: nearBudget.controlGrant.docGeneration,
-      expectedArtRevision: nearBudget.artRevision }), /exceeds 7 MiB budget/);
+      expectedArtRevision: nearBudget.artRevision,
+      expectedControlEpoch: nearBudget.controlGrant.controlEpoch }), /exceeds 7 MiB budget/);
     assert.equal(nearBudget.status, 'paused');
     assert.equal(budgetNotified, false, 'a budget failure never notifies');
     assert.deepEqual(nearBudget.snapshot(), budgetBefore, 'a budget failure preserves the entire state');
@@ -165,7 +167,8 @@ describe('recovery and bounded direction regressions', () => {
     const playingBefore = structuredClone(playing.snapshot());
     conflict(() => playing.addComment({ requestId: 'req-playing-1', text: 'too soon', rect: null,
       expectedDocGeneration: playing.controlGrant.docGeneration,
-      expectedArtRevision: playing.artRevision }), 'comments cannot be added while playing');
+      expectedArtRevision: playing.artRevision,
+      expectedControlEpoch: playing.controlGrant.controlEpoch }), 'comments cannot be added while playing');
     assert.deepEqual(playing.snapshot(), playingBefore, 'a rejected comment on a playing session mutates nothing');
   });
 
@@ -214,7 +217,7 @@ describe('recovery and bounded direction regressions', () => {
       for (let i = 0; i < 20; i++) {
         session3.addComment({ requestId: `req-coalesce-${i}`, text: `Coalesced ${i}`, rect: null,
           expectedDocGeneration: session3.controlGrant.docGeneration,
-          expectedArtRevision: session3.artRevision });
+          expectedArtRevision: session3.artRevision, expectedControlEpoch: session3.controlGrant.controlEpoch });
       }
       await flush();
       const readBack = JSON.parse(await readFile(file, 'utf8'));

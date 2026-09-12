@@ -44,9 +44,11 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
       value: planeValue(descriptor.value),
       composing: false,
       dragging: false,
-      dispatch: fire,
-      document: doc,
-      skipClick: false,
+    dispatch: fire,
+    document: doc,
+    skipClick: false,
+    focusListener: null,
+    blurListener: null,
     };
     bind(record);
     root.appendChild(el);
@@ -57,8 +59,9 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
   }
   function bind(record) {
     const { el } = record;
-    el.addEventListener("focus", notify);
-    el.addEventListener("blur", notify);
+    record.focusListener = () => notify(); record.blurListener = () => notify();
+    el.addEventListener("focus", record.focusListener);
+    el.addEventListener("blur", record.blurListener);
     if (record.descriptor.kind === "range") bindRange(record);
     else if (record.descriptor.kind === "textarea") bindArea(record);
     else if (record.descriptor.kind === "plane") bindPlane(record);
@@ -201,8 +204,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
       dispatchValue(record, record.el.value);
       notify();
     });
-  }
-  function apply(record) {
+  } function apply(record) {
     const d = record.descriptor;
     const el = record.el;
     el.style.left = `${d.x}px`;
@@ -254,9 +256,12 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
   function remove(record) {
     if (activeDrag?.record === record) activeDrag = null;
     record.dragging = false;
-    elements.delete(record.el);
-    record.el.remove();
     controls.delete(record.descriptor.id);
+    elements.delete(record.el);
+    record.el.removeEventListener?.("focus", record.focusListener);
+    record.el.removeEventListener?.("blur", record.blurListener);
+    record.removed = true;
+    record.el.remove();
   }
 
   function destroy() {
@@ -289,10 +294,6 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
   return { sync, destroy, state, inputState, setVector(nextVector) { currentVector = nextVector; } };
 }
 
-function dispatchValue(record, value) {
-  const d = record.descriptor;
-  const payload = d.payload && typeof d.payload === "object" ? d.payload : {};
-  record.dispatch?.(d.action, { ...payload, value });
-}
+function dispatchValue(record, value) { const d = record.descriptor; const payload = d.payload && typeof d.payload === "object" ? d.payload : {}; const result = record.dispatch?.(d.action, { ...payload, value }); result?.catch?.(() => {}); }
 
 function busy(record) { return record.composing || record.document.activeElement === record.el || record.dragging; }

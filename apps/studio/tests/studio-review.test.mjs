@@ -92,6 +92,7 @@ test('begin pauses through dispatch and activates region selection on the confir
   assert.equal(confirmed.controlEpoch, 1, 'the confirmed snapshot resolves');
   assert.equal(model.get().review.phase, 'selecting');
   assert.equal(model.get().review.artRevision, 4, 'the art revision freezes at the accepted pause');
+  assert.equal(model.get().review.controlEpoch, 1, 'the confirmed pause epoch freezes for submission');
   assert.equal(model.get().tool, 'comment');
   assert.equal(model.get().tab, 'feedback');
   assert.deepEqual(model.get().drawers, { left: true, right: false });
@@ -118,6 +119,18 @@ test('an art change during region selection goes stale before any rect', async (
   observe(paused({ revision: 3, controlEpoch: 1, artRevision: 5 }));
   assert.equal(model.get().review.phase, 'stale', 'the drag is stale after artwork moved');
   assert.equal(model.get().review.text, 'drag note');
+});
+
+test('a control epoch change during composing goes stale with text preserved', async () => {
+  const { model, calls, observe, review } = build();
+  observe(snapshot({ revision: 1 }));
+  const begun = review.handle({ type: 'review.begin', scope: 'whole' });
+  calls[0].control.resolve(paused({ revision: 2, controlEpoch: 1, artRevision: 4 }));
+  await begun;
+  review.handle({ type: 'review.text', text: 'keep this draft' });
+  observe(paused({ revision: 3, controlEpoch: 2, artRevision: 4 }));
+  assert.equal(model.get().review.phase, 'stale');
+  assert.equal(model.get().review.text, 'keep this draft');
 });
 
 test('review.rect keeps the frozen revision and moves to composing', async () => {
@@ -260,7 +273,7 @@ test('review transitions gate on the current item status and send exact context'
   calls.at(-1).control.resolve(paused({ revision: 3 }));
   await first;
   assert.deepEqual(calls.at(-1).args, [{
-    id: 'c1', reopen: false, expectedDocGeneration: 'gen-1', expectedSeq: 3,
+    id: 'c1', reopen: false, source: 'human', expectedDocGeneration: 'gen-1', expectedSeq: 3,
   }]);
   const open = { ...comment, id: 'c2', status: 'open' };
   observe(paused({ revision: 3, comments: [open] }));
@@ -274,6 +287,6 @@ test('review transitions gate on the current item status and send exact context'
   calls.at(-1).control.resolve(paused({ revision: 5 }));
   await reopen;
   assert.deepEqual(calls.at(-1).args, [{
-    id: 'c3', reopen: true, expectedDocGeneration: 'gen-1', expectedSeq: 3,
+    id: 'c3', reopen: true, source: 'human', expectedDocGeneration: 'gen-1', expectedSeq: 3,
   }]);
 });

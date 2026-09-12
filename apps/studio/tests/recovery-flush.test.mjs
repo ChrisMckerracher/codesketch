@@ -106,7 +106,8 @@ describe('recovery flush and strict envelope persistence', () => {
       const { flush } = await attachPersistence(session, file);
       session.control('pause', undefined, { source: 'human' });
       const comment = (requestId, text) => session.addComment({ requestId, text, rect: null,
-        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+        expectedControlEpoch: session.controlGrant.controlEpoch });
       comment('req-queued-1', 'oldest');
       const first = flush();
       comment('req-queued-2', 'newest');
@@ -214,7 +215,8 @@ describe('recovery flush and strict envelope persistence', () => {
       await flush();
       await chmod(dir, 0o555);
       session.addComment({ requestId: 'req-blocked', text: 'blocked', rect: null,
-        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+        expectedControlEpoch: session.controlGrant.controlEpoch });
       await new Promise(resolve => setTimeout(resolve, 50));
       assert.match(session.storageError, /Local recovery could not be saved/);
       await chmod(dir, 0o700);

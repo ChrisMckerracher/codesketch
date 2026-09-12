@@ -236,6 +236,19 @@ test('constructor validates timeoutMs and defaults to 10 seconds', () => {
   assert.equal(new StudioApi().timeoutMs, 10000);
 });
 
+test('fetchProject requires and binds the captured instance and generation', async () => {
+  const paths = [];
+  await serve(async (path) => {
+    paths.push(path);
+    return jsonResponse({ format: 'codesketch', version: 2, commands: [], cursor: 0, queue: [], comments: [] });
+  }, async () => {
+    const api = new StudioApi({ timeoutMs: 500 });
+    await api.fetchProject({ expectedInstanceId: 'instance 1', expectedDocGeneration: 'generation/1' });
+    await assert.rejects(api.fetchProject(), TypeError);
+  });
+  assert.equal(paths[0], '/api/project?expectedInstanceId=instance%201&expectedDocGeneration=generation%2F1');
+});
+
 test('makes no automatic retries after a failed request', async () => {
   const { api } = recordingApi(500);
   let calls = 0;

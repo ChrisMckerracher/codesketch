@@ -21,6 +21,10 @@ function pausedAtEpoch(value, gesture) {
     && value.snapshot.playback?.status === 'paused';
 }
 
+function effectiveSize(value) {
+  return value.tool === 'eraser' ? Math.min(100, 2 * value.size) : value.size;
+}
+
 export function createGesture({ model, dispatch, requests, canvas, point }) {
   let current = model.get();
   let gesture = null;
@@ -131,11 +135,9 @@ export function createGesture({ model, dispatch, requests, canvas, point }) {
     const value = model.get();
     if (!serverReady(value)) return;
     if (value.tool === 'hand' || value.tool === 'comment') return;
-    const effectiveTool = value.context === 'layer' ? 'brush' : value.tool;
-    const kind = PAINT_TOOLS.has(effectiveTool) ? 'stroke' : SHAPE_TOOLS.has(effectiveTool) ? effectiveTool : null;
+    const kind = PAINT_TOOLS.has(value.tool) ? 'stroke' : SHAPE_TOOLS.has(value.tool) ? value.tool : null;
     if (!kind) return;
     if (!value.snapshot.document?.layers?.some((layer) => layer?.id === value.targetLayer)) return;
-    if (value.context === 'layer') dispatch({ type: 'tool.return' }).catch(() => {});
     const token = ++nextToken;
     gesture = {
       token,
@@ -146,9 +148,10 @@ export function createGesture({ model, dispatch, requests, canvas, point }) {
       acceptedArtRevision: null,
       layer: value.targetLayer,
       kind,
-      brush: kind === 'stroke' ? effectiveTool : null,
+      brush: kind === 'stroke' ? value.tool : null,
       color: value.color,
-      size: value.size,
+      size: effectiveSize(value),
+      smoothing: value.smoothing,
       opacity: value.opacity,
     };
     acked = false;
@@ -172,7 +175,7 @@ export function createGesture({ model, dispatch, requests, canvas, point }) {
     if (pointerId !== null && event.pointerId !== undefined && event.pointerId !== pointerId) return;
     const coords = clampPoint(point(event));
     if (phase === 'idle') {
-      if (PAINT_TOOLS.has(current.tool)) guide.show(coords[0], coords[1], current.size);
+      if (PAINT_TOOLS.has(current.tool)) guide.show(coords[0], coords[1], effectiveSize(current));
       else guide.hide();
       return;
     }
@@ -232,7 +235,6 @@ export function createGesture({ model, dispatch, requests, canvas, point }) {
   canvas.addEventListener('pointerdown', onPointerDown, { signal: options.signal });
   canvas.addEventListener('pointermove', onPointerMove, { signal: options.signal });
   canvas.addEventListener('pointerup', onPointerUp, { signal: options.signal });
-  canvas.addEventListener('pointercancel', () => cancelGesture(), { signal: options.signal });
   canvas.addEventListener('pointercancel', (event) => {
     if (pointerId !== null && event.pointerId !== undefined && event.pointerId !== pointerId) return;
     cancelGesture();

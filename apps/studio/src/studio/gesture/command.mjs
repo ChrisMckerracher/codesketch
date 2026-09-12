@@ -1,3 +1,5 @@
+import { smoothPoints } from './smoothing.mjs';
+
 export const CANVAS_WIDTH = 1000;
 export const CANVAS_HEIGHT = 700;
 export const MAX_POINTS = 2000;
@@ -27,7 +29,7 @@ export function buildStroke(frozen, points) {
     color: frozen.color,
     size: frozen.size,
     opacity: frozen.opacity,
-    points: boundedPoints(points).map(clampPoint),
+    points: smoothPoints(boundedPoints(points), frozen.smoothing ?? 0).map(clampPoint),
   };
 }
 

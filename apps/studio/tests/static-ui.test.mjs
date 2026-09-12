@@ -71,7 +71,7 @@ test('the application icon serves as the one explicit SVG with no favicon alias'
 test('query strings are stripped from static request targets', async t => {
   const studio = await startStudio(realRoot);
   t.after(() => studio.close());
-  const stylesheet = await studio.request('/public/tokens.css?cachebust=123');
+  const stylesheet = await studio.request('/public/workspace.css?cachebust=123');
   assert.equal(stylesheet.status, 200);
   assert.match(stylesheet.headers['content-type'], /^text\/css; charset=utf-8$/);
   const shell = await studio.request('/?edition=compact');
@@ -82,7 +82,7 @@ test('query strings are stripped from static request targets', async t => {
 test('existing allowlisted stylesheets serve as CSS and retained modules still serve', async t => {
   const studio = await startStudio(realRoot);
   t.after(() => studio.close());
-  for (const name of ['tokens', 'workspace', 'controls', 'layers']) {
+  for (const name of ['workspace']) {
     const response = await studio.request(`/public/${name}.css`);
     assert.equal(response.status, 200, `${name}.css must serve`);
     assert.match(response.headers['content-type'], /^text\/css; charset=utf-8$/);
@@ -97,8 +97,10 @@ test('unknown public files and non-allowlisted names return JSON 404', async t =
   const studio = await startStudio(realRoot);
   t.after(() => studio.close());
   for (const path of ['/public/README.md', '/public/base.css', '/public/tokens.cssx',
+    '/public/tokens.css', '/public/controls.css', '/public/layers.css',
+    '/public/inspector.css', '/public/stage.css', '/public/feedback.css',
     '/public/tokens', '/public/', '/public/index.html/', '/index.html', '/favicon.ico',
-    '/public/tokens.css/extra', '/PUBLIC/INDEX.HTML']) {
+    '/public/workspace.css/extra', '/PUBLIC/INDEX.HTML']) {
     const response = await studio.request(path);
     assert.equal(response.status, 404, `${path} must not be served`);
     assert.equal(response.headers['content-type'], 'application/json');
@@ -128,22 +130,23 @@ test('disposable fixtures prove allowlist behavior and reject escaping symlinks'
   mkdirSync(join(fixtureRoot, 'src', 'studio'), { recursive: true });
   writeFileSync(join(fixtureRoot, 'public', 'index.html'),
     '<!doctype html><html><body id="studio-app">fixture shell</body></html>');
-  writeFileSync(join(fixtureRoot, 'public', 'tokens.css'), '.fixture { color: currentColor; }\n');
+  writeFileSync(join(fixtureRoot, 'public', 'workspace.css'), '.fixture { color: currentColor; }\n');
   writeFileSync(join(fixtureRoot, 'src', 'studio', 'fixture.mjs'), 'export const fixture = 1;\n');
-  symlinkSync('/etc/hostname', join(fixtureRoot, 'public', 'workspace.css'));
   symlinkSync('/etc/hostname', join(fixtureRoot, 'src', 'studio', 'escape.mjs'));
   const studio = await startStudio(fixtureRoot);
   t.after(() => studio.close());
   const entry = await studio.request('/');
   assert.equal(entry.status, 200);
   assert.ok(entry.text.includes('fixture shell'), 'fixture entrypoint serves from the disposable root');
-  const stylesheet = await studio.request('/public/tokens.css');
+  const stylesheet = await studio.request('/public/workspace.css');
   assert.equal(stylesheet.status, 200, 'allowlisted fixture stylesheet serves');
   assert.match(stylesheet.headers['content-type'], /^text\/css/);
   const module = await studio.request('/src/studio/fixture.mjs');
   assert.equal(module.status, 200, 'retained module fixture serves');
   const missing = await studio.request('/public/inspector.css');
   assert.equal(missing.status, 404, 'allowlisted name with no file still returns 404');
+  rmSync(join(fixtureRoot, 'public', 'workspace.css'));
+  symlinkSync('/etc/hostname', join(fixtureRoot, 'public', 'workspace.css'));
   const escapedStylesheet = await studio.request('/public/workspace.css');
   assert.equal(escapedStylesheet.status, 404, 'symlinked stylesheet escaping public must 404');
   const escapedModule = await studio.request('/src/studio/escape.mjs');
@@ -155,14 +158,14 @@ test('a public or module directory symlink escaping the canonical root serves no
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   mkdirSync(join(fixtureRoot, 'outside'), { recursive: true });
   writeFileSync(join(fixtureRoot, 'outside', 'index.html'), '<!doctype html>external shell');
-  writeFileSync(join(fixtureRoot, 'outside', 'tokens.css'), '.external {}\n');
+   writeFileSync(join(fixtureRoot, 'outside', 'workspace.css'), '.external {}\n');
   writeFileSync(join(fixtureRoot, 'outside', 'fixture.mjs'), 'export const external = 1;\n');
   mkdirSync(join(fixtureRoot, 'src'), { recursive: true });
   symlinkSync(join(fixtureRoot, 'outside'), join(fixtureRoot, 'public'));
   symlinkSync(join(fixtureRoot, 'outside'), join(fixtureRoot, 'src', 'studio'));
   const studio = await startStudio(fixtureRoot);
   t.after(() => studio.close());
-  for (const path of ['/', '/public/index.html', '/public/tokens.css', '/src/studio/fixture.mjs']) {
+  for (const path of ['/', '/public/index.html', '/public/workspace.css', '/src/studio/fixture.mjs']) {
     const response = await studio.request(path);
     assert.equal(response.status, 404, `${path} through an escaping directory symlink must 404`);
     assert.equal(response.headers['content-type'], 'application/json');

@@ -188,7 +188,8 @@ describe('session playback control guard', () => {
     const session = new Session();
     session.submit({ commands: [stroke(5, 5)], play: false, source: 'human' });
     session.addComment({ requestId: 'req-new-1', text: 'slow down here', rect: null,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch });
     const stale = session.controlGrant.docGeneration;
     session.control('new', undefined, { source: 'human' });
     assert.notEqual(session.controlGrant.docGeneration, stale);
@@ -210,19 +211,22 @@ describe('session playback control guard', () => {
     session.submit({ commands: [stroke(5, 5)], ...context(session) });
     session.control('pause', 1, { source: 'human' });
     session.addComment({ requestId: 'req-note-1', text: 'note', rect: null,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch });
     assert.equal(session.status, 'paused');
     assert.equal(session.controlGrant.requiresGrant, true);
     conflict(() => session.submit({ commands: [stroke(7, 7)] }));
     for (let i = 2; i <= 100; i++) {
       session.addComment({ requestId: `req-note-${i}`, text: `note ${i}`, rect: null,
-        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+        expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+        expectedControlEpoch: session.controlGrant.controlEpoch });
     }
     assert.equal(session.comments.length, 100);
     const before = session.controlGrant.snapshot();
     const revisions = session.revision;
     assert.throws(() => session.addComment({ requestId: 'req-note-over', text: 'one too many', rect: null,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision }),
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch }),
       /At most 100/);
     assert.equal(session.status, 'paused');
     assert.deepEqual(session.controlGrant.snapshot(), before, 'a capacity failure invalidates nothing');
@@ -241,11 +245,13 @@ describe('session playback control guard', () => {
     session.control('speed', 2);
     session.submit({ commands: [stroke(60, 60)], play: false, ...context(session) });
     session.addComment({ requestId: 'req-art-1', text: 'send only pauses', rect: null,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch });
     assert.equal(session.artRevision, start, 'controls, staging and Send never move artRevision');
     assert.ok(emissions > 0 && session.revision > 0, 'ordinary revision and onChange still advance');
     session.addComment({ text: 'go fresh', rect: null, requestId: 'apply-idle', continuePlayback: true,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch });
     assert.equal(session.artRevision, start, 'Apply without an active preview keeps artRevision');
     session.submit({ commands: [{ type: 'layer.update', id: 'paint', opacity: 0.5 }],
       immediate: true, source: 'human' });
@@ -257,7 +263,8 @@ describe('session playback control guard', () => {
     session.control('pause', 1, { source: 'human' });
     const beforePreview = session.artRevision;
     session.addComment({ text: 'clear preview', rect: null, requestId: 'apply-active', continuePlayback: true,
-      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision });
+      expectedDocGeneration: session.controlGrant.docGeneration, expectedArtRevision: session.artRevision,
+      expectedControlEpoch: session.controlGrant.controlEpoch });
     assert.equal(session.active, null);
     assert.equal(session.queue.length, 0);
     assert.equal(session.artRevision, beforePreview + 1, 'Apply removing an active preview advances artRevision');

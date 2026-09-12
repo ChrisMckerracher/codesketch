@@ -74,7 +74,7 @@ describe('guarded resets, loads, and load-adjacent control actions', () => {
     source.submit({ commands: [stroke(5, 5)], immediate: true, source: 'human' });
     source.addComment({ requestId: 'req-keep-1', text: 'keep me', rect: null,
       expectedDocGeneration: source.controlGrant.docGeneration,
-      expectedArtRevision: source.artRevision });
+      expectedArtRevision: source.artRevision, expectedControlEpoch: source.controlGrant.controlEpoch });
     const project = source.project();
     session.control('new', 1, { source: 'human' });
     assert.equal(session.status, 'idle');

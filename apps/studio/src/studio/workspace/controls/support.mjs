@@ -9,39 +9,17 @@ export function elementTag(kind) {
 
 export function rawPoint(point, event) {
   const value = point(event);
-  if (Array.isArray(value)) return [number(value[0], 0), number(value[1], 0)];
-  return [number(value?.x, 0), number(value?.y, 0)];
+  if (!Array.isArray(value)) throw new TypeError("point must return [x, y]");
+  return [number(value[0], 0), number(value[1], 0)];
 }
 
 export function trackLimits(descriptor, axis) {
-  const track = descriptor.track;
   const startKey = axis === "y" ? "y" : "x";
   const sizeKey = axis === "y" ? "height" : "width";
-  const fallbackStart = descriptor[startKey];
-  const fallbackEnd = fallbackStart + descriptor[sizeKey];
-  if (Array.isArray(track)) {
-    if (track.length >= 4) {
-      return [number(track[axis === "y" ? 1 : 0], fallbackStart), number(track[axis === "y" ? 3 : 2], fallbackEnd)];
-    }
-    if (track.length >= 2) return [number(track[0], fallbackStart), number(track[1], fallbackEnd)];
-  }
-  if (!track || typeof track !== "object") return [fallbackStart, fallbackEnd];
-  const start = number(
-    track[startKey]
-      ?? track[startKey === "y" ? "top" : "left"]
-      ?? track[startKey + "1"]
-      ?? track.from
-      ?? track.start,
-    fallbackStart,
-  );
-  const end = number(
-    track[axis === "y" ? "y2" : "x2"]
-      ?? track[axis === "y" ? "bottom" : "right"]
-      ?? track.to
-      ?? track.end,
-    start + number(track[sizeKey], descriptor[sizeKey]),
-  );
-  return [start, end];
+  const track = descriptor.track && typeof descriptor.track === "object" ? descriptor.track : {};
+  const start = number(track[startKey], number(descriptor[startKey], 0));
+  const size = number(track[sizeKey], number(descriptor[sizeKey], 0));
+  return [start, start + size];
 }
 
 export function setPlaneAria(record) {

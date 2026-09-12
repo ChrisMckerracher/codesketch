@@ -20,16 +20,16 @@ export function createPauseFlow({ model, requests, dispatch, internal, onClose }
 
   const confirmed = (ack) => {
     const latest = currentSnapshot();
-    return Boolean(latest && internal.captured &&
-      latest.instanceId === internal.captured.instanceId &&
-      latest.docGeneration === internal.captured.generation &&
+    return Boolean(latest && ack && internal.pendingContext &&
+      latest.instanceId === internal.pendingContext.instanceId &&
+      latest.docGeneration === internal.pendingContext.generation &&
       latest.playback && latest.playback.status === 'paused' &&
       latest.controlEpoch === ack.controlEpoch);
   };
 
   const handshake = new PauseHandshake({
     sendPause: () => dispatch({
-      type: 'playback.control', action: 'pause', generation: internal.captured?.generation,
+      type: 'playback.control', action: 'pause', generation: internal.pendingContext?.generation,
     }),
     acceptSnapshot: (ack) => confirmed(ack),
   });
@@ -51,7 +51,8 @@ export function createPauseFlow({ model, requests, dispatch, internal, onClose }
     handshake.expire();
     rejectPending(stale('Review was replaced before the pause was confirmed'));
     internal.operation += 1;
-    internal.captured = { instanceId: current.instanceId, generation: current.docGeneration };
+    internal.pendingContext = { instanceId: current.instanceId, generation: current.docGeneration };
+    internal.captured = null;
     internal.scope = scope;
     internal.artRevision = null;
     internal.rect = null;
@@ -60,7 +61,7 @@ export function createPauseFlow({ model, requests, dispatch, internal, onClose }
     internal.origin = origin;
     model.patch({
       review: { ...review(), phase: 'pausing', scope, rect: null, text, keepPaused,
-        requestId: null, generation: internal.captured.generation, artRevision: null },
+        requestId: null, generation: null, artRevision: null, controlEpoch: null },
     });
     model.patch({ tool: 'comment', tab: 'feedback', drawers: { left: true, right: false } });
     const pending = { operation: internal.operation, deferred: deferred() };
@@ -70,15 +71,24 @@ export function createPauseFlow({ model, requests, dispatch, internal, onClose }
         if (!valid(pending)) return;
         internal.pendingBegin = null;
         const latest = currentSnapshot();
+        internal.pendingContext = null;
+        internal.captured = {
+          instanceId: latest.instanceId,
+          generation: latest.docGeneration,
+          artRevision: latest.artRevision,
+          controlEpoch: ack.controlEpoch,
+        };
         internal.artRevision = latest.artRevision;
         model.patch({ review: { ...review(),
           phase: internal.scope === 'whole' ? 'composing' : 'selecting',
-          rect: null, artRevision: latest.artRevision } });
+          rect: null, generation: latest.docGeneration, artRevision: latest.artRevision,
+          controlEpoch: ack.controlEpoch } });
         pending.deferred.resolve(ack);
       },
       onStale: (error) => {
         if (!valid(pending)) return;
         internal.pendingBegin = null;
+        internal.pendingContext = null;
         if (origin === 'reselect') model.patch({ review: { ...review(), phase: 'stale' } });
         else onClose();
         pending.deferred.reject(error ?? stale('The pause acknowledgement was not confirmed'));
@@ -91,8 +101,8 @@ export function createPauseFlow({ model, requests, dispatch, internal, onClose }
     start,
     expire: () => handshake.expire(),
     rejectPending,
-    rotatedDuringPause: (snap) => Boolean(internal.captured &&
-      (snap.instanceId !== internal.captured.instanceId ||
-        snap.docGeneration !== internal.captured.generation)),
+    rotatedDuringPause: (snap) => Boolean(internal.pendingContext &&
+      (snap.instanceId !== internal.pendingContext.instanceId ||
+        snap.docGeneration !== internal.pendingContext.generation)),
   };
 }

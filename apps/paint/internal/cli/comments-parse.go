@@ -30,15 +30,15 @@ func prepareCommentsOptions(a *parse.Result) (commentsOptions, error) {
 		if len(args) != 0 {
 			return opts, usage("usage: paint comments list")
 		}
-		if commentsHasFlags(a, "since", "timeout", "generation", "seq") {
-			return opts, usage("comments list rejects --since, --timeout, --generation, and --seq")
+		if commentsHasFlags(a, "since", "timeout", "generation", "seq", "request-id") {
+			return opts, usage("comments list rejects --since, --timeout, --generation, --seq, and --request-id")
 		}
 	case "wait", "watch":
 		if len(args) != 0 {
 			return opts, usage("usage: paint comments %s [--since CURSOR] [--timeout SECONDS]", opts.action)
 		}
-		if commentsHasFlags(a, "generation", "seq") {
-			return opts, usage("comments %s rejects --generation and --seq", opts.action)
+		if commentsHasFlags(a, "generation", "seq", "request-id") {
+			return opts, usage("comments %s rejects --generation, --seq, and --request-id", opts.action)
 		}
 		seconds, err := number(a, "timeout", "30", 0.001, 30)
 		if err != nil {
@@ -56,8 +56,8 @@ func prepareCommentsOptions(a *parse.Result) (commentsOptions, error) {
 		if len(args) != 1 {
 			return opts, usage("usage: paint comments %s ID --generation STRING --seq N", opts.action)
 		}
-		if commentsHasFlags(a, "since", "timeout") {
-			return opts, usage("comments %s rejects --since and --timeout", opts.action)
+		if commentsHasFlags(a, "since", "timeout", "request-id") {
+			return opts, usage("comments %s rejects --since, --timeout, and --request-id", opts.action)
 		}
 		id, err := parseCommentsID(args[0])
 		if err != nil {
@@ -72,8 +72,36 @@ func prepareCommentsOptions(a *parse.Result) (commentsOptions, error) {
 			return opts, usage("%s", err)
 		}
 		opts.id, opts.generation, opts.seq = id, generation, seq
+	case "reply":
+		if len(args) != 2 {
+			return opts, usage("usage: paint comments reply ID TEXT --generation STRING --seq N --request-id ID")
+		}
+		if commentsHasFlags(a, "since", "timeout") {
+			return opts, usage("comments reply rejects --since and --timeout")
+		}
+		id, err := parseCommentsID(args[0])
+		if err != nil {
+			return opts, usage("%s", err)
+		}
+		if _, err := label(args[1], "reply text", 2000); err != nil {
+			return opts, err
+		}
+		text := args[1]
+		generation, err := parseCommentsGeneration(value(a, "generation", ""))
+		if err != nil {
+			return opts, usage("%s", err)
+		}
+		seq, err := parseCommentsSeq(value(a, "seq", ""))
+		if err != nil {
+			return opts, usage("%s", err)
+		}
+		requestID, err := parseCommentsRequestID(value(a, "request-id", ""))
+		if err != nil {
+			return opts, usage("%s", err)
+		}
+		opts.id, opts.text, opts.generation, opts.seq, opts.requestID = id, text, generation, seq, requestID
 	default:
-		return opts, usage("unknown comments action %q; use list, wait, watch, ack, or address", opts.action)
+		return opts, usage("unknown comments action %q; use list, wait, watch, ack, address, or reply", opts.action)
 	}
 	return opts, nil
 }
@@ -133,14 +161,23 @@ func parseCommentsSeq(raw string) (int64, error) {
 
 // parseCommentsID bounds the comment identifier without interpreting it.
 func parseCommentsID(raw string) (string, error) {
-	if raw == "" || strings.TrimSpace(raw) == "" {
-		return "", fmt.Errorf("comments ack/address requires a comment ID")
+	id, err := label(raw, "comment ID", 80)
+	if err != nil {
+		return "", err
 	}
-	if len(raw) > 80 {
-		return "", fmt.Errorf("comment ID exceeds 80 characters")
-	}
-	if strings.ContainsFunc(raw, unicode.IsControl) {
+	if strings.ContainsFunc(id, unicode.IsControl) {
 		return "", fmt.Errorf("comment ID contains control characters")
 	}
-	return raw, nil
+	return id, nil
+}
+
+func parseCommentsRequestID(raw string) (string, error) {
+	requestID, err := label(raw, "--request-id", 80)
+	if err != nil {
+		return "", err
+	}
+	if strings.ContainsFunc(requestID, unicode.IsControl) {
+		return "", fmt.Errorf("--request-id contains control characters")
+	}
+	return requestID, nil
 }
