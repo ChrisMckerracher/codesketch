@@ -175,7 +175,7 @@ GitHub publication verified: `gh repo view` reports the repository public at [gi
 
 ## Studio vector reconstruction verification — September 11, 2026
 
-Visual design baseline approved September 11, 2026 matching user-approved frozen reference mockup (SHA-256 `ff8ca047b1a56b252180bccdbe0baee57e6fb13dfe9fdefef640af9e5c2b6d64`). Final source committed at `cfb0cf6`. Studio presentation operates strictly on dual canvases (`#painting-canvas` and `#ui-canvas`) with custom vector typography (`GLYPHS` engine), fixed 1000×700 design geometry, and invisible semantic DOM backing controls (`#control-host`) for native accessibility, IME composition, and keyboard navigation without visible HTML text nodes.
+Visual design baseline approved September 11, 2026 matching user-approved frozen reference mockup (SHA-256 `ff8ca047b1a56b252180bccdbe0baee57e6fb13dfe9fdefef640af9e5c2b6d64`). Final source committed at `cfb0cf6`, merged to main at `abd084b`. Studio presentation operates strictly on dual canvases (`#painting-canvas` and `#ui-canvas`) with custom vector typography (`GLYPHS` engine), fixed 1000×700 design geometry, and invisible semantic DOM backing controls (`#control-host`) for native accessibility, IME composition, and keyboard navigation without visible HTML text nodes.
 
 | Check | Result |
 | --- | --- |
@@ -183,7 +183,7 @@ Visual design baseline approved September 11, 2026 matching user-approved frozen
 | Extended native suite | Passed: all native packages passed extended verification (`/private/tmp/codesketch-native-acceptance-20260911.log`). |
 | Candidate binary verification | Passed: copied candidate binary outside checkout passed real drawing, feedback `SEND`, and native agent reply with zero browser console or network errors; runtime digest `a596bb38707b98b4bb86c29f6c209be2c0e718dd957b6ba99b9b718069da5c37`; candidate process closed and stopped cleanly. |
 | Browser reconstruction suite | Passed: final manager `npm run test:browser` passed 8/8 registered scenarios (`studio`, `layers-keyboard`, `layers-opacity`, `comments`, `comments-races`, `finish`, `appearance`, `connection`) with zero failures (`/private/tmp/codesketch-final-browser-20260911.log`). |
-| Production cutover & release | **Pending**: production release cutover remains pending lead execution; not claimed done. |
+| Production cutover & release | **Accepted / Released**: Lead cutover completed at 2026-09-12T00:30:37Z (September 11, 20:30 EDT) in 0.928 seconds (complete stop/start/health/preservation sequence). Receipt and backup recorded in `/private/tmp/codesketch-vector-release-fp9rxg4f/{data-backup,paint-before,paint-candidate,cutover.json}`. Old PID 59613 stopped cleanly through authenticated old CLI; candidate atomically installed to `~/.local/bin/paint` (SHA-256 `4ba17b41e05bbd8d715f153d014821afd7c8cd2343d1559f8f56835a262d5533`). New healthy production runtime running at `http://127.0.0.1:4317` with PID 62621, instance `4d4d4587-e787-4554-94e5-2da9cfee377a`, and runtime digest `a596bb38707b98b4bb86c29f6c209be2c0e718dd957b6ba99b9b718069da5c37`. Exact isolated rehearsal restored project/document, followed by production exact preservation: 1,378 commands, 2 comments, paused state (speed 8), `activeGrant: null`, `requiresGrant: true`; no data replacement needed. |
 
 ### Independent review corrections and rechecks
 
