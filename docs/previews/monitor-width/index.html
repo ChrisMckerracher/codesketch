@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codesketch Studio — Responsive Full Width Mockup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0B0F19;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+    #appRoot {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0B0F19;
+      display: flex;
+    }
+    /* Full-width canvas workspace attached to left window edge, extending to fixed 360px sidebar */
+    #canvasWorkspace {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 360px;
+      overflow: hidden;
+      background: #0B0F19; /* Neutral surrounding stage */
+    }
+    #studioCanvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    #canvasOverlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    /* Sidebar attached to right edge; fixed 360px CSS width; spans full window height */
+    #sidebarWorkspace {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 360px;
+      background: #FFFFFF;
+      border-left: 1px solid #E2E8F0;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      z-index: 50;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #sidebarWorkspace.collapsed {
+      transform: translateX(100%);
+    }
+    #sidebarCanvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: default;
+    }
+    #sidebarOverlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .interactive-btn {
+      position: absolute;
+      pointer-events: auto;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0;
+      margin: 0;
+    }
+    .interactive-btn:focus-visible {
+      outline: 2px solid #0284C7;
+      outline-offset: 1px;
+    }
+    #cardInteractiveGroup {
+      position: absolute;
+      pointer-events: none;
+      z-index: 25;
+    }
+    #critiqueInput {
+      position: absolute;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: transparent;
+      caret-color: #0284C7;
+      padding: 4px 6px;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    #btnExpandStudio {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      height: 28px;
+      padding: 0 12px;
+      background: #1E293B;
+      color: #FFFFFF;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #btnExpandStudio:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div id="appRoot">
+    <!-- Full Width Responsive Canvas Workspace with Neutral Surrounding Stage -->
+    <div id="canvasWorkspace">
+      <canvas id="studioCanvas"></canvas>
+      <div id="canvasOverlay">
+        <!-- Area Selection Feedback Card Interactive Hotspots -->
+        <div id="cardInteractiveGroup">
+          <button class="interactive-btn" id="btnCloseCard" title="Dismiss Feedback Card"></button>
+          <textarea id="critiqueInput" placeholder="" autocomplete="off" spellcheck="false"></textarea>
+          <button class="interactive-btn" id="btnCancelFeedback" title="Cancel Feedback"></button>
+          <button class="interactive-btn" id="btnSendFeedback" title="Send Feedback"></button>
+        </div>
+
+        <!-- Canvas Comment Pins Hotspots -->
+        <button class="interactive-btn" id="btnCommentPin1" style="border-radius: 4px;" title="Prior Feedback #1: Sunset Gradient (Acknowledged)"></button>
+        <button class="interactive-btn" id="btnCommentPin5" style="border-radius: 4px;" title="Frame #5: Forest Silhouette (Active)"></button>
+        <button class="interactive-btn" id="btnClusterLake" style="border-radius: 4px;" title="3 Notes Cluster"></button>
+
+        <!-- Selection Marquee Drag Hotspot -->
+        <div id="marqueeDragZone" style="position: absolute; cursor: move; pointer-events: auto;" title="Drag Marquee Selection"></div>
+        <div id="marqueeResizeHandle" style="position: absolute; width: 14px; height: 14px; cursor: se-resize; pointer-events: auto;" title="Resize Selection"></div>
+
+        <!-- Floating Studio Expand CTA when sidebar collapsed -->
+        <button id="btnExpandStudio" title="Expand Studio Inspector">
+          <span>&lt;| STUDIO</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Responsive Studio Inspector Attached to Right Edge (Fixed 360px CSS Width across monitors) -->
+    <div id="sidebarWorkspace">
+      <canvas id="sidebarCanvas"></canvas>
+      <div id="sidebarOverlay">
+        <!-- Header Actions -->
+        <button class="interactive-btn" id="btnHeaderFb" title="Toggle Feedback Overlay"></button>
+        <button class="interactive-btn" id="btnHeaderSave" title="Save Project"></button>
+        <button class="interactive-btn" id="btnHeaderCollapse" title="Collapse Panel to Widescreen Canvas"></button>
+
+        <!-- Tool Buttons -->
+        <button class="interactive-btn" id="btnToolInk" title="Tool: Ink"></button>
+        <button class="interactive-btn" id="btnToolPencil" title="Tool: Pencil"></button>
+        <button class="interactive-btn" id="btnToolMark" title="Tool: Marker"></button>
+        <button class="interactive-btn" id="btnToolErase" title="Tool: Eraser"></button>
+
+        <!-- Stroke Sliders Direct Touch Zones -->
+        <button class="interactive-btn" id="sliderTrackSize" style="cursor: ew-resize;" title="Drag Brush Size (1-100px)"></button>
+        <button class="interactive-btn" id="sliderTrackOpacity" style="cursor: ew-resize;" title="Drag Stroke Opacity (1-100%)"></button>
+        <button class="interactive-btn" id="sliderTrackSmoothing" style="cursor: ew-resize;" title="Drag Smoothing (0-100%)"></button>
+
+        <!-- Color Trigger -->
+        <button class="interactive-btn" id="btnTriggerColorPicker" title="Open Color Picker / Customize Pigment"></button>
+
+        <!-- Pigment Chips Group -->
+        <div id="pigmentChipsGroup"></div>
+
+        <!-- Layers Header -->
+        <button class="interactive-btn" id="btnNewLayer" title="Add New Layer"></button>
+
+        <!-- Dynamic Layer Touch Container -->
+        <div id="layersTouchContainer"></div>
+
+        <!-- Comments Filter Chiclets -->
+        <button class="interactive-btn" id="btnFilterAll" title="Show All 24 Comments"></button>
+        <button class="interactive-btn" id="btnFilterActive" title="Filter to 4 Active Comments"></button>
+
+        <!-- Dynamic Sidebar Comments Container -->
+        <div id="commentsTouchContainer"></div>
+
+        <!-- Comments Dedicated Scrollbar Touch Zone -->
+        <div id="commentsScrollDragZone" style="position: absolute; cursor: grab; pointer-events: auto;" title="Drag paint stroke scrollbar (or use mousewheel)"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GLYPHS = {"A": [[[0, 7], [0, 2], [2, 0], [3, 0], [5, 2], [5, 7]], [[0, 4], [5, 4]]], "B": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5], [4, 3.5], [5, 5], [4, 7], [0, 7]]], "C": [[[5, 1], [3, 0], [2, 0], [0, 2], [0, 5], [2, 7], [3, 7], [5, 6]]], "D": [[[0, 7], [0, 0], [3, 0], [5, 2], [5, 5], [3, 7], [0, 7]]], "E": [[[5, 0], [0, 0], [0, 7], [5, 7]], [[0, 3.5], [4, 3.5]]], "F": [[[0, 7], [0, 0], [5, 0]], [[0, 3.5], [3.5, 3.5]]], "G": [[[5, 1], [3, 0], [2, 0], [0, 2], [0, 5], [2, 7], [4, 7], [5, 6], [5, 3.5], [3, 3.5]]], "H": [[[0, 0], [0, 7]], [[5, 0], [5, 7]], [[0, 3.5], [5, 3.5]]], "I": [[[2.5, 0], [2.5, 7]]], "J": [[[4, 0], [4, 5], [3, 7], [1, 7], [0, 5]]], "K": [[[0, 0], [0, 7]], [[5, 0], [0, 4], [5, 7]]], "L": [[[0, 0], [0, 7], [5, 7]]], "M": [[[0, 7], [0, 0], [2.5, 4], [5, 0], [5, 7]]], "N": [[[0, 7], [0, 0], [5, 7], [5, 0]]], "O": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]]], "P": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5]]], "Q": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]], [[3, 5], [5, 7]]], "R": [[[0, 7], [0, 0], [4, 0], [5, 1.5], [4, 3.5], [0, 3.5]], [[3, 3.5], [5, 7]]], "S": [[[5, 1], [3, 0], [1, 0], [0, 1.5], [1, 3.5], [4, 3.5], [5, 5.5], [4, 7], [2, 7], [0, 6]]], "T": [[[0, 0], [5, 0]], [[2.5, 0], [2.5, 7]]], "U": [[[0, 0], [0, 5], [2, 7], [3, 7], [5, 5], [5, 0]]], "V": [[[0, 0], [2.5, 7], [5, 0]]], "W": [[[0, 0], [1.5, 7], [2.5, 3], [3.5, 7], [5, 0]]], "X": [[[0, 0], [5, 7]], [[5, 0], [0, 7]]], "Y": [[[0, 0], [2.5, 3.5], [5, 0]], [[2.5, 3.5], [2.5, 7]]], "Z": [[[0, 0], [5, 0], [0, 7], [5, 7]]], "0": [[[2, 0], [3, 0], [5, 2], [5, 5], [3, 7], [2, 7], [0, 5], [0, 2], [2, 0]], [[4, 1], [1, 6]]], "1": [[[0.5, 2.5], [2.5, 0], [2.5, 7]], [[1, 7], [4, 7]]], "2": [[[0, 2], [1, 0], [4, 0], [5, 2], [0, 7], [5, 7]]], "3": [[[0, 1], [1, 0], [4, 0], [5, 2], [3, 3.5], [5, 5], [4, 7], [1, 7], [0, 6]]], "4": [[[4, 7], [4, 0], [0, 5], [5, 5]]], "5": [[[5, 0], [0, 0], [0, 3.5], [4, 3.5], [5, 5], [4, 7], [1, 7], [0, 6]]], "6": [[[4, 0], [2, 0], [0, 3], [0, 5], [2, 7], [4, 7], [5, 5], [4, 3.5], [0, 3.5]]], "7": [[[0, 0], [5, 0], [2, 7]]], "8": [[[2, 0], [3, 0], [5, 1.5], [3, 3.5], [2, 3.5], [0, 1.5], [2, 0]], [[2, 3.5], [3, 3.5], [5, 5.5], [3, 7], [2, 7], [0, 5.5], [2, 3.5]]], "9": [[[5, 3.5], [1, 3.5], [0, 2], [1, 0], [4, 0], [5, 3], [5, 5], [3, 7], [1, 7]]], ":": [[[2.5, 2], [2.5, 2.5]], [[2.5, 5], [2.5, 5.5]]], "-": [[[0, 3.5], [5, 3.5]]], "/": [[[0, 7], [5, 0]]], "+": [[[2.5, 1], [2.5, 6]], [[0, 3.5], [5, 3.5]]], "#": [[[1.5, 0], [1.5, 7]], [[3.5, 0], [3.5, 7]], [[0, 2.5], [5, 2.5]], [[0, 4.5], [5, 4.5]]], "[": [[[3, 0], [1, 0], [1, 7], [3, 7]]], "]": [[[1, 0], [3, 0], [3, 7], [1, 7]]], "(": [[[3, 0], [1, 2], [1, 5], [3, 7]]], ")": [[[1, 0], [3, 2], [3, 5], [1, 7]]], "%": [[[0, 1], [1, 1]], [[4, 6], [5, 6]], [[0, 7], [5, 0]]], ".": [[[2.5, 6.5], [2.5, 7]]], ",": [[[2.5, 6], [2.5, 6.5], [1.5, 8]]], "=": [[[0, 2.5], [5, 2.5]], [[0, 4.5], [5, 4.5]]], ">": [[[0, 1], [4, 3.5], [0, 6]]], "<": [[[4, 1], [0, 3.5], [4, 6]]], "|": [[[2.5, 0], [2.5, 7]]], "&": [[[4, 0], [2, 0], [0, 2], [0, 3.5], [4, 5], [4, 7], [2, 7], [0, 5]], [[2, 3.5], [5, 7]]], "!": [[[2.5, 0], [2.5, 4.5]], [[2.5, 6.5], [2.5, 7]]], "'": [[[2.5, 0], [2, 2.5]]], "\"": [[[1.5, 0], [1, 2.5]], [[4, 0], [3.5, 2.5]]], "?": [[[0, 1.5], [1, 0], [4, 0], [5, 1.5], [5, 3], [2.5, 4.5], [2.5, 5.5]], [[2.5, 6.5], [2.5, 7]]], "_": [[[0, 7], [5, 7]]], ";": [[[2.5, 2], [2.5, 2.5]], [[2.5, 5], [2.5, 6], [1.5, 7.5]]], "*": [[[2.5, 1], [2.5, 6]], [[1, 2], [4, 5]], [[1, 5], [4, 2]]], " ": []};
+    const ALL_FRAMES = [{"id": 1, "bounds": [40, 60, 220, 140], "title": "SUNSET GRADIENT", "author": "DIRECTOR", "status": "ACK", "lines": ["ADJUST WARMTH ALONG TOP SKY", "AND BLEND MAGENTA BAND"]}, {"id": 2, "bounds": [80, 220, 260, 150], "title": "RIDGE CONTOURS", "author": "LEAD", "status": "ACK", "lines": ["SMOOTH RIDGES WITH 14PX", "FINE PENCIL TEXTURE"]}, {"id": 3, "bounds": [120, 160, 320, 190], "title": "CRAG LINEART", "author": "DIRECTOR", "status": "ACTIVE", "lines": ["CRAG LINEART CONTOUR IS TOO", "HEAVY. SOFTEN THE RIDGE EDGES", "AND LIGHTEN MIDGROUND WASH"]}, {"id": 4, "bounds": [280, 180, 200, 160], "title": "MIDGROUND WASH", "author": "DIRECTOR", "status": "ACK", "lines": ["LIGHTEN CYAN WASH OVER PEAKS"]}, {"id": 5, "bounds": [480, 280, 180, 140], "title": "FOREST SILHOUETTE", "author": "ARTIST", "status": "ACTIVE", "lines": ["ADD PINE VARIETY AND DEEPER", "SHADOW ON FOREGROUND"]}, {"id": 6, "bounds": [200, 520, 340, 120], "title": "LAKE REFLECTIONS", "author": "DIRECTOR", "status": "ACK", "lines": ["ADD WATER RIPPLE ACCENTS"]}, {"id": 7, "bounds": [300, 230, 90, 80], "title": "PEAK HIGHLIGHT", "author": "DIRECTOR", "status": "ACK", "lines": ["SHARPEN SNOW HIGHLIGHT"]}, {"id": 8, "bounds": [320, 240, 90, 80], "title": "PEAK SHADOW", "author": "DIRECTOR", "status": "ACTIVE", "lines": ["COOL BLUE CAST ON CLIFF"]}, {"id": 9, "bounds": [310, 250, 90, 80], "title": "SNOW CREVICE", "author": "LEAD", "status": "ACK", "lines": ["SUBTLE INK LINE CONTOUR"]}, {"id": 10, "bounds": [60, 480, 240, 160], "title": "SHORELINE CONTRAST", "author": "DIRECTOR", "status": "ACK", "lines": ["DARKEN WATER EDGE CONTOUR"]}, {"id": 11, "bounds": [420, 480, 260, 150], "title": "DEEP WATER SHADOW", "author": "DIRECTOR", "status": "ACK", "lines": ["RICH NAVY FILL GRADIENT"]}, {"id": 12, "bounds": [240, 80, 320, 120], "title": "ATMOSPHERIC HAZE", "author": "DIRECTOR", "status": "ACTIVE", "lines": ["SOFTEN SKY HORIZON BAND"]}];
+    const ALL_COMMENTS = [{"num": 24, "label": "ATMOSPHERIC HAZE", "author": "DIRECTOR", "status": "ACTIVE", "bounds": "240,80 -> 560,200", "frameIdx": 11, "note": "SOFTEN SKY HORIZON FALLOFF AND BLEND WARM SUNSET GRADIENT TONES."}, {"num": 23, "label": "FOREST SILHOUETTE", "author": "ARTIST", "status": "ACTIVE", "bounds": "480,280 -> 660,420", "frameIdx": 4, "note": "ADD PINE TREE CANOPY DENSITY AND DEEPER SHADOW ON FOREGROUND WASH."}, {"num": 22, "label": "PEAK SHADOW CAST", "author": "DIRECTOR", "status": "ACTIVE", "bounds": "320,240 -> 410,320", "frameIdx": 7, "note": "COOL BLUE RIDGE CAST LOOKS SOLID; VERIFY CONTRAST WITH CLIFF CONTOURS."}, {"num": 21, "label": "CRAG LINEART CONTOUR", "author": "DIRECTOR", "status": "ACTIVE", "bounds": "120,160 -> 440,350", "frameIdx": 2, "note": "CRAG LINEART CONTOUR IS TOO HEAVY. SOFTEN THE RIDGE EDGES AND LIGHTEN WASH."}, {"num": 20, "label": "SNOW CREVICE LINE", "author": "LEAD", "status": "ACK", "bounds": "310,250 -> 400,330", "frameIdx": 8, "note": "SUBTLE INK LINE CONTOUR CONFIRMED ALONG THE UPPER CREVICE RIDGES."}, {"num": 19, "label": "PEAK HIGHLIGHT SHARP", "author": "DIRECTOR", "status": "ACK", "bounds": "300,230 -> 390,310", "frameIdx": 6, "note": "SHARP MORNING SUNLIGHT HIGHLIGHT ON SNOW PEAKS APPROVED BY DIRECTOR."}, {"num": 18, "label": "LAKE REFLECTION", "author": "DIRECTOR", "status": "ACK", "bounds": "200,520 -> 540,640", "frameIdx": 5, "note": "WATER RIPPLE ACCENTS BLENDED NATURALLY INTO THE LOWER SHORELINE REFLECTION."}, {"num": 17, "label": "SHORELINE CONTRAST", "author": "DIRECTOR", "status": "ACK", "bounds": "60,480 -> 300,640", "frameIdx": 9, "note": "DARKEN SHORELINE CONTOUR TO ANCHOR FOREGROUND WITH DEEP LAKE WATER."}, {"num": 16, "label": "DEEP WATER SHADOW", "author": "DIRECTOR", "status": "ACK", "bounds": "420,480 -> 680,630", "frameIdx": 10, "note": "RICH NAVY GRADIENT FILL ACCENTUATES DEPTH ON LOWER CANVAS BOUNDS."}, {"num": 15, "label": "MIDGROUND WASH TINT", "author": "DIRECTOR", "status": "ACK", "bounds": "280,180 -> 480,340", "frameIdx": 3, "note": "CYAN WASH OVER PEAKS LIGHTENED TO IMPROVE ATMOSPHERIC DEPTH SEPARATION."}, {"num": 14, "label": "RIDGE CONTOURS", "author": "LEAD", "status": "ACK", "bounds": "80,220 -> 340,370", "frameIdx": 1, "note": "SMOOTH RIDGES APPLIED WITH 14PX FINE PENCIL TEXTURE; LOOKS ACCURATE."}, {"num": 13, "label": "SUNSET GRADIENT BLEND", "author": "DIRECTOR", "status": "ACK", "bounds": "40,60 -> 260,200", "frameIdx": 0, "note": "WARMTH ADJUSTED ALONG TOP SKY BANDS; MAGENTA TRANSITION APPROVED."}, {"num": 12, "label": "COLOR SCHEME HARMONY", "author": "LEAD", "status": "ACK", "bounds": "GLOBAL PALETTE", "frameIdx": -1, "note": "VERIFY PALETTE BALANCE ACROSS COBALT INK AND EMERALD PINE WASHES."}, {"num": 11, "label": "LINE WEIGHT BALANCE", "author": "DIRECTOR", "status": "ACK", "bounds": "LAYER STACK", "frameIdx": -1, "note": "MAINTAIN 14PX STROKE STANDARD FOR ALL CONTOUR REVIEW CALLOUTS."}, {"num": 10, "label": "CANVAS GRAIN TEST", "author": "ARTIST", "status": "ACK", "bounds": "CANVAS FILL", "frameIdx": -1, "note": "FINE TEXTURE GRAIN PATTERN TESTED ACROSS MOUNTAIN BACKDROP WASH."}, {"num": 9, "label": "PALETTE SATURATION", "author": "DIRECTOR", "status": "ACK", "bounds": "PALETTE SWATCH", "frameIdx": -1, "note": "TONE DOWN CADMIUM RED CHIP INTENSITY TO MATCH STUDIO NATURAL TONES."}, {"num": 8, "label": "SMOOTHING CURVE", "author": "LEAD", "status": "ACK", "bounds": "STROKE ENGINE", "frameIdx": -1, "note": "75% SMOOTHING PRESET VERIFIED FOR NATURAL ROUNDED INK BRUSH ENDS."}, {"num": 7, "label": "BACKDROP OPACITY", "author": "DIRECTOR", "status": "ACK", "bounds": "01 BACKDROP", "frameIdx": -1, "note": "ENSURE BACKDROP WASH LAYER RETAINS FULL 100% CANVAS COVERAGE."}, {"num": 6, "label": "TREE STEM DETAIL", "author": "ARTIST", "status": "ACK", "bounds": "FOREST REGION", "frameIdx": -1, "note": "DEEP LAMP BLACK PINE STEMS PROVIDE CRISP ANCHORS FOR FOOTHILLS."}, {"num": 5, "label": "HORIZON ALIGNMENT", "author": "DIRECTOR", "status": "ACK", "bounds": "HORIZON LINE", "frameIdx": -1, "note": "HORIZONTAL RIDGE ALIGNMENT CONFIRMS LEVEL LAKE WATER HORIZON."}, {"num": 4, "label": "HIGHLIGHT OPACITY", "author": "LEAD", "status": "ACK", "bounds": "05 HIGHLIGHTS", "frameIdx": -1, "note": "SNOW CREST HIGHLIGHT OPACITY LOCKED TO 100% FOR MAXIMUM CLARITY."}, {"num": 3, "label": "INK BRUSH SENSITIVITY", "author": "DIRECTOR", "status": "ACK", "bounds": "03 LINEART", "frameIdx": -1, "note": "LIVE PAINT STROKE VELOCITY CURVE TUNED FOR HIGH-DPI DISPLAYS."}, {"num": 2, "label": "LAYER STACK REORDER", "author": "ARTIST", "status": "ACK", "bounds": "STACK REORDER", "frameIdx": -1, "note": "LINEART POSITIONED ABOVE PENCIL ROUGHS AND BELOW BRUSH SHADING."}, {"num": 1, "label": "INITIAL ROUGH SKETCH", "author": "DIRECTOR", "status": "ACK", "bounds": "BOOTSTRAP", "frameIdx": -1, "note": "INITIAL DIRECTOR ROUGH SKETCH AND MOUNTAIN CRAG CONTOURS APPROVED."}];
+
+    const PALETTE = ["#000000", "#475569", "#2563EB", "#0284C7", "#059669", "#D97706", "#DC2626", "#FFFFFF"];
+    const PALETTE_NAMES = ["Lamp Black", "Graphite Slate", "Cobalt Blue", "Cerulean Cyan", "Emerald Green", "Yellow Ochre", "Cadmium Red", "Titanium White"];
+
+    // Canonical Single Intact Artwork Dimensions (Approved Reference)
+    const DOC_W = 740;
+    const DOC_H = 700;
+
+    // Fixed CSS Sidebar Width across all monitor sizes
+    const SIDEBAR_W = 360;
+
+    // Application state
+    const state = {
+      activeTool: 'INK',
+      size: 14,
+      opacity: 100,
+      smoothing: 75,
+      color: '#2563EB',
+      activeSlider: null,
+      hoveredSlider: null,
+      activeFrameIdx: 2, // Frame #3: CRAG LINEART
+      commentFilter: 'ALL', // Displays realistic comment list by default
+      commentScrollY: 0,
+      isDraggingScrollbar: false,
+      dragStartY: 0,
+      dragStartScrollY: 0,
+      activeLayer: '03',
+      layerScrollY: 0,
+      hoveredNewLayer: false,
+      saved: false,
+      feedbackOpen: true,
+      statusBadge: 'ACTIVE',
+      // USER FEEDBACK: "the Write Feedback should have no text. the theme of htis app has been minimal text."
+      // "Empty feedback input has no visible placeholder. Show one blank feedback composer alongside a realistic comment list so user can judge both."
+      userCritiqueText: '',
+      collapsed: false,
+      // Canonical document coordinates matching approved reference mockup
+      marqueeX: 120,
+      marqueeY: 160,
+      marqueeW: 320,
+      marqueeH: 190,
+      composerX: 476,
+      composerY: 156,
+      layers: [
+        { num: "05", name: "HIGHLIGHTS", op: "100%", opacityNum: 100, vis: true },
+        { num: "04", name: "BRUSH SHADING", op: "80%", opacityNum: 80, vis: true },
+        { num: "03", name: "LINEART", op: "100%", opacityNum: 100, vis: true },
+        { num: "02", name: "PENCIL ROUGHS", op: "60%", opacityNum: 60, vis: true },
+        { num: "01", name: "BACKDROP WASH", op: "100%", opacityNum: 100, vis: true },
+        { num: "00", name: "CANVAS FILL", op: "100%", opacityNum: 100, vis: true }
+      ],
+      userStrokes: [],
+      isDrawing: false,
+      currentStroke: null,
+      isDraggingMarquee: false,
+      dragMarqueeOffset: { x: 0, y: 0 },
+      // Current fitted artwork layout on stage
+      artX: 0,
+      artY: 0,
+      artW: 740,
+      artH: 700,
+      fitScale: 1.0
+    };
+
+    window.state = state;
+
+    // DOM Elements
+    const canvasWorkspace = document.getElementById('canvasWorkspace');
+    const studioCanvas = document.getElementById('studioCanvas');
+    const studioCtx = studioCanvas.getContext('2d');
+
+    const sidebarWorkspace = document.getElementById('sidebarWorkspace');
+    const sidebarCanvas = document.getElementById('sidebarCanvas');
+    const sidebarCtx = sidebarCanvas.getContext('2d');
+
+    function getSidebarWidth() {
+      return state.collapsed ? 0 : SIDEBAR_W;
+    }
+
+    // Vector drawing primitives
+    function draw_rect(ctx, x, y, w, h, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      ctx.restore();
+    }
+
+    function draw_rounded_rect(ctx, x, y, w, h, r, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h), r);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function draw_stroke(ctx, pts, color, size = 1, opacity = 1.0) {
+      if (!pts || pts.length === 0) return;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i][0], pts[i][1]);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function draw_ellipse(ctx, cx, cy, rx, ry, color, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(Math.round(cx), Math.round(cy), rx / 2, ry / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Pure custom vector GLYPHS renderer with uniform scaling
+    function draw_text(ctx, text, x, y, scale = 1.0, color = "#1E293B", size = 1, opacity = 1.0) {
+      let cur_x = Math.round(x);
+      const char_w = 6 * scale;
+      const spacing = 2 * scale;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      for (let char of String(text).toUpperCase()) {
+        if (GLYPHS[char]) {
+          const paths = GLYPHS[char];
+          for (let path of paths) {
+            ctx.beginPath();
+            const p0x = cur_x + path[0][0] * scale;
+            const p0y = y + path[0][1] * scale;
+            ctx.moveTo(p0x, p0y);
+            if (path.length === 1) {
+              ctx.lineTo(p0x + 0.5, p0y + 0.5);
+            } else {
+              for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(cur_x + path[i][0] * scale, y + path[i][1] * scale);
+              }
+            }
+            ctx.stroke();
+          }
+        }
+        cur_x += char_w + spacing;
+      }
+      ctx.restore();
+    }
+
+    function get_text_width(text, scale = 1.0) {
+      const len = String(text).length;
+      return len * (8 * scale);
+    }
+
+    function wrap_comment_text(text, maxChars = 24) {
+      const words = String(text).toUpperCase().split(/\s+/);
+      const lines = [];
+      let cur = "";
+      for (let w of words) {
+        if (!cur) {
+          cur = w;
+        } else if ((cur + " " + w).length <= maxChars) {
+          cur += " " + w;
+        } else {
+          lines.push(cur);
+          cur = w;
+        }
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    }
+
+    // 1. RENDER WORKSPACE: NEUTRAL SURROUNDING STAGE + ONE INTACT UNIFORMLY FITTED ARTWORK
+    // CRITICAL MANAGER REQUIREMENT:
+    // "Remove repetition; show one intact artwork uniformly fitted within the full-width workspace,
+    // with a neutral surrounding stage where aspect ratios differ. Preserve single artwork coordinates
+    // and pin/marquee alignment. No invented enlargement of document or repeated painting."
+    function renderCanvasWorkspace() {
+      const ww = canvasWorkspace.clientWidth;
+      const wh = canvasWorkspace.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+
+      if (studioCanvas.width !== Math.round(ww * dpr) || studioCanvas.height !== Math.round(wh * dpr)) {
+        studioCanvas.width = Math.round(ww * dpr);
+        studioCanvas.height = Math.round(wh * dpr);
+      }
+
+      studioCtx.save();
+      studioCtx.scale(dpr, dpr);
+      studioCtx.clearRect(0, 0, ww, wh);
+
+      // NEUTRAL SURROUNDING STAGE: Dark workspace canvas where aspect ratios differ
+      draw_rect(studioCtx, 0, 0, ww, wh, "#0B0F19");
+
+      // Calculate uniform fitting of intact 740x700 artwork within full-width workspace
+      const padX = 36;
+      const padY = 32;
+      const availW = Math.max(200, ww - padX * 2);
+      const availH = Math.max(200, wh - padY * 2);
+      const fitScale = Math.min(availW / DOC_W, availH / DOC_H);
+
+      state.fitScale = fitScale;
+      state.artW = Math.round(DOC_W * fitScale);
+      state.artH = Math.round(DOC_H * fitScale);
+      state.artX = Math.round((ww - state.artW) / 2);
+      state.artY = Math.round((wh - state.artH) / 2);
+
+      const ax = state.artX;
+      const ay = state.artY;
+      const aw = state.artW;
+      const ah = state.artH;
+
+      // Studio Artboard Frame: Crisp border & deep drop shadow on neutral stage
+      draw_rounded_rect(studioCtx, ax + 2, ay + 6, aw, ah, 6, "rgba(0, 0, 0, 0.65)");
+      draw_rounded_rect(studioCtx, ax - 1, ay - 1, aw + 2, ah + 2, 4, "#1E293B");
+      draw_rounded_rect(studioCtx, ax, ay, aw, ah, 3, "#0F172A");
+
+      // Clip strictly to intact single artwork bounds
+      studioCtx.save();
+      studioCtx.beginPath();
+      studioCtx.roundRect(ax, ay, aw, ah, 3);
+      studioCtx.clip();
+
+      // Transform context to single canonical artwork coordinate space (0..740, 0..700)
+      studioCtx.translate(ax, ay);
+      studioCtx.scale(fitScale, fitScale);
+
+      // --- INTACT SINGLE ARTWORK PAINTING (NO REPETITION, NO TILING) ---
+      const cw = DOC_W; // 740
+      const ch = DOC_H; // 700
+
+      // Sky Gradient Bands
+      draw_rect(studioCtx, 0, 0, cw, 120, "#DDD6FE");
+      draw_rect(studioCtx, 0, 120, cw, 80, "#FED7AA");
+      draw_rect(studioCtx, 0, 200, cw, 60, "#FECDD3");
+      draw_rect(studioCtx, 0, 260, cw, 55, "#FEF08A");
+
+      // Distant Mountain Range (Single intact reference line)
+      const mtn_distant = [
+        [0, 260], [60, 220], [130, 250], [210, 180], [300, 255],
+        [390, 190], [480, 240], [560, 175], [640, 230], [710, 195], [cw, 210]
+      ];
+      draw_stroke(studioCtx, mtn_distant, "#93C5FD", 6);
+      for (let y = 250; y < 315; y += 12) {
+        draw_rect(studioCtx, 0, y, cw, 14, "#BFDBFE", 0.7);
+      }
+
+      // Midground Ridge (Single intact reference line)
+      const mtn_mid = [
+        [0, 320], [50, 285], [110, 310], [180, 240], [260, 310],
+        [340, 230], [420, 290], [500, 220], [580, 280], [660, 240], [cw, 270]
+      ];
+      draw_stroke(studioCtx, mtn_mid, "#3B82F6", 8);
+      for (let y = 300; y < 385; y += 12) {
+        draw_rect(studioCtx, 0, y, cw, 14, "#60A5FA", 0.7);
+      }
+
+      // Rocky Mountain Crags & Passes (Single intact reference line)
+      const crag_pass = [
+        [0, 370], [80, 320], [170, 360], [270, 290], [380, 350],
+        [480, 300], [580, 360], [670, 310], [cw, 340]
+      ];
+      draw_stroke(studioCtx, crag_pass, "#1D4ED8", 10);
+      for (let y = 350; y < 425; y += 12) {
+        draw_rect(studioCtx, 0, y, cw, 14, "#1E40AF", 0.85);
+      }
+
+      // Forefront Rolling Foothills
+      draw_rect(studioCtx, 0, 410, cw, 105, "#065F46");
+      const hill_pts = [
+        [0, 410], [80, 370], [170, 400], [270, 350], [380, 390],
+        [480, 340], [580, 380], [670, 350], [cw, 370]
+      ];
+      draw_stroke(studioCtx, hill_pts, "#047857", 10);
+
+      // Pine Trees (Single intact reference positions)
+      const treeX = [30, 70, 120, 170, 220, 270, 320, 370, 420, 470, 520, 570, 620, 670, 710];
+      for (let px of treeX) {
+        const py = px < 400 ? 380 : 360;
+        draw_stroke(studioCtx, [[px, py + 28], [px, py]], "#022C22", 3);
+        draw_stroke(studioCtx, [[px - 7, py + 16], [px, py + 3], [px + 7, py + 16]], "#064E3B", 4);
+        draw_stroke(studioCtx, [[px - 11, py + 26], [px, py + 10], [px + 11, py + 26]], "#047857", 4);
+      }
+
+      // Deep Reflective Lake Water
+      draw_rect(studioCtx, 0, 510, cw, 190, "#0F172A");
+      const lake_reflections = [
+        [40, 530, 140], [220, 545, 180], [450, 535, 160],
+        [90, 570, 150], [310, 580, 200], [560, 565, 140],
+        [50, 615, 170], [270, 630, 190], [510, 620, 180],
+        [120, 665, 160], [380, 675, 210]
+      ];
+      for (let [rx, ry, rw] of lake_reflections) {
+        draw_rect(studioCtx, rx, ry, rw, 3, "#38BDF8", 0.45);
+      }
+
+      // Active Live Stroke on Canvas (03 Lineart layer)
+      const lineartLayer = state.layers.find(l => l.num === '03');
+      if (lineartLayer && lineartLayer.vis) {
+        const brush_pts = [
+          [60, 330], [160, 310], [280, 260], [380, 290], [480, 240], [570, 275]
+        ];
+        draw_stroke(studioCtx, brush_pts, state.color, state.size, (lineartLayer.opacityNum / 100));
+      }
+
+      // User drawn strokes
+      for (let st of state.userStrokes) {
+        const lyr = state.layers.find(l => l.num === st.layer);
+        if (lyr && lyr.vis) {
+          draw_stroke(studioCtx, st.points, st.color, st.size, (st.opacity / 100) * (lyr.opacityNum / 100));
+        }
+      }
+      if (state.currentStroke) {
+        draw_stroke(studioCtx, state.currentStroke.points, state.color, state.size, state.opacity / 100);
+      }
+
+      // Restore clip and base transform immediately after artwork painting!
+      // Return to unscaled 1:1 CSS screen coordinates so UI controls stay fixed size across viewports.
+      studioCtx.restore();
+
+      // --- IN-APP FEEDBACK OVERLAYS ---
+      // CRITICAL MANAGER REQUIREMENT:
+      // "Keep composer at fixed CSS size across 1440/2560, with fixed-size glyphs/buttons/pin labels/dimension badge;
+      // only artwork and spatial marquee rectangle follow artwork fit."
+      if (state.feedbackOpen) {
+        // A. Collapsed Prior Comment Pin #1 (doc: 62, 262) - Fixed CSS size
+        const p1x = Math.round(ax + 62 * fitScale);
+        const p1y = Math.round(ay + 262 * fitScale);
+        draw_ellipse(studioCtx, p1x, p1y, 20, 20, "#0D99FF");
+        draw_ellipse(studioCtx, p1x, p1y, 16, 16, "#FFFFFF");
+        draw_ellipse(studioCtx, p1x, p1y, 10, 10, "#0D99FF");
+        draw_stroke(studioCtx, [[p1x - 10, p1y + 4], [p1x - 18, p1y + 12], [p1x - 4, p1y + 7]], "#0D99FF", 1.5);
+        draw_rounded_rect(studioCtx, p1x + 12, p1y - 8, 46, 16, 2, "#DCFCE7");
+        draw_text(studioCtx, "#1 ACK", p1x + 16, p1y - 4, 0.55, "#16A34A", 1);
+
+        // B. Active Pin #5 (Forest Silhouette) (doc: 560, 390) - Fixed CSS size
+        const p5x = Math.round(ax + 560 * fitScale);
+        const p5y = Math.round(ay + 390 * fitScale);
+        draw_ellipse(studioCtx, p5x, p5y, 16, 16, "#0284C7");
+        draw_ellipse(studioCtx, p5x, p5y, 12, 12, "#FFFFFF");
+        draw_ellipse(studioCtx, p5x, p5y, 8, 8, "#0284C7");
+        draw_stroke(studioCtx, [[p5x - 8, p5y + 4], [p5x - 16, p5y + 12], [p5x - 2, p5y + 7]], "#0284C7", 1.5);
+        draw_rounded_rect(studioCtx, p5x + 12, p5y - 8, 48, 16, 2, "#E0F2FE");
+        draw_text(studioCtx, "#5 ACT", p5x + 16, p5y - 4, 0.55, "#0284C7", 1);
+
+        // C. Spatial Cluster Badge [ 3 NOTES v ] at Lake Shoreline (doc: 230, 508) - Fixed CSS size
+        const clx = Math.round(ax + 230 * fitScale);
+        const cly = Math.round(ay + 508 * fitScale);
+        draw_rounded_rect(studioCtx, clx, cly, 88, 22, 4, "#1E293B");
+        draw_ellipse(studioCtx, clx + 12, cly + 11, 8, 8, "#38BDF8");
+        draw_text(studioCtx, "3 NOTES v", clx + 22, cly + 6, 0.6, "#FFFFFF", 1);
+
+        // D. Ghost Pins for Historical Notes - Fixed CSS size
+        const ghosts = [
+          { x: 90, y: 100, label: "#13" },
+          { x: 380, y: 95, label: "#12" },
+          { x: 140, y: 280, label: "#14" }
+        ];
+        for (let g of ghosts) {
+          const gx = Math.round(ax + g.x * fitScale);
+          const gy = Math.round(ay + g.y * fitScale);
+          draw_ellipse(studioCtx, gx, gy, 8, 8, "rgba(148, 163, 184, 0.4)");
+          draw_text(studioCtx, g.label, gx + 8, gy - 4, 0.52, "rgba(148, 163, 184, 0.7)", 1);
+        }
+
+        // E. Area Selection Marquee at doc bounds
+        // ONLY artwork and spatial marquee rectangle follow artwork fit!
+        const smx = Math.round(ax + state.marqueeX * fitScale);
+        const smy = Math.round(ay + state.marqueeY * fitScale);
+        const smw = Math.round(state.marqueeW * fitScale);
+        const smh = Math.round(state.marqueeH * fitScale);
+
+        // Selection Wash (Follows spatial marquee rectangle)
+        draw_rect(studioCtx, smx, smy, smw, smh, "rgba(2, 132, 199, 0.12)");
+
+        // Alternating dashed border (Follows spatial marquee rectangle)
+        studioCtx.save();
+        studioCtx.strokeStyle = "#0284C7";
+        studioCtx.lineWidth = 1.5;
+        studioCtx.setLineDash([8, 6]);
+        studioCtx.strokeRect(smx, smy, smw, smh);
+        studioCtx.strokeStyle = "#FFFFFF";
+        studioCtx.lineDashOffset = 7;
+        studioCtx.strokeRect(smx, smy, smw, smh);
+        studioCtx.restore();
+
+        // 4 Corner Handles (FIXED SIZE 8x8 px across all viewports)
+        const handles = [[smx, smy], [smx + smw, smy], [smx, smy + smh], [smx + smw, smy + smh]];
+        for (const [hx, hy] of handles) {
+          draw_rounded_rect(studioCtx, hx - 4, hy - 4, 8, 8, 1, "#FFFFFF");
+          studioCtx.save();
+          studioCtx.strokeStyle = "#0284C7";
+          studioCtx.lineWidth = 1;
+          studioCtx.strokeRect(hx - 4, hy - 4, 8, 8);
+          studioCtx.restore();
+        }
+
+        // Dimension Badge [ 320 X 190 PX ] (FIXED CSS SIZE 92x18 px, fixed-size glyphs)
+        draw_rounded_rect(studioCtx, smx, smy - 24, 92, 18, 3, "#1E293B");
+        draw_text(studioCtx, `${state.marqueeW} X ${state.marqueeH} PX`, smx + 6, smy - 19, 0.65, "#FFFFFF", 1);
+
+        // Dragging cursor indicator & badge at corner (FIXED CSS SIZE 58x16 px)
+        draw_stroke(studioCtx, [[smx + smw, smy + smh], [smx + smw + 8, smy + smh + 8]], "#38BDF8", 1.5);
+        draw_rounded_rect(studioCtx, smx + smw - 25, smy + smh + 12, 58, 16, 2, "#1E293B");
+        draw_text(studioCtx, "DRAGGING", smx + smw - 21, smy + smh + 15, 0.55, "#FFFFFF", 1);
+
+        // F. Anchored Comment Composer Popover Card
+        // CRITICAL REQUIREMENT: "Keep composer at fixed CSS size across 1440/2560"
+        const cardW = 248;
+        const cardH = 178;
+
+        const hx = smx + smw;
+        const hy = smy + Math.round(smh * 0.5);
+        let cx = hx + 24;
+        let cy = Math.max(14, Math.min(wh - cardH - 14, hy - 44));
+        if (cx + cardW > ww - 10) cx = ww - cardW - 10;
+        state.composerScreenX = cx;
+        state.composerScreenY = cy;
+
+        // Pointer Arrow from Marquee Handle (hx, hy) to Composer (cx, hy)
+        draw_stroke(studioCtx, [[hx, hy], [cx, hy]], "#0284C7", 1.5);
+        draw_stroke(studioCtx, [[cx, hy - 6], [cx - 8, hy], [cx, hy + 6]], "#CBD5E1", 1);
+        draw_stroke(studioCtx, [[cx, hy - 5], [cx - 7, hy], [cx, hy + 5]], "#FFFFFF", 2);
+
+        // Soft Drop Shadow & Body (FIXED CSS SIZE 248x178 px)
+        draw_rounded_rect(studioCtx, cx + 3, cy + 3, cardW, cardH, 6, "rgba(0, 0, 0, 0.25)");
+        draw_rounded_rect(studioCtx, cx, cy, cardW, cardH, 6, "#FFFFFF");
+        draw_rect(studioCtx, cx, cy, cardW, 1, "#CBD5E1");
+        draw_rect(studioCtx, cx, cy, 1, cardH, "#CBD5E1");
+        draw_rect(studioCtx, cx + cardW - 1, cy, 1, cardH, "#CBD5E1");
+        draw_rect(studioCtx, cx, cy + cardH - 1, cardW, 1, "#CBD5E1");
+
+        // Header Bar (y: cy..cy+28)
+        draw_rounded_rect(studioCtx, cx + 1, cy + 1, cardW - 2, 28, 5, "#F8FAFC");
+        draw_rect(studioCtx, cx, cy + 28, cardW, 1, "#E2E8F0");
+
+        // Green Active Listening Dot
+        draw_ellipse(studioCtx, cx + 10, cy + 14, 8, 8, "#16A34A");
+
+        // Blue Feedback Badge [ FEEDBACK #3 ]
+        const curFrame = ALL_FRAMES[state.activeFrameIdx] || ALL_FRAMES[2];
+        draw_rounded_rect(studioCtx, cx + 24, cy + 5, 96, 18, 3, "#E0F2FE");
+        draw_text(studioCtx, `FEEDBACK #${curFrame.id}`, cx + 30, cy + 9, 0.6, "#0284C7", 1);
+
+        // Status Badge: [ ACTIVE ] or [ ACK ]
+        const isActBadge = (curFrame.status === 'ACTIVE');
+        draw_rounded_rect(studioCtx, cx + 126, cy + 5, 64, 18, 3, isActBadge ? "#E0F2FE" : "#DCFCE7");
+        draw_text(studioCtx, isActBadge ? "ACTIVE" : "ACK", cx + 138, cy + 9, 0.58, isActBadge ? "#0284C7" : "#15803D", 1);
+
+        // Close [X]
+        draw_text(studioCtx, "X", cx + 226, cy + 8, 0.75, "#94A3B8", 1);
+
+        // Bounds & Layer Info (FIXED CSS SIZE)
+        draw_text(studioCtx, `BOUNDS: ${state.marqueeX},${state.marqueeY} -> ${state.marqueeX+state.marqueeW},${state.marqueeY+state.marqueeH}`, cx + 10, cy + 34, 0.52, "#475569", 1);
+        draw_text(studioCtx, "STACK: 03 LINEART, 02 PENCIL", cx + 10, cy + 46, 0.52, "#94A3B8", 1);
+
+        // Textarea field container (Blank, minimal text theme)
+        draw_rounded_rect(studioCtx, cx + 10, cy + 60, 228, 76, 3, "#F8FAFC");
+        draw_rect(studioCtx, cx + 10, cy + 60, 228, 1, "#CBD5E1");
+        draw_rect(studioCtx, cx + 10, cy + 60, 1, 76, "#CBD5E1");
+        draw_rect(studioCtx, cx + 237, cy + 60, 1, 76, "#CBD5E1");
+        draw_rect(studioCtx, cx + 10, cy + 135, 228, 1, "#CBD5E1");
+
+        // CRITICAL USER FEEDBACK REQUIREMENT:
+        // "the Write Feedback should have no text. the theme of htis app has been minimal text."
+        // Empty feedback composer has NO text and NO placeholder!
+        if (state.userCritiqueText) {
+          const lines = state.userCritiqueText.split('\n');
+          for (let li = 0; li < Math.min(3, lines.length); li++) {
+            draw_text(studioCtx, lines[li], cx + 16, cy + 68 + li * 14, 0.68, "#0F172A", 1);
+          }
+        } else {
+          // Active blinking caret to indicate focus and typing readiness
+          const blink = Math.floor(Date.now() / 500) % 2 === 0;
+          if (blink) {
+            draw_stroke(studioCtx, [[cx + 16, cy + 68], [cx + 16, cy + 82]], "#0284C7", 1.5);
+          }
+        }
+
+        // Action Buttons: [ CANCEL ] and primary [ SEND ] (FIXED CSS SIZE)
+        const by = cy + 144;
+        // [ CANCEL ]
+        draw_rounded_rect(studioCtx, cx + 110, by, 58, 24, 3, "#F1F5F9");
+        draw_rect(studioCtx, cx + 110, by, 58, 1, "#CBD5E1");
+        draw_text(studioCtx, "CANCEL", cx + 118, by + 6, 0.55, "#64748B", 1);
+
+        // [ SEND ] (Primary submission button)
+        draw_rounded_rect(studioCtx, cx + 174, by, 64, 24, 3, "#0284C7");
+        draw_text(studioCtx, "SEND", cx + 190, by + 6, 0.55, "#FFFFFF", 1);
+      }
+
+      studioCtx.restore(); // Restore dpr scale from start of function
+    }
+
+    // 2. RENDER UNIFIED STUDIO INSPECTOR SIDEBAR (FIXED 360PX CSS WIDTH ACROSS MONITORS)
+    function renderSidebarWorkspace() {
+      if (state.collapsed) return;
+
+      const sw = SIDEBAR_W;
+      const sh = sidebarWorkspace.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+
+      if (sidebarCanvas.width !== Math.round(sw * dpr) || sidebarCanvas.height !== Math.round(sh * dpr)) {
+        sidebarCanvas.width = Math.round(sw * dpr);
+        sidebarCanvas.height = Math.round(sh * dpr);
+      }
+
+      sidebarCtx.save();
+      sidebarCtx.scale(dpr, dpr);
+      sidebarCtx.clearRect(0, 0, sw, sh);
+
+      // Base Background & Left Border
+      draw_rect(sidebarCtx, 0, 0, sw, sh, "#FFFFFF");
+
+      // Header Bar (y: 0..44)
+      draw_text(sidebarCtx, "STUDIO", 18, 18, 0.95, "#0F172A", 1);
+
+      // Feedback Toggle [FB] (Bright Blue Pill when active)
+      const fbX = 214;
+      if (state.feedbackOpen) {
+        draw_rounded_rect(sidebarCtx, fbX, 10, 42, 24, 3, "#0284C7");
+        draw_text(sidebarCtx, "FB", fbX + 13, 16, 0.85, "#FFFFFF", 1);
+      } else {
+        draw_rounded_rect(sidebarCtx, fbX, 10, 42, 24, 3, "#F1F5F9");
+        draw_rect(sidebarCtx, fbX, 10, 42, 1, "#CBD5E1");
+        draw_text(sidebarCtx, "FB", fbX + 13, 16, 0.85, "#64748B", 1);
+      }
+
+      // Primary SAVE button [SAVE]
+      const saveX = 262;
+      if (state.saved) {
+        draw_rounded_rect(sidebarCtx, saveX, 10, 58, 24, 3, "#10B981");
+        draw_text(sidebarCtx, "SAVED", saveX + 10, 16, 0.82, "#FFFFFF", 1);
+      } else {
+        draw_rounded_rect(sidebarCtx, saveX, 10, 58, 24, 3, "#0284C7");
+        draw_text(sidebarCtx, "SAVE", saveX + 14, 16, 0.85, "#FFFFFF", 1);
+      }
+
+      // Collapse toggle icon [>|]
+      const colX = 332;
+      draw_stroke(sidebarCtx, [[colX - 4, 15], [colX + 2, 21], [colX - 4, 27]], "#64748B", 1.5);
+      draw_stroke(sidebarCtx, [[colX + 6, 15], [colX + 6, 27]], "#64748B", 1.5);
+
+      // Section 1: Compact Tool Buttons
+      draw_text(sidebarCtx, "TOOLS", 18, 56, 0.8, "#64748B", 1);
+      draw_text(sidebarCtx, "INK", 24, 76, 0.85, state.activeTool === 'INK' ? "#0284C7" : "#94A3B8", 1);
+      draw_text(sidebarCtx, "PENCIL", 78, 76, 0.85, state.activeTool === 'PENCIL' ? "#0284C7" : "#94A3B8", 1);
+      draw_text(sidebarCtx, "MARK", 144, 76, 0.85, state.activeTool === 'MARK' ? "#0284C7" : "#94A3B8", 1);
+      draw_text(sidebarCtx, "ERASE", 202, 76, 0.85, state.activeTool === 'ERASE' ? "#0284C7" : "#94A3B8", 1);
+
+      // Section 2: Compact Stroke Properties & Sliders
+      draw_text(sidebarCtx, "STROKE PROPERTIES", 18, 106, 0.8, "#64748B", 1);
+      
+      const trackRight = 342;
+      const sliderTrackW = trackRight - 18; // 324px
+
+      // SIZE Slider
+      const isSizeActive = state.activeSlider === 'size' || state.hoveredSlider === 'size';
+      const sizeValStr = `${state.size} PX`;
+      const sizeValW = get_text_width(sizeValStr, 0.72);
+      draw_text(sidebarCtx, "SIZE", 18, 124, 0.72, "#64748B", 1);
+      draw_text(sidebarCtx, sizeValStr, trackRight - sizeValW, 124, 0.72, isSizeActive ? "#0284C7" : "#64748B", 1);
+      draw_rect(sidebarCtx, 18, 136, sliderTrackW, 2, "#E2E8F0");
+      const sizeRatio = Math.max(0, Math.min(1, (state.size - 1) / 99));
+      const sizeFillW = Math.round(sizeRatio * sliderTrackW);
+      draw_rect(sidebarCtx, 18, 136, sizeFillW, 2, isSizeActive ? "#0284C7" : "#94A3B8");
+      draw_ellipse(sidebarCtx, 18 + sizeFillW, 137, 8, 8, isSizeActive ? "#0284C7" : "#94A3B8");
+
+      // OPACITY Slider
+      const isOpActive = state.activeSlider === 'opacity' || state.hoveredSlider === 'opacity';
+      const opValStr = `${state.opacity}%`;
+      const opValW = get_text_width(opValStr, 0.72);
+      draw_text(sidebarCtx, "OPACITY", 18, 150, 0.72, "#64748B", 1);
+      draw_text(sidebarCtx, opValStr, trackRight - opValW, 150, 0.72, isOpActive ? "#0284C7" : "#64748B", 1);
+      draw_rect(sidebarCtx, 18, 162, sliderTrackW, 2, "#E2E8F0");
+      const opRatio = Math.max(0, Math.min(1, state.opacity / 100));
+      const opFillW = Math.round(opRatio * sliderTrackW);
+      draw_rect(sidebarCtx, 18, 162, opFillW, 2, isOpActive ? "#0284C7" : "#94A3B8");
+      draw_ellipse(sidebarCtx, 18 + opFillW, 163, 8, 8, isOpActive ? "#0284C7" : "#94A3B8");
+
+      // SMOOTHING Slider
+      const isSmActive = state.activeSlider === 'smoothing' || state.hoveredSlider === 'smoothing';
+      const smValStr = `${state.smoothing}%`;
+      const smValW = get_text_width(smValStr, 0.72);
+      draw_text(sidebarCtx, "SMOOTHING", 18, 176, 0.72, "#64748B", 1);
+      draw_text(sidebarCtx, smValStr, trackRight - smValW, 176, 0.72, isSmActive ? "#0284C7" : "#64748B", 1);
+      draw_rect(sidebarCtx, 18, 188, sliderTrackW, 2, "#E2E8F0");
+      const smRatio = Math.max(0, Math.min(1, state.smoothing / 100));
+      const smFillW = Math.round(smRatio * sliderTrackW);
+      draw_rect(sidebarCtx, 18, 188, smFillW, 2, isSmActive ? "#0284C7" : "#94A3B8");
+      draw_ellipse(sidebarCtx, 18 + smFillW, 189, 8, 8, isSmActive ? "#0284C7" : "#94A3B8");
+
+      // Section 3: Pigment Chips
+      draw_text(sidebarCtx, "INK PIGMENT", 18, 208, 0.75, "#64748B", 1);
+      draw_rounded_rect(sidebarCtx, 274, 204, 68, 18, 3, "#E0F2FE");
+      draw_text(sidebarCtx, state.color.toUpperCase(), 282, 208, 0.68, "#0284C7", 1);
+
+      for (let i = 0; i < PALETTE.length; i++) {
+        const cx_chip = 28 + i * 28;
+        const cy_chip = 232;
+        const isSelected = state.color.toUpperCase() === PALETTE[i].toUpperCase();
+        if (isSelected) {
+          draw_ellipse(sidebarCtx, cx_chip, cy_chip, 22, 22, "#0284C7");
+          draw_ellipse(sidebarCtx, cx_chip, cy_chip, 18, 18, "#FFFFFF");
+        }
+        draw_ellipse(sidebarCtx, cx_chip, cy_chip, 15, 15, PALETTE[i]);
+        if (PALETTE[i] === '#FFFFFF') {
+          draw_stroke(sidebarCtx, [[cx_chip - 7, cy_chip], [cx_chip + 7, cy_chip]], "#E2E8F0", 1);
+        }
+      }
+
+      // Section 4: Layers Tree
+      draw_text(sidebarCtx, "LAYERS", 18, 260, 0.8, "#64748B", 1);
+      if (state.hoveredNewLayer) {
+        draw_rounded_rect(sidebarCtx, 296, 256, 46, 18, 3, "#E0F2FE");
+        draw_text(sidebarCtx, "+ NEW", 302, 260, 0.72, "#0369A1", 1);
+      } else {
+        draw_text(sidebarCtx, "+ NEW", 302, 260, 0.72, "#0284C7", 1);
+      }
+
+      const layerVpY = 276;
+      const layerVpH = 160;
+      let totalLayersH = 0;
+      for (let layer of state.layers) {
+        totalLayersH += (state.activeLayer === layer.num ? 48 : 28);
+      }
+      const maxLayerScroll = Math.max(0, totalLayersH - layerVpH);
+      state.layerScrollY = Math.max(0, Math.min(maxLayerScroll, state.layerScrollY || 0));
+
+      sidebarCtx.save();
+      sidebarCtx.beginPath();
+      sidebarCtx.rect(12, layerVpY, sw - 24, layerVpH);
+      sidebarCtx.clip();
+
+      let ly = layerVpY + 2 - state.layerScrollY;
+      for (let layer of state.layers) {
+        const isActive = state.activeLayer === layer.num;
+        const rowH = isActive ? 46 : 28;
+
+        if (ly + rowH >= layerVpY && ly <= layerVpY + layerVpH) {
+          if (isActive) {
+            draw_rounded_rect(sidebarCtx, 12, ly - 2, sw - 28, 46, 3, "#F0F9FF");
+            draw_rect(sidebarCtx, 12, ly - 2, 3, 46, "#0284C7");
+          }
+          draw_text(sidebarCtx, layer.num, 20, ly + 2, 0.82, isActive ? "#0284C7" : "#64748B", 1);
+          draw_text(sidebarCtx, layer.name, 48, ly + 2, 0.80, isActive ? "#0F172A" : "#64748B", 1);
+          draw_text(sidebarCtx, layer.op, sw - 76, ly + 2, 0.72, isActive ? "#0284C7" : "#94A3B8", 1);
+
+          if (layer.vis) {
+            draw_ellipse(sidebarCtx, sw - 32, ly + 6, 12, 6, "#64748B");
+            draw_ellipse(sidebarCtx, sw - 32, ly + 6, 4, 4, "#FFFFFF");
+          } else {
+            draw_ellipse(sidebarCtx, sw - 32, ly + 6, 12, 6, "#CBD5E1");
+            draw_stroke(sidebarCtx, [[sw - 38, ly + 2], [sw - 26, ly + 10]], "#94A3B8", 1.5);
+          }
+
+          if (isActive) {
+            draw_text(sidebarCtx, "OPACITY", 20, ly + 20, 0.62, "#0369A1", 1);
+            const sliderW = sw - 120;
+            draw_rect(sidebarCtx, 72, ly + 24, sliderW, 2, "#E2E8F0");
+            const fillW = Math.round((layer.opacityNum / 100) * sliderW);
+            draw_rect(sidebarCtx, 72, ly + 24, fillW, 2, "#0284C7");
+            draw_ellipse(sidebarCtx, 72 + fillW, 25 + ly, 6, 6, "#0284C7");
+          }
+        }
+        ly += (isActive ? 48 : 28);
+      }
+      sidebarCtx.restore();
+
+      // Section 5: Unboxed Comments Section Using FULL Available Sidebar Width
+      // CRITICAL USER FEEDBACK & MANAGER REQUIREMENT:
+      // "The comments section you have lots of width to use in the sidebar and arent."
+      // "Include a realistic longer comment sentence to prove the available text width is used rather than only short demo labels."
+      // "unboxed comment presentation"
+      draw_rect(sidebarCtx, 18, 444, sw - 36, 1, "#F1F5F9");
+      draw_text(sidebarCtx, "COMMENTS", 18, 458, 0.82, "#0F172A", 1);
+
+      // Dynamic Filter Chiclets
+      const isActFilter = (state.commentFilter === 'ACTIVE');
+      const isAllFilter = !isActFilter;
+
+      const f24X = 234;
+      draw_rounded_rect(sidebarCtx, f24X, 452, 34, 18, 3, isAllFilter ? "#0284C7" : "#F1F5F9");
+      if (!isAllFilter) draw_rect(sidebarCtx, f24X, 452, 34, 1, "#CBD5E1");
+      draw_text(sidebarCtx, "24", f24X + 8, 456, 0.65, isAllFilter ? "#FFFFFF" : "#64748B", 1);
+
+      const fActX = 274;
+      draw_rounded_rect(sidebarCtx, fActX, 452, 68, 18, 3, isActFilter ? "#0284C7" : "#F1F5F9");
+      if (!isActFilter) draw_rect(sidebarCtx, fActX, 452, 68, 1, "#CBD5E1");
+      draw_text(sidebarCtx, "4 ACTIVE", fActX + 8, 456, 0.60, isActFilter ? "#FFFFFF" : "#64748B", 1);
+
+      // Filtered Comments: Displays realistic project comments list
+      // CRITICAL REQUIREMENT:
+      // "Comments: show one actual sentence plus number, 10-12px glyph height and wordwrap across row width,
+      // then compact bounds/status; remove separate title and author duplication. Preserve unboxed rows and selected accent."
+      const filteredComments = isActFilter
+        ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE')
+        : ALL_COMMENTS;
+
+      const vpY = 478;
+      const vpH = Math.max(160, sh - vpY - 14);
+
+      // Pre-compute wrapped lines and item heights
+      // Glyph height: 7 * 1.55 = 10.85px (in 10-12px range). Pitch per char = 8 * 1.55 = 12.4px.
+      // Card width: 332px; Text starts at x=32; available text width = 308px => 24 chars per line.
+      const commentItems = filteredComments.map(c => {
+        const fullText = `#${c.num} ${c.note || "CRITIQUE NOTE CONFIRMED BY TEAM LEAD."}`;
+        const lines = wrap_comment_text(fullText, 24);
+        const rowH = lines.length * 16 + 30;
+        return Object.assign({}, c, { fullText, lines, rowH });
+      });
+
+      const totalContentH = commentItems.reduce((sum, item) => sum + item.rowH, 0);
+      const maxScroll = Math.max(0, totalContentH - vpH);
+      state.commentScrollY = Math.max(0, Math.min(maxScroll, state.commentScrollY));
+
+      const commentCardX = 12;
+      const commentCardW = sw - 28; // 332px wide
+      const badgeRightX = sw - 20;
+
+      sidebarCtx.save();
+      sidebarCtx.beginPath();
+      sidebarCtx.rect(commentCardX, vpY, commentCardW + 4, vpH);
+      sidebarCtx.clip();
+
+      let curY = vpY + 4 - state.commentScrollY;
+      for (let item of commentItems) {
+        const rowTop = curY;
+        const rowBottom = curY + item.rowH;
+        curY += item.rowH;
+
+        if (rowBottom < vpY || rowTop > vpY + vpH) continue;
+
+        const isAct = (item.status === 'ACTIVE');
+        const isSelected = (item.frameIdx === state.activeFrameIdx);
+
+        // UNBOXED PRESENTATION & SELECTED ACCENT
+        if (isSelected) {
+          draw_rounded_rect(sidebarCtx, commentCardX, rowTop, commentCardW, item.rowH - 3, 3, "#F0F9FF");
+          draw_rect(sidebarCtx, commentCardX, rowTop, 3, item.rowH - 3, "#0284C7");
+        } else {
+          draw_rect(sidebarCtx, commentCardX + 6, rowTop + item.rowH - 2, commentCardW - 12, 1, "#F1F5F9");
+        }
+
+        // Left Status Pip
+        draw_ellipse(sidebarCtx, commentCardX + 8, rowTop + 11, 6, 6, isAct ? "#0284C7" : "#94A3B8");
+
+        // Sentence text: one actual sentence plus number, 10-12px glyph height, wordwrapped across row width
+        const tx = commentCardX + 20;
+        const textColor = isSelected ? "#0F172A" : (isAct ? "#1E293B" : "#475569");
+        for (let li = 0; li < item.lines.length; li++) {
+          draw_text(sidebarCtx, item.lines[li], tx, rowTop + 6 + li * 16, 1.50, textColor, 1.15);
+        }
+
+        // Compact bounds & status (separate title and author duplication removed)
+        const metaY = rowTop + 6 + (item.lines.length * 16) + 4;
+        draw_text(sidebarCtx, item.bounds, tx, metaY, 0.52, "#94A3B8", 1);
+
+        // Right-aligned status pill: [ ACTIVE ] or [ ACK ]
+        const pillW = isAct ? 46 : 36;
+        const pillX = badgeRightX - pillW;
+        draw_rounded_rect(sidebarCtx, pillX, metaY - 3, pillW, 14, 2, isAct ? "#E0F2FE" : "#F1F5F9");
+        draw_text(sidebarCtx, isAct ? "ACTIVE" : "ACK", pillX + (isAct ? 6 : 7), metaY - 1, 0.48, isAct ? "#0284C7" : "#64748B", 1);
+      }
+      sidebarCtx.restore();
+
+      // Dedicated Floating Paint-Stroke Scrollbar in Reserved Gutter
+      const sx = sw - 10;
+      const trackTop = vpY;
+      const trackBottom = vpY + vpH;
+      const trackH = trackBottom - trackTop;
+
+      if (totalContentH > vpH) {
+        const thumbH = Math.max(28, Math.min(trackH - 12, Math.round((vpH / totalContentH) * trackH)));
+        const scrollRatio = maxScroll > 0 ? (state.commentScrollY / maxScroll) : 0;
+        const thumbY = trackTop + Math.round(scrollRatio * (trackH - thumbH));
+
+        // Floating rounded paint stroke thumb (4px width, natural rounded ends)
+        draw_stroke(sidebarCtx, [[sx, thumbY], [sx, thumbY + thumbH]], "#94A3B8", 4);
+      }
+
+      // NO OLD DIAGNOSTIC FOOTER TEXT:
+      // "CODESKETCH ENGINE V2 \ CLS 0.0000 STABLE GUTTER" is completely removed!
+
+      sidebarCtx.restore();
+    }
+
+    // Synchronize HTML overlay hotspots with canvas layout and fitted artwork
+    function syncOverlayElements() {
+      const sw = getSidebarWidth();
+
+      canvasWorkspace.style.right = sw + 'px';
+      sidebarWorkspace.style.width = sw + 'px';
+
+      if (state.collapsed) {
+        sidebarWorkspace.classList.add('collapsed');
+        document.getElementById('btnExpandStudio').style.display = 'flex';
+      } else {
+        sidebarWorkspace.classList.remove('collapsed');
+        document.getElementById('btnExpandStudio').style.display = 'none';
+      }
+
+      // Map document coordinates to screen coordinates via fitScale & offset
+      const ax = state.artX;
+      const ay = state.artY;
+      const s = state.fitScale;
+
+      const toScreenX = (x) => Math.round(ax + x * s);
+      const toScreenY = (y) => Math.round(ay + y * s);
+      const toScreenW = (w) => Math.round(w * s);
+      const toScreenH = (h) => Math.round(h * s);
+
+      // Canvas Hotspots (Fixed size buttons anchored at scaled pin coordinates)
+      const pin1 = document.getElementById('btnCommentPin1');
+      const p1x = toScreenX(62);
+      const p1y = toScreenY(262);
+      pin1.style.left = (p1x - 10) + 'px';
+      pin1.style.top = (p1y - 10) + 'px';
+      pin1.style.width = '70px';
+      pin1.style.height = '24px';
+
+      const pin5 = document.getElementById('btnCommentPin5');
+      const p5x = toScreenX(560);
+      const p5y = toScreenY(390);
+      pin5.style.left = (p5x - 8) + 'px';
+      pin5.style.top = (p5y - 8) + 'px';
+      pin5.style.width = '70px';
+      pin5.style.height = '24px';
+
+      const cluster = document.getElementById('btnClusterLake');
+      const clx = toScreenX(230);
+      const cly = toScreenY(508);
+      cluster.style.left = clx + 'px';
+      cluster.style.top = cly + 'px';
+      cluster.style.width = '88px';
+      cluster.style.height = '22px';
+
+      // Marquee Hotspots (Follow spatial marquee rectangle)
+      const smx = toScreenX(state.marqueeX);
+      const smy = toScreenY(state.marqueeY);
+      const smw = toScreenW(state.marqueeW);
+      const smh = toScreenH(state.marqueeH);
+
+      const mqZone = document.getElementById('marqueeDragZone');
+      mqZone.style.left = smx + 'px';
+      mqZone.style.top = smy + 'px';
+      mqZone.style.width = smw + 'px';
+      mqZone.style.height = smh + 'px';
+
+      const mqHandle = document.getElementById('marqueeResizeHandle');
+      mqHandle.style.left = (smx + smw - 8) + 'px';
+      mqHandle.style.top = (smy + smh - 8) + 'px';
+      mqHandle.style.width = '16px';
+      mqHandle.style.height = '16px';
+
+      // Composer Card Overlay (FIXED CSS SIZE 248x178px across all viewports)
+      const cardGroup = document.getElementById('cardInteractiveGroup');
+      if (state.feedbackOpen) {
+        cardGroup.style.display = 'block';
+        cardGroup.style.position = 'absolute';
+        const cx = state.composerScreenX || (smx + smw + 24);
+        const cy = state.composerScreenY || (smy + 40);
+        const cardW = 248;
+        const cardH = 178;
+
+        cardGroup.style.left = cx + 'px';
+        cardGroup.style.top = cy + 'px';
+        cardGroup.style.width = cardW + 'px';
+        cardGroup.style.height = cardH + 'px';
+
+        document.getElementById('btnCloseCard').style.left = '224px';
+        document.getElementById('btnCloseCard').style.top = '4px';
+        document.getElementById('btnCloseCard').style.width = '20px';
+        document.getElementById('btnCloseCard').style.height = '20px';
+
+        const critiqueInp = document.getElementById('critiqueInput');
+        critiqueInp.style.left = '10px';
+        critiqueInp.style.top = '60px';
+        critiqueInp.style.width = '228px';
+        critiqueInp.style.height = '76px';
+
+        document.getElementById('btnCancelFeedback').style.left = '110px';
+        document.getElementById('btnCancelFeedback').style.top = '144px';
+        document.getElementById('btnCancelFeedback').style.width = '58px';
+        document.getElementById('btnCancelFeedback').style.height = '24px';
+
+        document.getElementById('btnSendFeedback').style.left = '174px';
+        document.getElementById('btnSendFeedback').style.top = '144px';
+        document.getElementById('btnSendFeedback').style.width = '64px';
+        document.getElementById('btnSendFeedback').style.height = '24px';
+      } else {
+        cardGroup.style.display = 'none';
+      }
+
+      // Sidebar Header Hotspots (Fixed CSS sizes)
+      document.getElementById('btnHeaderFb').style.left = '214px';
+      document.getElementById('btnHeaderFb').style.top = '10px';
+      document.getElementById('btnHeaderFb').style.width = '42px';
+      document.getElementById('btnHeaderFb').style.height = '24px';
+
+      document.getElementById('btnHeaderSave').style.left = '262px';
+      document.getElementById('btnHeaderSave').style.top = '10px';
+      document.getElementById('btnHeaderSave').style.width = '58px';
+      document.getElementById('btnHeaderSave').style.height = '24px';
+
+      document.getElementById('btnHeaderCollapse').style.left = '332px';
+      document.getElementById('btnHeaderCollapse').style.top = '10px';
+      document.getElementById('btnHeaderCollapse').style.width = '24px';
+      document.getElementById('btnHeaderCollapse').style.height = '24px';
+
+      // Tool Hotspots
+      document.getElementById('btnToolInk').style.left = '20px';
+      document.getElementById('btnToolInk').style.top = '66px';
+      document.getElementById('btnToolInk').style.width = '46px';
+      document.getElementById('btnToolInk').style.height = '26px';
+
+      document.getElementById('btnToolPencil').style.left = '74px';
+      document.getElementById('btnToolPencil').style.top = '66px';
+      document.getElementById('btnToolPencil').style.width = '58px';
+      document.getElementById('btnToolPencil').style.height = '26px';
+
+      document.getElementById('btnToolMark').style.left = '140px';
+      document.getElementById('btnToolMark').style.top = '66px';
+      document.getElementById('btnToolMark').style.width = '50px';
+      document.getElementById('btnToolMark').style.height = '26px';
+
+      document.getElementById('btnToolErase').style.left = '198px';
+      document.getElementById('btnToolErase').style.top = '66px';
+      document.getElementById('btnToolErase').style.width = '58px';
+      document.getElementById('btnToolErase').style.height = '26px';
+
+      // Sliders Hotspots
+      const sliderTrackW = 324;
+      document.getElementById('sliderTrackSize').style.left = '18px';
+      document.getElementById('sliderTrackSize').style.top = '124px';
+      document.getElementById('sliderTrackSize').style.width = sliderTrackW + 'px';
+      document.getElementById('sliderTrackSize').style.height = '22px';
+
+      document.getElementById('sliderTrackOpacity').style.left = '18px';
+      document.getElementById('sliderTrackOpacity').style.top = '150px';
+      document.getElementById('sliderTrackOpacity').style.width = sliderTrackW + 'px';
+      document.getElementById('sliderTrackOpacity').style.height = '22px';
+
+      document.getElementById('sliderTrackSmoothing').style.left = '18px';
+      document.getElementById('sliderTrackSmoothing').style.top = '176px';
+      document.getElementById('sliderTrackSmoothing').style.width = sliderTrackW + 'px';
+      document.getElementById('sliderTrackSmoothing').style.height = '22px';
+
+      // Color Trigger
+      document.getElementById('btnTriggerColorPicker').style.left = '274px';
+      document.getElementById('btnTriggerColorPicker').style.top = '204px';
+      document.getElementById('btnTriggerColorPicker').style.width = '68px';
+      document.getElementById('btnTriggerColorPicker').style.height = '20px';
+
+      // Chips
+      const chipsGroup = document.getElementById('pigmentChipsGroup');
+      chipsGroup.innerHTML = '';
+      for (let i = 0; i < PALETTE.length; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'interactive-btn';
+        btn.style.left = (18 + i * 28) + 'px';
+        btn.style.top = '220px';
+        btn.style.width = '24px';
+        btn.style.height = '24px';
+        btn.style.borderRadius = '50%';
+        btn.title = PALETTE_NAMES[i];
+        btn.onclick = () => {
+          state.color = PALETTE[i];
+          renderApp();
+        };
+        chipsGroup.appendChild(btn);
+      }
+
+      // Layers Header Hotspot
+      document.getElementById('btnNewLayer').style.left = '296px';
+      document.getElementById('btnNewLayer').style.top = '256px';
+      document.getElementById('btnNewLayer').style.width = '46px';
+      document.getElementById('btnNewLayer').style.height = '20px';
+
+      buildLayersTouchUI();
+
+      // Comment Filter Chiclets Hotspots
+      document.getElementById('btnFilterAll').style.left = '234px';
+      document.getElementById('btnFilterAll').style.top = '452px';
+      document.getElementById('btnFilterAll').style.width = '34px';
+      document.getElementById('btnFilterAll').style.height = '20px';
+
+      document.getElementById('btnFilterActive').style.left = '274px';
+      document.getElementById('btnFilterActive').style.top = '452px';
+      document.getElementById('btnFilterActive').style.width = '68px';
+      document.getElementById('btnFilterActive').style.height = '20px';
+
+      buildCommentsTouchUI();
+
+      // Dedicated Scrollbar Touch Zone
+      const scrollZone = document.getElementById('commentsScrollDragZone');
+      scrollZone.style.left = '340px';
+      scrollZone.style.top = '478px';
+      scrollZone.style.width = '20px';
+      scrollZone.style.height = Math.max(160, sidebarWorkspace.clientHeight - 478 - 14) + 'px';
+    }
+
+    // Dynamic Layers Touch Targets
+    function buildLayersTouchUI() {
+      const cont = document.getElementById('layersTouchContainer');
+      cont.innerHTML = '';
+      const layerVpY = 276;
+      const layerVpH = 160;
+      let ly = layerVpY + 2 - (state.layerScrollY || 0);
+
+      state.layers.forEach((layer) => {
+        const isActive = state.activeLayer === layer.num;
+        const rowH = isActive ? 46 : 28;
+
+        if (ly + rowH >= layerVpY && ly <= layerVpY + layerVpH) {
+          const btnSelect = document.createElement('button');
+          btnSelect.className = 'interactive-btn';
+          btnSelect.style.top = (ly - 2) + 'px';
+          btnSelect.style.left = '12px';
+          btnSelect.style.width = '300px';
+          btnSelect.style.height = rowH + 'px';
+          btnSelect.title = `Select Layer ${layer.num} (${layer.name})`;
+          btnSelect.onclick = () => {
+            state.activeLayer = layer.num;
+            renderApp();
+          };
+          cont.appendChild(btnSelect);
+
+          const btnEye = document.createElement('button');
+          btnEye.className = 'interactive-btn';
+          btnEye.style.top = (ly + 2) + 'px';
+          btnEye.style.left = '316px';
+          btnEye.style.width = '26px';
+          btnEye.style.height = '20px';
+          btnEye.title = `Toggle Visibility Layer ${layer.num}`;
+          btnEye.onclick = (e) => {
+            e.stopPropagation();
+            layer.vis = !layer.vis;
+            renderApp();
+          };
+          cont.appendChild(btnEye);
+
+          if (isActive) {
+            const btnSlider = document.createElement('button');
+            btnSlider.className = 'interactive-btn';
+            btnSlider.style.top = (ly + 16) + 'px';
+            btnSlider.style.left = '70px';
+            btnSlider.style.width = '244px';
+            btnSlider.style.height = '18px';
+            btnSlider.style.cursor = 'ew-resize';
+            btnSlider.title = `Layer ${layer.num} Opacity`;
+
+            btnSlider.addEventListener('pointerdown', (e) => {
+              state.activeSlider = 'layerOp';
+              const updateOp = (pe) => {
+                const rect = btnSlider.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width));
+                layer.opacityNum = Math.round(ratio * 100);
+                layer.op = `${layer.opacityNum}%`;
+                renderApp();
+              };
+              updateOp(e);
+              const onMove = (pe) => updateOp(pe);
+              const onUp = () => {
+                state.activeSlider = null;
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                renderApp();
+              };
+              window.addEventListener('pointermove', onMove);
+              window.addEventListener('pointerup', onUp);
+            });
+            cont.appendChild(btnSlider);
+          }
+        }
+        ly += (isActive ? 48 : 28);
+      });
+    }
+
+    // Dynamic Comments Touch Targets (Uses FULL width of sidebar)
+    function buildCommentsTouchUI() {
+      const cont = document.getElementById('commentsTouchContainer');
+      cont.innerHTML = '';
+      const isAct = state.commentFilter === 'ACTIVE';
+      const filteredList = isAct ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+      const vpY = 478;
+      const vpH = Math.max(160, sidebarWorkspace.clientHeight - vpY - 14);
+      const cardW = 332;
+
+      let curY = vpY + 4 - state.commentScrollY;
+      filteredList.forEach((c) => {
+        const fullText = `#${c.num} ${c.note || "CRITIQUE NOTE CONFIRMED BY TEAM LEAD."}`;
+        const lines = wrap_comment_text(fullText, 24);
+        const rowH = lines.length * 16 + 30;
+        const rowTop = curY;
+        curY += rowH;
+
+        if (rowTop + rowH < vpY || rowTop > vpY + vpH) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'interactive-btn';
+        btn.style.top = rowTop + 'px';
+        btn.style.left = '12px';
+        btn.style.width = cardW + 'px';
+        btn.style.height = (rowH - 3) + 'px';
+        btn.title = `#${c.num} (${c.status}) — ${c.bounds}`;
+        btn.onclick = () => {
+          if (c.frameIdx >= 0 && c.frameIdx < ALL_FRAMES.length) {
+            state.activeFrameIdx = c.frameIdx;
+            const f = ALL_FRAMES[c.frameIdx];
+            state.marqueeX = f.bounds[0];
+            state.marqueeY = f.bounds[1];
+            state.marqueeW = f.bounds[2];
+            state.marqueeH = f.bounds[3];
+            state.feedbackOpen = true;
+          }
+          renderApp();
+        };
+        cont.appendChild(btn);
+      });
+    }
+
+    function renderApp() {
+      renderCanvasWorkspace();
+      renderSidebarWorkspace();
+      syncOverlayElements();
+    }
+
+    // Event Handlers Setup
+    window.addEventListener('resize', () => {
+      renderApp();
+    });
+
+    // Tool Buttons
+    document.getElementById('btnToolInk').onclick = () => { state.activeTool = 'INK'; renderApp(); };
+    document.getElementById('btnToolPencil').onclick = () => { state.activeTool = 'PENCIL'; renderApp(); };
+    document.getElementById('btnToolMark').onclick = () => { state.activeTool = 'MARK'; renderApp(); };
+    document.getElementById('btnToolErase').onclick = () => { state.activeTool = 'ERASE'; renderApp(); };
+
+    // Sliders
+    function setupSlider(elemId, sliderName, minVal, maxVal, getVal, setVal) {
+      const el = document.getElementById(elemId);
+      el.addEventListener('pointerenter', () => {
+        if (!state.activeSlider) {
+          state.hoveredSlider = sliderName;
+          renderApp();
+        }
+      });
+      el.addEventListener('pointerleave', () => {
+        if (state.hoveredSlider === sliderName) {
+          state.hoveredSlider = null;
+          renderApp();
+        }
+      });
+      el.addEventListener('pointerdown', (e) => {
+        state.activeSlider = sliderName;
+        const update = (pe) => {
+          const rect = el.getBoundingClientRect();
+          const ratio = Math.max(0, Math.min(1, (pe.clientX - rect.left) / rect.width));
+          setVal(Math.round(minVal + ratio * (maxVal - minVal)));
+          renderApp();
+        };
+        update(e);
+        const onMove = (pe) => update(pe);
+        const onUp = () => {
+          state.activeSlider = null;
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          renderApp();
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+      });
+    }
+
+    setupSlider('sliderTrackSize', 'size', 1, 100, () => state.size, (v) => state.size = v);
+    setupSlider('sliderTrackOpacity', 'opacity', 1, 100, () => state.opacity, (v) => state.opacity = v);
+    setupSlider('sliderTrackSmoothing', 'smoothing', 0, 100, () => state.smoothing, (v) => state.smoothing = v);
+
+    // + NEW Layer
+    const btnNewLayer = document.getElementById('btnNewLayer');
+    btnNewLayer.addEventListener('pointerenter', () => { state.hoveredNewLayer = true; renderApp(); });
+    btnNewLayer.addEventListener('pointerleave', () => { state.hoveredNewLayer = false; renderApp(); });
+    btnNewLayer.onclick = () => {
+      const existingNums = state.layers.map(l => parseInt(l.num, 10)).filter(n => !isNaN(n));
+      const nextNum = (existingNums.length > 0 ? Math.max(...existingNums) : 0) + 1;
+      const nextNumStr = String(nextNum).padStart(2, '0');
+      state.layers.unshift({
+        num: nextNumStr,
+        name: `LAYER ${nextNum}`,
+        op: "100%",
+        opacityNum: 100,
+        vis: true
+      });
+      state.activeLayer = nextNumStr;
+      renderApp();
+    };
+
+    // Comment Filters
+    document.getElementById('btnFilterAll').onclick = () => {
+      state.commentFilter = 'ALL';
+      state.commentScrollY = 0;
+      renderApp();
+    };
+    document.getElementById('btnFilterActive').onclick = () => {
+      state.commentFilter = 'ACTIVE';
+      state.commentScrollY = 0;
+      renderApp();
+    };
+
+    // Scrollbar Dragging & Wheel
+    const scrollZone = document.getElementById('commentsScrollDragZone');
+    scrollZone.addEventListener('pointerdown', (e) => {
+      state.isDraggingScrollbar = true;
+      state.dragStartY = e.clientY;
+      state.dragStartScrollY = state.commentScrollY;
+      const filtered = state.commentFilter === 'ACTIVE' ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+      const vpH = Math.max(160, sidebarWorkspace.clientHeight - 478 - 14);
+      const totalContentH = filtered.length * 52;
+      const maxScroll = Math.max(0, totalContentH - vpH);
+
+      const onMove = (pe) => {
+        if (!state.isDraggingScrollbar) return;
+        const delta = pe.clientY - state.dragStartY;
+        const scrollDelta = (delta / vpH) * maxScroll;
+        state.commentScrollY = Math.max(0, Math.min(maxScroll, state.dragStartScrollY + scrollDelta));
+        renderApp();
+      };
+      const onUp = () => {
+        state.isDraggingScrollbar = false;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // Mousewheel over comments
+    sidebarWorkspace.addEventListener('wheel', (e) => {
+      const rect = sidebarWorkspace.getBoundingClientRect();
+      const relativeY = e.clientY - rect.top;
+      if (relativeY >= 450) {
+        e.preventDefault();
+        const filtered = state.commentFilter === 'ACTIVE' ? ALL_COMMENTS.filter(c => c.status === 'ACTIVE') : ALL_COMMENTS;
+        const vpH = Math.max(160, sidebarWorkspace.clientHeight - 478 - 14);
+        const maxScroll = Math.max(0, filtered.length * 52 - vpH);
+        state.commentScrollY = Math.max(0, Math.min(maxScroll, state.commentScrollY + e.deltaY));
+        renderApp();
+      } else if (relativeY >= 260 && relativeY < 440) {
+        e.preventDefault();
+        let totalH = 0;
+        state.layers.forEach(l => totalH += (state.activeLayer === l.num ? 48 : 28));
+        const maxScroll = Math.max(0, totalH - 160);
+        state.layerScrollY = Math.max(0, Math.min(maxScroll, state.layerScrollY + e.deltaY));
+        renderApp();
+      }
+    }, { passive: false });
+
+    // Feedback Actions
+    document.getElementById('btnHeaderFb').onclick = () => {
+      state.feedbackOpen = !state.feedbackOpen;
+      renderApp();
+    };
+    document.getElementById('btnCloseCard').onclick = () => {
+      state.feedbackOpen = false;
+      renderApp();
+    };
+    document.getElementById('btnCancelFeedback').onclick = () => {
+      state.feedbackOpen = false;
+      renderApp();
+    };
+    document.getElementById('btnSendFeedback').onclick = () => {
+      const curFrame = ALL_FRAMES[state.activeFrameIdx] || ALL_FRAMES[2];
+      curFrame.status = 'ACK';
+      const commentItem = ALL_COMMENTS.find(c => c.frameIdx === state.activeFrameIdx);
+      if (commentItem) commentItem.status = 'ACK';
+      renderApp();
+    };
+
+    // Textarea input
+    const critiqueInp = document.getElementById('critiqueInput');
+    critiqueInp.addEventListener('input', (e) => {
+      state.userCritiqueText = e.target.value.toUpperCase();
+      renderApp();
+    });
+
+    // Header Actions
+    document.getElementById('btnHeaderSave').onclick = () => {
+      state.saved = true;
+      renderApp();
+      setTimeout(() => {
+        state.saved = false;
+        renderApp();
+      }, 1500);
+    };
+
+    document.getElementById('btnHeaderCollapse').onclick = () => {
+      state.collapsed = true;
+      renderApp();
+    };
+    document.getElementById('btnExpandStudio').onclick = () => {
+      state.collapsed = false;
+      renderApp();
+    };
+
+    // Canvas comment pins
+    document.getElementById('btnCommentPin1').onclick = () => {
+      state.activeFrameIdx = 0;
+      const f = ALL_FRAMES[0];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.feedbackOpen = true;
+      renderApp();
+    };
+
+    document.getElementById('btnCommentPin5').onclick = () => {
+      state.activeFrameIdx = 4;
+      const f = ALL_FRAMES[4];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.feedbackOpen = true;
+      renderApp();
+    };
+
+    document.getElementById('btnClusterLake').onclick = () => {
+      state.activeFrameIdx = 5;
+      const f = ALL_FRAMES[5];
+      state.marqueeX = f.bounds[0];
+      state.marqueeY = f.bounds[1];
+      state.marqueeW = f.bounds[2];
+      state.marqueeH = f.bounds[3];
+      state.feedbackOpen = true;
+      renderApp();
+    };
+
+    // Marquee Dragging (in document coordinates)
+    const mqZone = document.getElementById('marqueeDragZone');
+    mqZone.addEventListener('pointerdown', (e) => {
+      state.isDraggingMarquee = true;
+      const s = state.fitScale;
+      state.dragMarqueeOffset = {
+        x: (e.clientX - state.artX) / s - state.marqueeX,
+        y: (e.clientY - state.artY) / s - state.marqueeY
+      };
+      const onMove = (pe) => {
+        if (!state.isDraggingMarquee) return;
+        const curDocX = (pe.clientX - state.artX) / s;
+        const curDocY = (pe.clientY - state.artY) / s;
+        state.marqueeX = Math.max(10, Math.min(DOC_W - state.marqueeW - 10, curDocX - state.dragMarqueeOffset.x));
+        state.marqueeY = Math.max(10, Math.min(DOC_H - state.marqueeH - 10, curDocY - state.dragMarqueeOffset.y));
+        renderApp();
+      };
+      const onUp = () => {
+        state.isDraggingMarquee = false;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // Marquee Resizing (in document coordinates)
+    const mqHandle = document.getElementById('marqueeResizeHandle');
+    mqHandle.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      const s = state.fitScale;
+      const startDocX = (e.clientX - state.artX) / s;
+      const startDocY = (e.clientY - state.artY) / s;
+      const startW = state.marqueeW;
+      const startH = state.marqueeH;
+      const onMove = (pe) => {
+        const curDocX = (pe.clientX - state.artX) / s;
+        const curDocY = (pe.clientY - state.artY) / s;
+        state.marqueeW = Math.max(80, Math.min(DOC_W - state.marqueeX, startW + (curDocX - startDocX)));
+        state.marqueeH = Math.max(60, Math.min(DOC_H - state.marqueeY, startH + (curDocY - startDocY)));
+        renderApp();
+      };
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // Canvas Freehand Drawing (mapped to document coordinates)
+    studioCanvas.addEventListener('pointerdown', (e) => {
+      if (e.target !== studioCanvas) return;
+      const rect = studioCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // Check if click is inside the artboard document
+      if (clickX < state.artX || clickX > state.artX + state.artW ||
+          clickY < state.artY || clickY > state.artY + state.artH) {
+        return;
+      }
+
+      state.isDrawing = true;
+      const docPt = [
+        (clickX - state.artX) / state.fitScale,
+        (clickY - state.artY) / state.fitScale
+      ];
+      state.currentStroke = {
+        points: [docPt],
+        color: state.color,
+        size: state.size,
+        opacity: state.opacity,
+        layer: state.activeLayer
+      };
+      renderCanvasWorkspace();
+
+      const onMove = (pe) => {
+        if (!state.isDrawing) return;
+        const p = [
+          (pe.clientX - rect.left - state.artX) / state.fitScale,
+          (pe.clientY - rect.top - state.artY) / state.fitScale
+        ];
+        state.currentStroke.points.push(p);
+        renderCanvasWorkspace();
+      };
+      const onUp = () => {
+        if (state.isDrawing && state.currentStroke) {
+          state.userStrokes.push(state.currentStroke);
+          state.currentStroke = null;
+        }
+        state.isDrawing = false;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        renderCanvasWorkspace();
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+
+    // Initial render
+    renderApp();
+  </script>
+</body>
+</html>
