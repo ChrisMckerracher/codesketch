@@ -5,6 +5,13 @@
 # Author: Gemini 3.8 Flash High (Creative & Writing Designer Agent)
 # Governance: FROZEN BASELINE REFERENCE SPECIFICATION — WRITING ONLY
 # Role: Implementation Acceptance Specification (Mockup remains frozen)
+# Technical Baseline Corrections from User Review (2026-09-11; Visual Approval Pending):
+# Note: Summarized feedback guides technical corrections; new explicit visual approval remains pending.
+#   - Feedback dragging: starts empty, live drag marquee before pointerup, fixed opposite anchor on resize, grab offset on move
+#   - Layer renaming: inline canonical edit committing once on Enter/blur, cancel on Escape, draft preservation, document generation fences
+#   - Ordinal suppression: numeric-token names suppress generated ordinal without stored text rewriting
+#   - Comment styling: unboxed reference comment rows with selected-only accent, title + bounds, real lifecycle status
+#
 #
 # Exact Frozen Reference Paths:
 #   - Isolated Repository References:
@@ -237,6 +244,37 @@ Feature: Codesketch Studio Reconstruction
     And the eye icon renders open with white pupil
     And user strokes on layer "layer-6" reappear on canvas
 
+  Scenario: Layer names containing numeric tokens suppress generated ordinal without stored text rewrite
+    Given layer 3 has stored canonical name "03 LINEART" and layer 4 has stored canonical name "Layer 4"
+    And layer 0 has stored canonical name "BACKGROUND"
+    When the layer stack renders row presentation numbers
+    Then layer 0 displays the generated zero-padded ordinal "00" followed by "BACKGROUND"
+    But layer 3 displays "03 LINEART" suppressing the duplicate generated "03" ordinal
+    And layer 4 displays "Layer 4" suppressing the duplicate generated "04" ordinal
+    And stored canonical layer names in document state remain strictly untouched without text rewriting
+
+  Scenario: Clicking layer name activates inline full canonical edit committing once on Enter or blur and canceling on Escape
+    Given a layer row with canonical name "LINEART" is displayed in the layer stack
+    When the human clicks the layer name button separate from row selection and visibility
+    Then an inline single-line text editor mounts populated with "LINEART" and all text selected
+    When the human edits the name to "03 LINEART" and presses Enter
+    Then the rename commits once with the full submitted text to the canonical document layer
+    And the inline text editor closes
+    When the human clicks the layer name again, edits text to "Discarded", and presses Escape
+    Then the edit is cancelled without dispatching a rename and the canonical name "03 LINEART" is restored
+    When the human clicks the layer name, edits text to "Ink Wash", and clicks outside to trigger blur
+    Then blur commits the rename once without duplicate dispatch
+
+  Scenario: Inline layer rename draft survives polling and scrolling while handling save failure and document generation fences
+    Given an inline layer rename editor is active with uncommitted draft text "Background Mountains"
+    When studio background polling cycles occur or the layer list scrolls
+    Then the local draft text "Background Mountains" is preserved across descriptor updates
+    When a save failure occurs during rename dispatch
+    Then the inline editor remains open with the draft text preserved and does not switch editors
+    When instance or document generation rotates establishing a layer mutation fence
+    Then pending rename dispatches are rejected as stale and the inline edit is cancelled cleanly
+
+
   Scenario: Layer stack overflow scrolls within bounded 200px viewport without shifting comments
     Given a test fixture stack of 8 layers with total content height exceeding 200 pixels
     Then the layers touch container and canvas rendering are strictly clipped between y 272 and 472
@@ -257,8 +295,40 @@ Feature: Codesketch Studio Reconstruction
   # Section 5: Journey 3 - Spatial Feedback Selection, Fenced Review & Replies
   # ============================================================================
 
+  Scenario: Area feedback mode starts empty without initial marquee or composer
+    Given the studio is loaded in expanded sidebar mode
+    When the human activates area feedback mode
+    Then feedback mode opens in empty state with selection null and selectedCommentId null
+    And zero selection marquee renders on the canvas and zero composer card is mounted
+    And the canvas drawing surface is ready for pointer drag selection
+
+  Scenario: First drag in empty feedback mode shows live selection box before pointerup then mounts composer
+    Given area feedback mode is active in empty state
+    When the human presses pointer down on the canvas at (120, 160) and drags to (440, 350)
+    Then before pointerup a live dashed selection marquee and dimension badge "[ 320 X 190 PX ]" render on the canvas
+    And the feedback composer card and text draft control remain unmounted during pointer drag
+    When pointerup occurs at (440, 350)
+    Then the selection bounds commit to x 120, y 160, width 320, height 190
+    And the anchored feedback composer card mounts with the editable critique textarea
+
+  Scenario: Moving feedback selection marquee retains dimensions and relative pointer grab offset
+    Given an active feedback selection marquee exists at x 100, y 100 with width 200 and height 100
+    When the human presses pointer down inside the marquee at (140, 130) and moves to (240, 230)
+    Then move retains the marquee width 200 and height 100 while preserving the relative pointer grab offset (40, 30)
+    And the marquee bounds update to x 200, y 200 with width 200 and height 100 clamped within visible artwork bounds
+
+  Scenario: Resizing feedback selection marquee preserves fixed opposite anchor across crossing
+    Given an active feedback selection marquee exists at x 100, y 100 with width 200 and height 100
+    When the human drags the southeast resize handle at (300, 200) back across the northwest corner to (50, 50)
+    Then resize maintains the northwest corner (100, 100) as the fixed opposite anchor throughout the gesture
+    And positioning the pointer at the exact anchor coordinate maintains a one-unit preview before crossing
+    And moving past the anchor flips the selection across the fixed opposite anchor without losing anchor origin
+    When pointerup occurs at (250, 150)
+    Then the selection commits with canonical bounds referencing the original fixed opposite anchor
+
   Scenario: Canvas spatial selection marquee and edge dragging with rectangle-aware bounds
     Given area feedback flow is open in expanded sidebar mode
+    And a completed non-zero drag has established an active selection marquee
     Then a selection marquee displays on canvas with blue wash "rgba(2, 132, 199, 0.14)"
     And the marquee displays an alternating dashed two-tone border in "#0284C7" and "#FFFFFF"
     And 4 corner handles render with 8x8 pixel white squares
@@ -270,6 +340,7 @@ Feature: Codesketch Studio Reconstruction
 
   Scenario: Selection marquee dragging in collapsed sidebar mode spans full width
     Given area feedback flow is open and the sidebar is collapsed
+    And a completed non-zero drag has established an active selection marquee
     When the human drags a selection marquee of width 300 and height 200 toward the right edge
     Then the marquee origin x is clamped between 0 and 700 so bounds span up to x 1000
     And the full 1000-pixel document bounds are available for spatial feedback
@@ -348,7 +419,17 @@ Feature: Codesketch Studio Reconstruction
     And each comment card renders at fixed width 216 pixels between x 752 and 968
     And active comments display an "ACTIVE" pill in light blue "#E0F2FE"
     And acknowledged comments display an "ACK" pill in slate "#F1F5F9"
-    And cards display comment number, label, author, and spatial bounds coordinates
+    And each row displays combined comment number and text, spatial bounds coordinates, and actual status
+    And comment thread replies retain author attribution within stored thread state
+
+  Scenario: Unboxed reference comment rows render with selected-only accent, title, bounds, and real lifecycle status
+    Given the comments review list is loaded in the sidebar
+    Then unselected comment rows render unboxed with a hairline divider at fixed width 216 pixels between x 752 and 968
+    And unselected comment rows render without background card fill or vertical accent bars
+    And each comment row displays title with comment number, text, and spatial bounds coordinates
+    And each comment row displays its real lifecycle status badge in a rounded status pill
+    When the human clicks a comment row to select it
+    Then only the selected comment row receives a background card in "#F0F9FF" and a 3-pixel vertical accent bar in "#0284C7"
 
   Scenario: Active filter strictly selects unresolved comments
     Given the comments list contains comments with status "open", "acknowledged", and "addressed", alongside resolved comments with status "resolved"
@@ -361,7 +442,9 @@ Feature: Codesketch Studio Reconstruction
 
   Scenario: Zero Cumulative Layout Shift invariant verified via layout-shift performance observer
     Given a PerformanceObserver is attached to observe "layout-shift" entries
-    And the comments section has a permanent 24-pixel reserved gutter between x 968 and 1000
+    And comment cards have fixed width 216 pixels between x 752 and 968
+    And the comments section has a permanent 24-pixel reserved gutter between x 968 and 992
+    And the thin 4-pixel scrollbar axis is positioned at x 994 explicitly
     When the human clicks the "[ 4 ACTIVE ]" filter chiclet
     Then the comments list filters to only active items without changing card width (fixed at 216px)
     When the human clicks the "[ 24 ALL ]" filter chiclet
@@ -413,9 +496,9 @@ Feature: Codesketch Studio Reconstruction
   Scenario: Header area feedback button toggles feedback flow
     Given the feedback card and selection marquee are hidden
     When the human clicks the "[ FB ]" button at x 818, y 11
-    Then the feedback selection marquee and composer card are displayed
+    Then area feedback mode opens in empty state with zero initial selection and no composer card
     When the human clicks the "[ FB ]" button again
-    Then the feedback selection marquee and composer card are hidden
+    Then area feedback mode closes and canvas returns to unobstructed drawing mode
 
   Scenario: Keyboard activation of layer controls
     Given a layer row has keyboard focus
