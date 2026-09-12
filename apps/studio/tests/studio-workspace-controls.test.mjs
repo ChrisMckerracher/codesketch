@@ -79,6 +79,123 @@ test("DOM events consume rejected async dispatches after routing reports them", 
   assert.equal(caught, true);
 });
 
+test("edit textareas select all, commit once on Enter or blur, and cancel on Escape", async () => {
+  const calls = [];
+  const document = new FakeDocument();
+  const root = document.createElement("div");
+  const controls = createControls({ root, vector: vector(), dispatch: (action, payload) => {
+    calls.push([action, payload]);
+    return Promise.resolve();
+  }, changed() {} });
+  const edit = descriptor("textarea", {
+    id: "layer-name", value: "Paint", edit: true, commitAction: "layer.rename", cancelAction: "layer.rename.cancel",
+    payload: { id: "paint" },
+  });
+  controls.update([edit]);
+  const area = root.children[0];
+  assert.equal(area["data-cancel-action"], "layer.rename.cancel");
+  assert.deepEqual([area.selectionStart, area.selectionEnd], [0, 5]);
+  area.value = "Renamed";
+  area.emit("input");
+  area.emit("keydown", { key: "Enter", isComposing: true });
+  assert.equal(calls.length, 0);
+  area.emit("compositionend");
+  area.emit("keydown", { key: "Enter" });
+  area.emit("blur");
+  await Promise.resolve();
+  assert.deepEqual(calls, [["layer.rename", { id: "paint", value: "Renamed" }]]);
+
+  controls.update([edit]);
+  const second = root.children[0];
+  second.emit("keydown", { key: "Escape" });
+  await Promise.resolve();
+  assert.deepEqual(calls.at(-1), ["layer.rename.cancel", { id: "paint" }]);
+  controls.destroy();
+});
+
+test("editing text survives descriptor polling until it is unmounted", () => {
+  const { root, controls } = mount([descriptor("textarea", {
+    id: "layer-name", value: "Paint", edit: true, commitAction: "layer.rename", cancelAction: "layer.rename.cancel",
+  })]);
+  const area = root.children[0];
+  area.value = "Draft";
+  area.emit("input");
+  controls.update([descriptor("textarea", {
+    id: "layer-name", value: "Paint", edit: true, commitAction: "layer.rename", cancelAction: "layer.rename.cancel",
+  })]);
+  assert.equal(root.children[0].value, "Draft");
+  controls.destroy();
+});
+
+test("single-line horizontal scroll keeps glyphs, selection, caret, and pointer hit testing aligned", () => {
+  const value = "A very long inline layer name";
+  const { root, controls, v } = mount([descriptor("textarea", {
+    value, singleLine: true, width: 48, height: 20,
+  })]);
+  const area = root.children[0];
+  area.focus();
+  area.setSelectionRange(value.length, value.length);
+  controls.draw(context(), v);
+  const glyph = v.texts.find(([text]) => text === "N");
+  const caret = v.strokes.find(([, color]) => color === "#2563EB");
+  assert.ok(glyph && glyph[1] < 14, "scrolled glyphs use the horizontal offset");
+  assert.ok(caret && caret[0][0][0] <= 54, "the caret uses the same horizontal offset");
+
+  area.setSelectionRange(0, value.length, "forward");
+  controls.draw(context(), v);
+  assert.ok(v.rects.some(([x]) => x < 14), "selection uses the horizontal offset");
+  area.emit("pointerdown", { button: 0, pointerId: 1, raw: [50, 27] });
+  area.emit("pointerup", { button: 0, pointerId: 1, raw: [50, 27] });
+  assert.ok(area.selectionStart > 0, "pointer hit testing includes the horizontal offset");
+  controls.destroy();
+});
+
+test("an emptied single-line field still paints its caret before typing again", () => {
+  const { root, controls, v } = mount([descriptor("textarea", {
+    value: "Name", singleLine: true, width: 48, height: 20, edit: true,
+  })]);
+  const area = root.children[0];
+  area.setSelectionRange(0, 4);
+  area.value = "";
+  area.emit("input");
+  assert.doesNotThrow(() => controls.draw(context(), v));
+  assert.ok(v.strokes.some(([, color]) => color === "#2563EB"), "empty field paints a visible caret");
+  area.value = "N";
+  area.emit("input");
+  assert.doesNotThrow(() => controls.draw(context(), v));
+  assert.ok(v.texts.some(([text]) => text === "N"), "typing after clearing remains renderable");
+  controls.destroy();
+});
+
+test("composition end flushes final text before one pending blur commit at the current revision", async () => {
+  const calls = [];
+  const document = new FakeDocument();
+  const root = document.createElement("div");
+  const controls = createControls({ root, vector: vector(), dispatch: (action, payload) => {
+    calls.push([action, payload]);
+    return Promise.resolve();
+  }, changed() {} });
+  controls.update([descriptor("textarea", {
+    id: "layer-name", value: "Paint", edit: true, textAction: "layer.rename.text",
+    commitAction: "layer.rename", cancelAction: "layer.rename.cancel", payload: { id: "paint", token: "new", revision: 2 },
+  })]);
+  const area = root.children[0];
+  area.emit("compositionstart");
+  area.value = "Final";
+  area.emit("blur");
+  controls.update([descriptor("textarea", {
+    id: "layer-name", value: "Paint", edit: true, textAction: "layer.rename.text",
+    commitAction: "layer.rename", cancelAction: "layer.rename.cancel", payload: { id: "paint", token: "fresh", revision: 3 },
+  })]);
+  area.emit("compositionend");
+  await Promise.resolve();
+  assert.deepEqual(calls, [
+    ["layer.rename.text", { id: "paint", token: "fresh", revision: 3, value: "Final" }],
+    ["layer.rename", { id: "paint", token: "fresh", revision: 3, value: "Final" }],
+  ]);
+  controls.destroy();
+});
+
 test("caret boundaries follow vector CRLF, CR, Unicode separators, expansion, and scale", () => {
   const v = createVector(null);
   const breaks = "A\r\n\u2028\u2029B";

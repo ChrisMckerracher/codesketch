@@ -1,9 +1,9 @@
 // Textarea geometry consumes the current vector layout directly. The vector
 // owner is the only authority for glyph positions and wrapping.
 
-export function layoutText(v, text, maxWidth, scale = 1) {
+export function layoutText(v, text, maxWidth, scale = 1, singleLine = false) {
   if (typeof v?.layout !== "function") throw new TypeError("controls require vector.layout");
-  const result = v.layout(String(text), maxWidth, scale);
+  const result = v.layout(String(text), singleLine ? Infinity : maxWidth, scale);
   if (!validLayout(result)) throw new TypeError("vector.layout returned an invalid layout");
   return result;
 }
