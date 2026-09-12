@@ -23,8 +23,12 @@ export function feedbackRegions({ model = {}, ui = {}, v } = {}) {
 }
 
 function feedbackTarget(model, ui) {
+  const phase = model.review?.phase;
+  if (ui.selection && (phase === "selecting" || phase === "composing" || phase === "pausing")) return null;
   const draft = reviewDraft(model);
-  if (draft) return { rect: draft.canonicalRect, comment: null };
+  const recovery = new Set(["submitting", "uncertain", "stale"]).has(phase);
+  if (draft && (draft.rect || recovery)) return { rect: draft.canonicalRect, comment: null };
+  if (new Set(["selecting", "composing", "pausing"]).has(phase)) return null;
   const comments = Array.isArray(model?.snapshot?.comments) ? model.snapshot.comments : [];
   const comment = comments.find((item) => item?.id === ui.selectedCommentId);
   return comment ? { rect: comment.rect, comment } : null;

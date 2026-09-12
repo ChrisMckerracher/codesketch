@@ -32,6 +32,11 @@ function control(kind, x, y, width, height, label, action, payload, extra = {}) 
     disabled: extra.disabled ?? false,
     ...(extra.axis === undefined ? {} : { axis: extra.axis }),
     ...(extra.track === undefined ? {} : { track: extra.track }),
+    ...(extra.edit === undefined ? {} : { edit: extra.edit }),
+    ...(extra.commitAction === undefined ? {} : { commitAction: extra.commitAction }),
+    ...(extra.cancelAction === undefined ? {} : { cancelAction: extra.cancelAction }),
+    ...(extra.singleLine === undefined ? {} : { singleLine: extra.singleLine }),
+    ...(extra.textAction === undefined ? {} : { textAction: extra.textAction }),
   };
 }
 
@@ -72,7 +77,7 @@ export function renderLayersPanel(v, ctx, model, ui, controls) {
   let rowY = VIEWPORT.y - scroll;
   for (const row of rows) {
     const visible = clipRect({ x: VIEWPORT.x, y: rowY, width: VIEWPORT.width, height: row.height }, VIEWPORT);
-    if (visible) renderRow(v, controls, row, rowY);
+     if (visible) renderRow(v, controls, row, rowY, ui);
     rowY += row.height;
   }
   ctx.restore();
@@ -83,27 +88,38 @@ export function renderLayersPanel(v, ctx, model, ui, controls) {
 function layoutRows(layers, targetLayer) {
   return layers.map((layer, canonicalIndex) => ({
     layer,
-    number: String(canonicalIndex).padStart(2, "0"),
+    number: /(?:^|\s)\d+(?:\s|$)/.test(String(layer?.name ?? "")) ? "" : String(canonicalIndex).padStart(2, "0"),
     active: layer?.id != null && layer.id === targetLayer,
     height: layer?.id != null && layer.id === targetLayer ? ACTIVE_ROW_HEIGHT : INACTIVE_ROW_HEIGHT,
   })).reverse();
 }
 
-function renderRow(v, controls, row, rowTop) {
+function renderRow(v, controls, row, rowTop, ui) {
   const { layer, active, height } = row;
   const name = String(layer?.name ?? "Untitled");
+  const editing = ui?.layerEdit?.id === layer.id;
   const textY = rowTop + 4;
   if (active) {
     v.roundRect(748, rowTop, 244, 46, 3, "#F0F9FF");
     v.rect(748, rowTop, 3, 46, ACCENT);
   }
-  v.text(row.number, 756, textY, 0.85, active ? ACCENT : "#64748B", 1);
-  v.text(fitText(v, name, 0.85, NAME_MAX_WIDTH), 786, textY, 0.85, active ? "#0F172A" : "#64748B", 1);
+  if (row.number) v.text(row.number, 756, textY, 0.85, active ? ACCENT : "#64748B", 1);
+  if (!editing) v.text(fitText(v, name, 0.85, NAME_MAX_WIDTH), 786, textY, 0.85, active ? "#0F172A" : "#64748B", 1);
   v.text(`${layerOpacityPercent(layer)}%`, 932, textY, 0.75, active ? ACCENT : "#94A3B8", 1);
   renderEye(v, layer, rowTop);
 
-  clippedControl(controls, "button", { x: 748, y: rowTop, width: 244, height }, name, "layer.select",
+  clippedControl(controls, "button", { x: 748, y: rowTop, width: 244, height }, `Select ${name}`, "layer.select",
     { id: layer.id }, { id: `layer.${layer.id}.select` });
+
+  if (editing) {
+    clippedControl(controls, "textarea", { x: 786, y: rowTop, width: NAME_MAX_WIDTH, height: 20 }, `Rename ${name}`,
+      "layer.rename", { id: layer.id, token: ui.layerEdit.token, revision: ui.layerEdit.revision },
+      { id: `layer.${layer.id}.rename`, value: ui.layerEdit.text, edit: true, singleLine: true,
+        textAction: "layer.rename.text", commitAction: "layer.rename", cancelAction: "layer.rename.cancel" });
+  } else {
+    clippedControl(controls, "button", { x: 786, y: rowTop, width: NAME_MAX_WIDTH, height: 20 }, name,
+      "layer.rename.begin", { id: layer.id, value: name }, { id: `layer.${layer.id}.name` });
+  }
 
   if (active) {
     renderRowOpacity(v, controls, layer, name, rowTop);

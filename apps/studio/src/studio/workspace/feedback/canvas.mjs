@@ -2,9 +2,12 @@ import { clipControl, control, reviewDraft, validRect, statusLabel } from "./dat
 import { dashedRect, textWidth } from "./paint.mjs";
 
 export function renderCanvas({ ctx, v, model, ui, comments, descriptors, drawable }) {
-  const selected = comments.find((item) => item?.id === ui.selectedCommentId) ?? null;
+  const activeReview = new Set(["selecting", "composing", "pausing", "submitting", "uncertain", "stale"])
+    .has(model.review?.phase);
+  const selected = activeReview ? null : comments.find((item) => item?.id === ui.selectedCommentId) ?? null;
   const draft = reviewDraft(model);
-  const canonicalDraft = draft?.canonicalRect ?? null;
+  const liveRect = model.review?.phase === "selecting" ? validRect(ui.selection) : null;
+  const canonicalDraft = draft?.canonicalRect ?? liveRect;
 
   ctx.save();
   ctx.beginPath();
@@ -12,7 +15,7 @@ export function renderCanvas({ ctx, v, model, ui, comments, descriptors, drawabl
   ctx.clip();
    renderPins(v, comments, ui.selectedCommentId, drawable, descriptors);
   if (selected?.rect && !draft) drawStoredSelection(v, selected.rect);
-  if (canonicalDraft) drawDraftSelection(v, canonicalDraft);
+   if (canonicalDraft) drawDraftSelection(v, canonicalDraft);
   ctx.restore();
 
   return {

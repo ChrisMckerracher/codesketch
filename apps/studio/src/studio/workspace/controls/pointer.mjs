@@ -9,12 +9,13 @@ export function textOffset(record, event, vector, scrolls, locate) {
   if (value.length === 0) return 0;
   const width = Math.max(d.width - TEXT_PADDING * 2, 8);
   const height = Math.max(d.height - TEXT_PADDING * 2, 11);
-  const layout = layoutText(vector, value, width, 1);
-  const maxScroll = Math.max(layout.height - height, 0);
+  const layout = layoutText(vector, value, width, 1, d.singleLine);
+  const maxScroll = d.singleLine ? Math.max(layout.width - width, 0) : Math.max(layout.height - height, 0);
   const scroll = clamp(Number(scrolls?.get(d.id)) || 0, 0, maxScroll);
   const [px, py] = rawPoint(locate, event);
   return offsetAtPoint(vector, value, layout,
-    px - d.x - TEXT_PADDING, py - d.y - TEXT_PADDING + scroll, 1);
+    px - d.x - TEXT_PADDING + (d.singleLine ? scroll : 0),
+    py - d.y - TEXT_PADDING + (d.singleLine ? 0 : scroll), 1);
 }
 
 export function selectionAnchor(el) {

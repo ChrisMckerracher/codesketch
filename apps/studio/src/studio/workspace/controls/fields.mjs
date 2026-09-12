@@ -12,7 +12,8 @@ import {
   setPlaneAria,
   trackLimits,
 } from "./support.mjs";
-import { focus, owns, primary, selectionAnchor, setSelection, textOffset } from "./pointer.mjs";
+import { activateTextArea, bindTextArea } from "./text-edit.mjs";
+import { focus, owns, primary } from "./pointer.mjs";
 const INVISIBLE =
   "position:absolute;margin:0;padding:0;border:0;opacity:0;" +
   "background:none;color:transparent;caret-color:transparent;" +
@@ -38,6 +39,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     if (descriptor.kind === "button" || descriptor.kind === "plane") el.type = "button";
     if (descriptor.kind === "range") el.type = "range";
     el.style.cssText = INVISIBLE;
+    if (descriptor.kind === "textarea" && descriptor.singleLine) el.style.font = "12px/16px monospace";
     const record = {
       descriptor,
       el,
@@ -55,6 +57,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     controls.set(descriptor.id, record);
     elements.add(el);
     apply(record);
+    activateTextArea(record);
     return record;
   }
   function bind(record) {
@@ -63,7 +66,9 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     el.addEventListener("focus", record.focusListener);
     el.addEventListener("blur", record.blurListener);
     if (record.descriptor.kind === "range") bindRange(record);
-    else if (record.descriptor.kind === "textarea") bindArea(record);
+    else if (record.descriptor.kind === "textarea") bindTextArea(record, {
+      vector: () => currentVector, scrolls, locate, notify, dispatchValue, bindDrag,
+    });
     else if (record.descriptor.kind === "plane") bindPlane(record);
     else {
       el.addEventListener("click", () => {
@@ -152,22 +157,6 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     el.addEventListener("lostpointercapture", release);
   }
 
-  function bindTextPointer(record) {
-    record.el.addEventListener("click", (event) => {
-      if (record.skipClick && event.detail !== 0) {
-        record.skipClick = false;
-        event.preventDefault?.();
-      }
-    });
-    bindDrag(record, (event) => {
-      const offset = textOffset(record, event, currentVector, scrolls, locate);
-      setSelection(record.el, activeDrag.anchor, offset);
-    }, (event) => {
-      const offset = textOffset(record, event, currentVector, scrolls, locate);
-      activeDrag.anchor = event.shiftKey ? selectionAnchor(record.el) : offset;
-      setSelection(record.el, activeDrag.anchor, offset);
-    });
-  }
   function trackRange(record, event) {
     const d = record.descriptor;
     const [px, py] = rawPoint(locate, event);
@@ -193,18 +182,7 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     setPlaneAria(record);
     dispatchValue(record, { ...record.value });
   }
-  function bindArea(record) {
-    bindTextPointer(record);
-    record.el.addEventListener("compositionstart", () => { record.composing = true; });
-    record.el.addEventListener("compositionend", () => {
-      record.composing = false;
-      notify();
-    });
-    record.el.addEventListener("input", () => {
-      dispatchValue(record, record.el.value);
-      notify();
-    });
-  } function apply(record) {
+  function apply(record) {
     const d = record.descriptor;
     const el = record.el;
     el.style.left = `${d.x}px`;
@@ -212,14 +190,17 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     el.style.width = `${d.width}px`;
     el.style.height = `${d.height}px`;
     el.setAttribute?.("aria-label", d.label || d.id);
+    if (d.cancelAction) el.setAttribute?.("data-cancel-action", d.cancelAction);
+    else el.removeAttribute?.("data-cancel-action");
     el.disabled = Boolean(d.disabled);
+    if (d.kind === "textarea" && d.singleLine) el.style.font = "12px/16px monospace";
 
     if (d.kind === "plane") {
       if (!busy(record)) record.value = planeValue(d.value);
       setPlaneAria(record);
       return;
     }
-    if (busy(record)) return;
+    if (busy(record) || (d.kind === "textarea" && record.editing)) return;
     if (d.kind === "range") {
       const min = number(d.min, 0);
       const max = Math.max(number(d.max, 100), min);
@@ -258,9 +239,11 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
     record.dragging = false;
     controls.delete(record.descriptor.id);
     elements.delete(record.el);
+    record.removed = true;
+    record.textCleanup?.();
     record.el.removeEventListener?.("focus", record.focusListener);
     record.el.removeEventListener?.("blur", record.blurListener);
-    record.removed = true;
+    record.canceling = true;
     record.el.remove();
   }
 
@@ -294,6 +277,6 @@ export function createFields({ root, dispatch, changed, point, vector, scrolls }
   return { sync, destroy, state, inputState, setVector(nextVector) { currentVector = nextVector; } };
 }
 
-function dispatchValue(record, value) { const d = record.descriptor; const payload = d.payload && typeof d.payload === "object" ? d.payload : {}; const result = record.dispatch?.(d.action, { ...payload, value }); result?.catch?.(() => {}); }
+function dispatchValue(record, value, action = record.descriptor.action) { const d = record.descriptor; const payload = d.payload && typeof d.payload === "object" ? d.payload : {}; const result = record.dispatch?.(action, { ...payload, value }); result?.catch?.(() => {}); return result; }
 
 function busy(record) { return record.composing || record.document.activeElement === record.el || record.dragging; }

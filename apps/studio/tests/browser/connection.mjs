@@ -28,6 +28,15 @@ async (page) => {
     source: 'human', expectedDocGeneration: snapshot.docGeneration, ...extra,
   });
   const save = page.getByRole('button', { name: 'Save project' });
+  const canvas = page.locator('#painting-canvas');
+  const dragRegion = async () => {
+    const box = await canvas.boundingBox();
+    assert(box, 'painting canvas is mounted for feedback drag');
+    await page.mouse.move(box.x + box.width * 0.15, box.y + box.height * 0.2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.45, box.y + box.height * 0.45, { steps: 6 });
+    await page.mouse.up();
+  };
 
   await page.setViewportSize({ width: 1200, height: 800 });
   await page.waitForSelector('#painting-canvas', { timeout: 15000 });
@@ -37,6 +46,7 @@ async (page) => {
 
   // Real workspace draft: a generation reset removes local feedback controls.
   await page.getByRole('button', { name: 'Feedback' }).click();
+  await dragRegion();
   const draft = page.getByRole('textbox', { name: 'Feedback draft' });
   await draft.waitFor({ timeout: 8000 }).catch(() => { throw new Error('feedback draft control did not mount'); });
   await draft.fill('discard this pending draft');

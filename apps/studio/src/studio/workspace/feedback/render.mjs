@@ -13,7 +13,12 @@ export function renderFeedback({ ctx, v, model = {}, ui = {} } = {}) {
   }
   if (ui.feedbackOpen) {
     const target = renderCanvas({ ctx, v, model, ui, comments: state.all, descriptors, drawable });
-    renderComposer({ ctx, v, model, ui, comments: state.all, drawable, target, descriptors });
+    const phase = model.review?.phase;
+    const activeGesture = Boolean(ui.selection) && (phase === "selecting" || phase === "pausing" || phase === "composing");
+    const hideComposer = phase === "selecting" || activeGesture;
+    if (!hideComposer && (target.draft || target.selected)) {
+      renderComposer({ ctx, v, model, ui, comments: state.all, drawable, target, descriptors });
+    }
   }
   return descriptors;
 }

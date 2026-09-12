@@ -60,10 +60,14 @@ export function createWorkspaceInput({
       if (SEMANTIC.has(String(node.tagName ?? node.nodeName ?? "").toUpperCase())) return true;
     }
     return false;
-  }
-  function textareaTarget(target) {
+  } function textareaTarget(target) {
     for (let node = target, depth = 0; node && depth < 8; node = node.parentNode, depth += 1) {
       if (String(node.tagName ?? node.nodeName ?? "").toUpperCase() === "TEXTAREA") return true;
+    }
+    return false;
+  } function ownsEscape(target) {
+    for (let node = target, depth = 0; node && depth < 8; node = node.parentNode, depth += 1) {
+      if (node.getAttribute?.("data-cancel-action") || node.dataset?.cancelAction) return true;
     }
     return false;
   }
@@ -110,7 +114,7 @@ export function createWorkspaceInput({
       drag = { kind: "create", pointerId: event.pointerId, start: clampPoint(p, bounds()), rect: null };
     } else {
       const handle = handleAtPoint(current, p);
-      if (handle) drag = { kind: "resize", pointerId: event.pointerId, handle, rect: current };
+      if (handle) drag = { kind: "resize", pointerId: event.pointerId, handle, rect: current, startRect: current };
       else if (containsPoint(current, p)) {
         drag = { kind: "move", pointerId: event.pointerId, rect: current,
           anchor: [p[0] - current.x, p[1] - current.y] };
@@ -124,7 +128,7 @@ export function createWorkspaceInput({
     if (!drag) return;
     if (drag.kind === "create") drag.rect = rectFromPoints(drag.start, p, bounds());
     else if (drag.kind === "move") drag.rect = moveRect(drag.rect, p, drag.anchor, bounds());
-    else drag.rect = resizeRect(drag.rect, drag.handle, p, bounds());
+    else drag.rect = resizeRect(drag.startRect, drag.handle, p, bounds());
     preview(drag.rect);
   }
   function finishSelection(event) {
@@ -259,6 +263,7 @@ export function createWorkspaceInput({
   }
   function onKeyDown(event) {
     if (event.key !== "Escape" || event.isComposing) return;
+    if (ownsEscape(event.target)) return;
     let handled = false;
     const currentPicker = picker();
     if (currentPicker?.picking || currentPicker?.open) {

@@ -19,6 +19,7 @@ function render(layers, options = {}) {
     ui: {
       collapsed: false,
       layerScroll: options.layerScroll ?? 0,
+      layerEdit: options.layerEdit ?? null,
       saved: options.saved ?? false,
     },
   });
@@ -50,6 +51,42 @@ test("layers use canonical numbers, stable IDs, and real layer payloads", () => 
   assert.ok(controls.some((item) => item.action === "tool.properties"));
   assert.ok(controls.some((item) => item.action === "pigment.select"));
   assert.ok(controls.some((item) => item.action === "layer.add"));
+});
+
+test("numeric tokens suppress only the separate ordinal while names stay canonical", () => {
+  const layers = [layer("line", "03 LINEART"), layer("plain", "Layer 4"), layer("word", "VersionX")];
+  const { controls, vector } = render(layers, { targetLayer: "word" });
+  const gutters = vector.texts.filter(([text, x]) => x === 756 && /^\d{2}$/.test(text)).map(([text]) => text);
+  assert.deepEqual(gutters, ["02"]);
+  assert.deepEqual(controls.filter((item) => item.action === "layer.rename.begin").map((item) => item.payload), [
+    { id: "word", value: "VersionX" },
+    { id: "plain", value: "Layer 4" },
+    { id: "line", value: "03 LINEART" },
+  ]);
+});
+
+test("layer name controls are separate from row selection and independent eye controls", () => {
+  const { controls } = render([layer("paint", "Paint")]);
+  const row = controls.find((item) => item.action === "layer.select");
+  const name = controls.find((item) => item.action === "layer.rename.begin");
+  const eye = controls.find((item) => item.action === "layer.visibility");
+  assert.equal(row.id, "layer.paint.select");
+  assert.equal(name.id, "layer.paint.name");
+  assert.equal(eye.id, "layer.paint.visibility");
+  assert.equal(row.label, "Select Paint");
+  assert.equal(name.label, "Paint");
+  assert.ok(name.x > row.x && name.x + name.width < eye.x);
+});
+
+test("inline textbox carries the complete local draft while retaining canonical identity", () => {
+  const { controls } = render([layer("paint", "Canonical name")], {
+    targetLayer: "paint",
+    layerEdit: { id: "paint", token: 4, revision: 2, text: "  local draft  " },
+  });
+  const editor = controls.find((item) => item.action === "layer.rename");
+  assert.equal(editor.payload.id, "paint");
+  assert.equal(editor.value, "  local draft  ");
+  assert.equal(editor.width, 144);
 });
 
 test("layer row, eye, and range hitboxes stay inside the viewport", () => {

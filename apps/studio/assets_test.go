@@ -69,6 +69,7 @@ var expectedRuntimeInventory = []string{
 	"src/studio/workspace/controls/pointer.mjs",
 	"src/studio/workspace/controls/presentation.mjs",
 	"src/studio/workspace/controls/support.mjs",
+	"src/studio/workspace/controls/text-edit.mjs",
 	"src/studio/workspace/feedback/canvas.mjs",
 	"src/studio/workspace/feedback/comments.mjs",
 	"src/studio/workspace/feedback/composer.mjs",
@@ -113,8 +114,8 @@ func TestRuntimeFSHasExactCurrentInventory(t *testing.T) {
 	if !reflect.DeepEqual(actual, want) {
 		t.Fatalf("runtime inventory mismatch (-actual +expected):\nactual=%v\nexpected=%v", actual, want)
 	}
-	if len(actual) != 94 {
-		t.Fatalf("runtime inventory has %d files, want 94", len(actual))
+	if len(actual) != 95 {
+		t.Fatalf("runtime inventory has %d files, want 95", len(actual))
 	}
 }
 

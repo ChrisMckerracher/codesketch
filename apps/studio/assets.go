@@ -84,6 +84,7 @@ var RendererStroke string
 //go:embed src/studio/workspace/controls/pointer.mjs
 //go:embed src/studio/workspace/controls/presentation.mjs
 //go:embed src/studio/workspace/controls/support.mjs
+//go:embed src/studio/workspace/controls/text-edit.mjs
 //go:embed src/studio/workspace/feedback/canvas.mjs
 //go:embed src/studio/workspace/feedback/comments.mjs
 //go:embed src/studio/workspace/feedback/composer.mjs

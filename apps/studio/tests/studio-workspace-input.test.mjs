@@ -89,6 +89,31 @@ test("existing draft moves with its dimensions and corner handles resize across 
   resized.input.destroy();
 });
 
+test("resizing repeatedly uses the original opposite corner after crossing and returning", () => {
+  const h = harness({ rect: { x: 100, y: 100, width: 200, height: 100 } });
+  h.root.emit("pointerdown", event(300, 200));
+  h.root.emit("pointermove", event(400, 300));
+  h.root.emit("pointermove", event(50, 50));
+  h.root.emit("pointermove", event(250, 150));
+  h.root.emit("pointerup", event(250, 150));
+  assert.deepEqual(h.calls[0].payload.rect, { x: 100, y: 100, width: 150, height: 50 });
+  h.input.destroy();
+});
+
+test("resizing at the exact opposite corner keeps a one-unit preview before crossing", () => {
+  const h = harness({ rect: { x: 100, y: 100, width: 200, height: 100 } });
+  h.root.emit("pointerdown", event(300, 200));
+  h.root.emit("pointermove", event(100, 100));
+  assert.deepEqual(h.ui.selection, { x: 100, y: 100, width: 1, height: 1 });
+  h.root.emit("pointermove", event(90, 90));
+  assert.deepEqual(h.ui.selection, { x: 90, y: 90, width: 10, height: 10 });
+  h.root.emit("pointermove", event(250, 150));
+  assert.deepEqual(h.ui.selection, { x: 100, y: 100, width: 150, height: 50 });
+  h.root.emit("pointerup", event(250, 150));
+  assert.deepEqual(h.calls[0].payload.rect, { x: 100, y: 100, width: 150, height: 50 });
+  h.input.destroy();
+});
+
 test("a second pointer is rejected while the first review pointer owns capture", () => {
   const h = harness();
   h.root.emit("pointerdown", event(10, 10, 1));
@@ -210,6 +235,17 @@ test("Escape cancels feedback while a semantic button or textarea is focused", (
   assert.equal(composing.ui.picker.open, true);
   assert.equal(composing.calls.length, 0);
   composing.input.destroy();
+});
+
+test("Escape belongs to inline editors marked with the cancel action attribute", () => {
+  const h = harness({ picker: { picking: true, open: true } });
+  const editor = { tagName: "TEXTAREA", getAttribute: (name) => name === "data-cancel-action" ? "layer.rename.cancel" : null };
+  const escape = h.root.emit("keydown", { key: "Escape", target: editor });
+  assert.equal(escape.defaultPrevented, undefined);
+  assert.equal(h.ui.feedbackOpen, true);
+  assert.equal(h.ui.picker.open, true);
+  assert.equal(h.calls.length, 0);
+  h.input.destroy();
 });
 
 test("Escape cancels a pending pause even when feedback is not open", () => {

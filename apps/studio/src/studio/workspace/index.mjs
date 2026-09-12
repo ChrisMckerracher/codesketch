@@ -81,7 +81,7 @@ export function createWorkspace({
       if (snapshot) renderer.render(snapshot.document, snapshot.playback?.active ?? null, value.draft);
       lastArtSignature = signature;
     }
-    descriptors = renderWorkspace({ ctx: uiContext, v: vector, model: value, ui, controls, artwork: canvas });
+    descriptors = renderWorkspace({ ctx: uiContext, v: vector, model: feedbackValue(), ui, controls, artwork: canvas });
   }
 
   resize();

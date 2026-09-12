@@ -11,7 +11,7 @@ async (page) => {
     let latest;
     for (let attempt = 0; attempt < 40; attempt += 1) {
       latest = await state();
-      if (predicate(latest)) return latest;
+      if (await predicate(latest)) return latest;
       await page.waitForTimeout(75);
     }
     throw new Error(`layers-keyboard: never ${label}; state=${JSON.stringify(latest).slice(0, 240)}`);
@@ -69,18 +69,48 @@ async (page) => {
   assert(names.every((name) => typeof name === 'string' && name.length > 0), 'layers have names');
   assert(await button(names.at(-1)).count() === 1, 'top-down row uses actual layer name');
 
-  const firstRow = button(names.at(-1));
+  const originalName = names.at(-1);
+  const nameEditor = () => page.locator('#control-host textarea[data-cancel-action="layer.rename.cancel"]');
+  const waitForEditor = () => page.waitForSelector('#control-host textarea[data-cancel-action="layer.rename.cancel"]');
+  await button(originalName).click();
+  assert(await page.locator('#control-host textarea[data-cancel-action="layer.rename.cancel"]').count() > 0,
+    `name editor mounted: ${JSON.stringify(await page.locator('#control-host *').evaluateAll((nodes) => nodes
+      .map((node) => [node.tagName, node.getAttribute('aria-label'), node.getAttribute('data-cancel-action')])) )}`);
+  await nameEditor().fill('03 LINEART');
+  await page.waitForTimeout(180);
+  assert((await nameEditor().inputValue()) === '03 LINEART', 'polling preserves the draft');
+  await nameEditor().press('Enter');
+  snap = await waitFor((value) => value.document.layers.at(-1).name === '03 LINEART', 'Enter rename');
+  assert(snap.document.layers.at(-1).name === '03 LINEART', 'stored name keeps exact submitted text');
+
+  const escapeName = names.at(-2);
+  await button(escapeName).click();
+  await waitForEditor();
+  await nameEditor().fill('discarded draft');
+  await nameEditor().press('Escape');
+  await waitFor((value) => value.document.layers.at(-2).name === escapeName, 'Escape cancel');
+  assert(await button(escapeName).count() === 1, 'Escape restores the canonical name');
+
+  const blurName = names.at(-3);
+  await button(blurName).click();
+  await waitForEditor();
+  await nameEditor().fill('Blurred once');
+  await button('03 LINEART').click();
+  snap = await waitFor((value) => value.document.layers.at(-3).name === 'Blurred once', 'blur rename');
+  assert(snap.document.layers.at(-3).name === 'Blurred once', 'blur commits one stored rename');
+
+  const firstRow = page.locator('#control-host button[aria-label="Select 03 LINEART"]');
   const firstBox = await firstRow.boundingBox();
   const scale = (await page.locator('#painting-canvas').boundingBox()).width / 1000;
   assert(firstBox && Math.abs(firstBox.height / scale - 50) < 0.5, 'active row has a 50px design-space hit area');
   await firstRow.focus();
   await page.keyboard.press('Enter');
-  assert(await range(`${names.at(-1)} opacity`).count() === 1, 'active layer mounts opacity slider');
+  assert(await range('03 LINEART opacity').count() === 1, 'active layer mounts opacity slider');
   await dragCanvas([420, 120], [480, 160]);
   snap = await waitFor((value) => value.document.marks.length === 4, 'stroke on selected layer');
   assert(snap.document.marks.at(-1).layer === ids.at(-1), 'stroke stores the selected actual layer id');
 
-  const eye = button(`${names.at(-1)} visibility`);
+  const eye = button('03 LINEART visibility');
   await eye.focus();
   await page.keyboard.press(' ');
   await waitFor((value) => value.document.layers.at(-1).visible === false, 'keyboard visibility toggle');

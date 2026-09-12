@@ -47,9 +47,13 @@ export function createWorkspaceActions({ application, ui, changed } = {}) {
     if (!local.feedbackOpen) {
       const tool = application?.model?.get?.()?.tool;
       if (tool && tool !== "comment") lastDrawingTool = tool;
-      togglePromise = routed({ type: "review.begin", scope: "region" }).then(() =>
-        routed({ type: "review.rect", rect: { x: 120, y: 160, width: 320, height: 190 } })
-          .then((result) => { local.feedbackOpen = true; notify(); return result; }));
+      togglePromise = routed({ type: "review.begin", scope: "region" }).then((result) => {
+        local.selection = null;
+        local.selectedCommentId = null;
+        local.feedbackOpen = true;
+        notify();
+        return result;
+      });
       togglePromise = togglePromise.finally(() => { togglePromise = null; });
       return togglePromise;
     }

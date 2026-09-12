@@ -142,10 +142,10 @@ async (page) => {
     await observePauseCompletion();
     await click('Feedback');
     await page.waitForFunction(() => window.__togglePauseDone === 1, null, { timeout: 8000 });
+    await dragRegion([0.55, 0.6], [0.8, 0.78]);
     await page.waitForSelector('#control-host [aria-label="Feedback draft"]', { timeout: 8000 });
     await removePauseObserver();
     await waitState((snapshot) => snapshot.playback.status === 'paused', 'second feedback pause');
-    await dragRegion([0.55, 0.6], [0.8, 0.78]);
     await control('Feedback draft').fill('second region');
     await click('Send feedback');
     const second = await waitState((snapshot) => snapshot.comments.length === 2, 'second stored region');
